@@ -15,7 +15,6 @@ const ProtectedRoute = ({ children, requirePremium = false }: ProtectedRouteProp
   const loading = authLoading || subscriptionLoading;
   
   if (loading) {
-    // Could add a loading spinner here
     return (
       <div className="min-h-screen joyful-gradient flex items-center justify-center">
         <div className="animate-pulse text-baby-purple">Loading...</div>

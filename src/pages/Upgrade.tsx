@@ -5,7 +5,7 @@ import { CheckCircle2, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const Upgrade = () => {
   const navigate = useNavigate();
@@ -16,14 +16,10 @@ const Upgrade = () => {
     // For this demo, we'll just upgrade the user directly
     try {
       upgradeToPremium();
-      // After successful payment/upgrade
-      navigate('/app');
+      // Toast and navigation happens in the success callback of the mutation
     } catch (error) {
       console.error('Upgrade error:', error);
-      toast("Upgrade failed", {
-        description: "There was a problem processing your upgrade",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error("There was a problem processing your upgrade");
     }
   };
 
