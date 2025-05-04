@@ -10,18 +10,20 @@ interface MonthHeaderProps {
 
 const MonthHeader: React.FC<MonthHeaderProps> = ({ monthNumber, selectedBaby }) => {
   return (
-    <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
         Month {monthNumber} Milestones
       </h1>
       
       {selectedBaby && (
-        <ShareButton 
-          babyId={selectedBaby.id}
-          babyName={selectedBaby.name}
-          type="month"
-          monthNumber={monthNumber}
-        />
+        <div className="w-full sm:w-auto">
+          <ShareButton 
+            babyId={selectedBaby.id}
+            babyName={selectedBaby.name}
+            type="month"
+            monthNumber={monthNumber}
+          />
+        </div>
       )}
     </div>
   );

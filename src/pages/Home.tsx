@@ -50,18 +50,18 @@ const Home = () => {
   }, [babies, selectedBaby]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome, <span className="text-baby-purple">{user?.email}</span>
+    <div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 md:mb-0">
+          Welcome, <span className="text-baby-purple truncate block sm:inline">{user?.email}</span>
         </h1>
         
         {!isPremium && (
           <Link
             to="/app/upgrade"
-            className="mt-4 md:mt-0 px-6 py-2 bg-baby-purple text-white rounded-lg shadow hover:bg-baby-purple/90 transition-colors flex items-center"
+            className="text-sm md:text-base px-4 md:px-6 py-1.5 md:py-2 bg-baby-purple text-white rounded-lg shadow hover:bg-baby-purple/90 transition-colors flex items-center whitespace-nowrap"
           >
-            <Crown className="mr-2 h-5 w-5" />
+            <Crown className="mr-1.5 md:mr-2 h-4 md:h-5 w-4 md:w-5" />
             Get Premium
           </Link>
         )}

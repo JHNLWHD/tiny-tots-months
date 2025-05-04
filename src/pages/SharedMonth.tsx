@@ -45,7 +45,7 @@ const SharedMonth = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="flex flex-col items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-2" />
+          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-gray-500 mb-2" />
           <p className="text-gray-500">Loading...</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ const SharedMonth = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Month Not Found</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Month Not Found</h1>
           <Alert variant="destructive" className="mb-4">
             <AlertTitle>Invalid or Expired Link</AlertTitle>
             <AlertDescription>
@@ -64,10 +64,10 @@ const SharedMonth = () => {
               If you received this link from someone, ask them to generate a new one.
             </AlertDescription>
           </Alert>
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-xs sm:text-sm">
             Share token: {shareToken}
           </p>
-          <p className="text-gray-500 mt-2">
+          <p className="text-gray-500 mt-2 text-xs sm:text-sm">
             Debug info: {notFound ? 'Not found flag set' : 'Not found flag not set'}, 
             {shareLink ? 'Share link exists' : 'No share link'}, 
             {baby ? 'Baby data exists' : 'No baby data'}
@@ -81,55 +81,55 @@ const SharedMonth = () => {
   const formattedDate = baby.date_of_birth ? format(parseISO(baby.date_of_birth), "MMMM d, yyyy") : '';
   
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
               {baby.name}'s Month {monthNumber} Milestones
             </h1>
-            <p className="text-gray-600">Born on {formattedDate}</p>
+            <p className="text-sm sm:text-base text-gray-600">Born on {formattedDate}</p>
           </div>
           
-          <div className={`w-full h-24 ${backgroundColors[monthNumber % backgroundColors.length]} rounded-lg mb-8 flex items-center justify-center`}>
-            <h2 className="text-3xl font-bold text-white drop-shadow-md">Month {monthNumber}</h2>
+          <div className={`w-full h-16 sm:h-20 md:h-24 ${backgroundColors[monthNumber % backgroundColors.length]} rounded-lg mb-6 sm:mb-8 flex items-center justify-center`}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-md">Month {monthNumber}</h2>
           </div>
           
           <Tabs defaultValue="photos">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
               <TabsTrigger value="photos">Photos</TabsTrigger>
               <TabsTrigger value="milestones">Milestones</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="photos" className="space-y-6">
+            <TabsContent value="photos" className="space-y-4 sm:space-y-6">
               <div>
-                <h2 className="text-xl font-semibold mb-4">Photos</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Photos</h2>
                 {photos && photos.length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     <PhotoGrid photos={photos} readOnly />
-                    <div className="bg-white p-4 rounded-lg shadow-sm">
-                      <h3 className="text-lg font-medium mb-4">Photo Collection</h3>
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+                      <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Photo Collection</h3>
                       <PhotoCollage photos={photos} maxDisplayCount={5} />
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No photos available for this month.</p>
+                  <p className="text-gray-500 text-center py-6 sm:py-8">No photos available for this month.</p>
                 )}
               </div>
             </TabsContent>
             
             <TabsContent value="milestones">
               <div>
-                <h2 className="text-xl font-semibold mb-4">Milestones</h2>
+                <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Milestones</h2>
                 {milestones && milestones.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {milestones.slice(0, 4).map((milestone) => (
                         <MilestoneDisplay 
                           key={milestone.id}
                           title={milestone.milestone_text.split('\n')[0] || 'Milestone'}
                           description={milestone.milestone_text}
-                          icon={<Star className="h-5 w-5" />}
+                          icon={<Star className="h-4 sm:h-5 w-4 sm:w-5" />}
                         />
                       ))}
                     </div>
@@ -137,13 +137,13 @@ const SharedMonth = () => {
                     {/* If we have more than 4 milestones, show the rest in a list */}
                     {milestones.length > 4 && (
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Additional Milestones</h3>
+                        <h3 className="text-base sm:text-lg font-medium mb-2">Additional Milestones</h3>
                         <MilestoneList milestones={milestones.slice(4)} readOnly />
                       </div>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No milestones recorded for this month.</p>
+                  <p className="text-gray-500 text-center py-6 sm:py-8">No milestones recorded for this month.</p>
                 )}
               </div>
             </TabsContent>
@@ -151,7 +151,7 @@ const SharedMonth = () => {
         </div>
       </div>
       
-      <footer className="text-center py-8 text-sm text-gray-500">
+      <footer className="text-center py-6 sm:py-8 text-xs sm:text-sm text-gray-500">
         <p>Shared via Tiny Tots Milestones</p>
       </footer>
     </div>

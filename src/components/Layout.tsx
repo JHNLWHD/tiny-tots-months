@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Baby, LogOut, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,34 +13,35 @@ interface LayoutProps {
 
 const Layout = ({ children, hideHeader = false }: LayoutProps) => {
   const { user, signOut } = useAuth();
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-baby-purple/5 pb-12">
       {!hideHeader && (
-        <header className="container mx-auto py-6 px-4">
+        <header className="container mx-auto py-4 md:py-6 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-baby-purple rounded-full flex items-center justify-center mr-3 shadow-lg">
-                <Baby size={24} className="text-white animate-bounce-soft" />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-baby-purple rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-lg">
+                <Baby size={isMobile ? 18 : 24} className="text-white animate-bounce-soft" />
               </div>
-              <h1 className="text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Button 
                 variant="ghost" 
                 onClick={signOut}
-                className="px-4 py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-sm font-medium"
+                className="px-2 md:px-4 py-1 md:py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-xs md:text-sm font-medium"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
+                <LogOut className="md:mr-2 h-4 w-4" />
+                <span className="hidden md:inline">Sign out</span>
               </Button>
               <Link 
                 to="/" 
-                className="px-4 py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
+                className="px-2 md:px-4 py-1 md:py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-xs md:text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
               >
-                <Home className="mr-2 h-4 w-4" />
-                Landing
+                <Home className="md:mr-2 h-4 w-4" />
+                <span className="hidden md:inline">Landing</span>
               </Link>
             </div>
           </div>
@@ -47,37 +49,37 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
       )}
       
       {user && (
-        <header className="container mx-auto py-4">
+        <header className="container mx-auto py-3 md:py-4 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-baby-purple rounded-full flex items-center justify-center mr-3 shadow-lg">
-                <Baby size={24} className="text-white animate-bounce-soft" />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-baby-purple rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-lg">
+                <Baby size={isMobile ? 18 : 24} className="text-white animate-bounce-soft" />
               </div>
-              <h1 className="text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Button 
                 variant="ghost" 
                 onClick={signOut}
-                className="px-4 py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-sm font-medium"
+                className="px-2 md:px-4 py-1 md:py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-xs md:text-sm font-medium"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
+                <LogOut className="md:mr-2 h-4 w-4" />
+                <span className="hidden md:inline">Sign out</span>
               </Button>
               <Link 
                 to="/" 
-                className="px-4 py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
+                className="px-2 md:px-4 py-1 md:py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-xs md:text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
               >
-                <Home className="mr-2 h-4 w-4" />
-                Landing
+                <Home className="md:mr-2 h-4 w-4" />
+                <span className="hidden md:inline">Landing</span>
               </Link>
             </div>
           </div>
         </header>
       )}
       
-      <main className="container mx-auto px-4 py-4 animate-fade-in">
+      <main className="container mx-auto px-3 md:px-4 py-3 md:py-4 animate-fade-in">
         {children}
       </main>
     </div>

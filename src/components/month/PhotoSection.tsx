@@ -7,6 +7,7 @@ import ImageUploader from "@/components/ImageUploader";
 import PhotoGrid from "@/components/PhotoGrid";
 import PhotoCollage from "@/components/PhotoCollage";
 import { Photo } from "@/hooks/usePhotos";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type SortOption = "newest" | "oldest" | "description";
 type ViewMode = "grid" | "collage";
@@ -32,6 +33,7 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
 }) => {
   const [sortOption, setSortOption] = React.useState<SortOption>("newest");
   const [viewMode, setViewMode] = React.useState<ViewMode>("grid");
+  const isMobile = useIsMobile();
   
   // Sort photos based on selected option
   const sortedPhotos = [...photos].sort((a, b) => {
@@ -65,14 +67,14 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
   
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      <div className="flex justify-center py-6 sm:py-8">
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-gray-500" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <ImageUploader
         babyId={babyId}
         month={monthNumber}
@@ -80,14 +82,14 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
       />
       
       <div>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
-          <h2 className="text-xl font-semibold">Photos</h2>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 gap-3">
+          <h2 className="text-lg sm:text-xl font-semibold">Photos</h2>
           
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex items-center gap-2">
-              <Label htmlFor="view-mode" className="whitespace-nowrap">View:</Label>
+              <Label htmlFor="view-mode" className="whitespace-nowrap text-sm">View:</Label>
               <Select value={viewMode} onValueChange={handleViewModeChange}>
-                <SelectTrigger id="view-mode" className="w-[120px]">
+                <SelectTrigger id="view-mode" className="w-[100px] sm:w-[120px] h-8 sm:h-10 text-xs sm:text-sm">
                   <SelectValue placeholder="View" />
                 </SelectTrigger>
                 <SelectContent>
@@ -98,9 +100,9 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
             </div>
             
             <div className="flex items-center gap-2">
-              <Label htmlFor="sort-by" className="whitespace-nowrap">Sort by:</Label>
+              <Label htmlFor="sort-by" className="whitespace-nowrap text-sm">Sort by:</Label>
               <Select value={sortOption} onValueChange={handleSortChange}>
-                <SelectTrigger id="sort-by" className="w-[120px]">
+                <SelectTrigger id="sort-by" className="w-[100px] sm:w-[120px] h-8 sm:h-10 text-xs sm:text-sm">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>

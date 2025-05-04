@@ -38,19 +38,19 @@ const Month = () => {
   return (
     <Layout hideHeader>
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-8">
           <MonthHeader 
             monthNumber={monthNumber} 
             selectedBaby={selectedBaby}
           />
           
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+            <div className="flex justify-center py-6 sm:py-8">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-gray-500" />
             </div>
           ) : (
             <>
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <BabySelector
                   babies={babies}
                   selectedBabyId={selectedBabyId}
@@ -61,7 +61,7 @@ const Month = () => {
               
               {selectedBabyId ? (
                 <Tabs defaultValue="photos" value={activeTab} onValueChange={handleTabChange}>
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
                     <TabsTrigger value="photos">Photos</TabsTrigger>
                     <TabsTrigger value="milestones">Milestones</TabsTrigger>
                   </TabsList>
@@ -92,7 +92,7 @@ const Month = () => {
                   </TabsContent>
                 </Tabs>
               ) : (
-                <div className="text-center py-8">
+                <div className="text-center py-6 sm:py-8">
                   <p className="text-gray-500">Add a baby to start tracking milestones</p>
                 </div>
               )}

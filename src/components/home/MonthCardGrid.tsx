@@ -1,6 +1,7 @@
 
 import React from 'react';
 import MonthCard from '@/components/MonthCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MonthCardGridProps {
   babyId?: string;
@@ -8,6 +9,8 @@ interface MonthCardGridProps {
 }
 
 const MonthCardGrid: React.FC<MonthCardGridProps> = ({ babyId, showGrid }) => {
+  const isMobile = useIsMobile();
+
   // Monthly background classes with gradients for the month cards
   const monthlyBackgroundClasses = [
     'bg-gradient-to-br from-blue-100 to-blue-200',
@@ -29,11 +32,11 @@ const MonthCardGrid: React.FC<MonthCardGridProps> = ({ babyId, showGrid }) => {
   }
 
   return (
-    <div className="mt-12 bg-white/50 p-8 rounded-xl shadow-sm">
-      <h2 className="text-2xl font-bold mb-8 font-bubblegum text-baby-purple inline-flex items-center">
-        <span className="text-3xl mr-2">📅</span> Monthly Milestones
+    <div className="mt-6 sm:mt-8 md:mt-12 bg-white/50 p-4 sm:p-6 md:p-8 rounded-xl shadow-sm">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 font-bubblegum text-baby-purple inline-flex items-center">
+        <span className="text-2xl sm:text-3xl mr-2">📅</span> Monthly Milestones
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
           <MonthCard 
             key={month}

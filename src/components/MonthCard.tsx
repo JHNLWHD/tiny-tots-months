@@ -5,8 +5,8 @@ import { Card } from '@/components/ui/card';
 import PhotoCollage from '@/components/PhotoCollage';
 import { useBabyPhotos } from '@/hooks/useBabyPhotos';
 import { useMilestones } from '@/hooks/useMilestones';
-import { Milestone } from '@/hooks/useMilestones';
 import { Star } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MonthCardProps {
   month: number;
@@ -15,6 +15,8 @@ interface MonthCardProps {
 }
 
 const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId }) => {
+  const isMobile = useIsMobile();
+  
   // Fetch photos for this baby and month if babyId is provided
   const { photos = [], isLoading: loadingPhotos } = useBabyPhotos(babyId);
   
@@ -34,9 +36,12 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
     return emojis[month - 1] || '👶';
   };
 
+  // Adjust height based on screen size
+  const cardHeight = isMobile ? "h-28 sm:h-32 md:h-36 lg:h-40" : "h-40";
+
   return (
     <Link to={`/app/month/${month}`} className="block transition-transform hover:scale-105">
-      <Card className={`month-card h-40 relative overflow-hidden rounded-xl shadow-lg ${!hasPhotos ? backgroundClass : ''}`}>
+      <Card className={`month-card ${cardHeight} relative overflow-hidden rounded-xl shadow-lg ${!hasPhotos ? backgroundClass : ''}`}>
         {/* Show photo collage as background if we have photos */}
         {hasPhotos && (
           <div className="absolute inset-0 w-full h-full">
@@ -51,12 +56,12 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
         {/* Overlay with month number and milestone indicator */}
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
           <div className="text-center transform hover:scale-110 transition-transform">
-            <div className="text-4xl mb-1">{getMonthEmoji(month)}</div>
-            <h2 className="text-3xl font-bold text-white drop-shadow-md font-bubblegum">Month {month}</h2>
+            <div className="text-2xl sm:text-3xl md:text-4xl mb-0.5 md:mb-1">{getMonthEmoji(month)}</div>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-md font-bubblegum">Month {month}</h2>
             {hasMilestones && (
-              <div className="mt-2 px-3 py-1 bg-white/40 backdrop-blur-sm rounded-full inline-flex items-center">
-                <Star className="h-3 w-3 text-yellow-300 mr-1" />
-                <span className="text-xs text-white font-medium">{milestones.length} milestone{milestones.length !== 1 ? 's' : ''}</span>
+              <div className="mt-1 md:mt-2 px-2 md:px-3 py-0.5 md:py-1 bg-white/40 backdrop-blur-sm rounded-full inline-flex items-center">
+                <Star className="h-2.5 md:h-3 w-2.5 md:w-3 text-yellow-300 mr-0.5 md:mr-1" />
+                <span className="text-[10px] md:text-xs text-white font-medium">{milestones.length} milestone{milestones.length !== 1 ? 's' : ''}</span>
               </div>
             )}
           </div>
