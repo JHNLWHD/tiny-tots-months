@@ -116,6 +116,7 @@ const Home = () => {
                       key={month}
                       month={month}
                       backgroundClass={backgroundColors[month % backgroundColors.length]}
+                      babyId={selectedBabyId || undefined}
                     />
                   ))}
                 </div>

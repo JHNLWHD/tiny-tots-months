@@ -8,7 +8,7 @@ import { useBabyPhotos } from '@/hooks/useBabyPhotos';
 interface MonthCardProps {
   month: number;
   backgroundClass: string;
-  babyId?: string; // Add babyId as an optional prop
+  babyId?: string; 
 }
 
 const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId }) => {
@@ -23,10 +23,10 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
 
   return (
     <Link to={`/month/${month}`} className="block transition-transform hover:scale-105">
-      <Card className={`month-card h-40 relative overflow-hidden ${!hasPhotos ? backgroundClass : 'border-2 border-white/50'}`}>
+      <Card className={`month-card h-40 relative overflow-hidden ${!hasPhotos ? backgroundClass : ''}`}>
         {/* Show photo collage as background if we have photos */}
         {hasPhotos && (
-          <div className="absolute inset-0 w-full h-full opacity-70">
+          <div className="absolute inset-0 w-full h-full">
             <PhotoCollage 
               photos={monthPhotos} 
               maxDisplayCount={4}
@@ -35,7 +35,7 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
         )}
         
         {/* Overlay with month number */}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/50 transition-colors">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white drop-shadow-md">Month {month}</h2>
           </div>

@@ -45,13 +45,13 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="h-full w-full">
         {title && <h3 className="font-medium text-lg">{title}</h3>}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-0.5 h-full">
           {displayPhotos.map((photo, index) => (
-            <Card 
+            <div 
               key={photo.id} 
-              className={`overflow-hidden cursor-pointer ${
+              className={`overflow-hidden h-full ${
                 index === 0 ? "col-span-2 row-span-2" : ""
               }`}
               onClick={(e) => {
@@ -59,7 +59,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
                 handlePhotoClick(photo);
               }}
             >
-              <div className="aspect-square relative">
+              <div className="h-full relative">
                 {photo.is_video ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                     <Play className="h-8 w-8 text-white" />
@@ -84,7 +84,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </div>
