@@ -32,6 +32,7 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
             <PhotoCollage 
               photos={monthPhotos} 
               maxDisplayCount={4}
+              isBackground={true}
             />
           </div>
         )}

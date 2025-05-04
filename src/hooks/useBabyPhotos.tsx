@@ -26,6 +26,10 @@ export const useBabyPhotos = (babyId?: string) => {
     
     console.log(`Found ${data?.length || 0} photos for baby ${babyId}`);
     
+    if (data && data.length > 0) {
+      console.log(`Sample photo month_number: ${data[0].month_number}`);
+    }
+    
     // Generate signed URLs for each photo that expire after 1 hour
     return await Promise.all((data || []).map(async (photo) => {
       try {

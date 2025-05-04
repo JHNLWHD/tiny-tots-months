@@ -13,12 +13,14 @@ interface PhotoCollageProps {
   photos: Photo[];
   title?: string;
   maxDisplayCount?: number;
+  isBackground?: boolean;
 }
 
 const PhotoCollage: React.FC<PhotoCollageProps> = ({ 
   photos, 
   title,
-  maxDisplayCount = 5 
+  maxDisplayCount = 5,
+  isBackground = false
 }) => {
   const [selectedPhoto, setSelectedPhoto] = React.useState<Photo | null>(null);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -39,6 +41,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
   }
 
   const handlePhotoClick = (photo: Photo) => {
+    if (isBackground) return; // Don't open dialog if used as background
     setSelectedPhoto(photo);
     setIsDialogOpen(true);
   };
@@ -46,8 +49,8 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
   return (
     <>
       <div className="h-full w-full">
-        {title && <h3 className="font-medium text-lg">{title}</h3>}
-        <div className="grid grid-cols-3 gap-0.5 h-full">
+        {title && !isBackground && <h3 className="font-medium text-lg">{title}</h3>}
+        <div className={`grid grid-cols-3 gap-0.5 h-full ${isBackground ? 'absolute inset-0' : ''}`}>
           {displayPhotos.map((photo, index) => (
             <div 
               key={photo.id} 
@@ -60,7 +63,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
               }}
             >
               <div className="h-full relative">
-                {photo.is_video ? (
+                {photo.is_video && !isBackground ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                     <Play className="h-8 w-8 text-white" />
                   </div>
@@ -69,7 +72,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
                 <img
                   src={photo.url || '/placeholder.svg'}
                   alt={photo.description || 'Baby photo'}
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full object-cover ${isBackground ? 'opacity-100' : ''}`}
                   loading="lazy"
                   onError={(e) => {
                     const imgElement = e.currentTarget;
@@ -78,7 +81,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
                   }}
                 />
                 
-                {index === 4 && remainingCount > 0 && (
+                {index === 4 && remainingCount > 0 && !isBackground && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white font-bold text-xl">
                     +{remainingCount} more
                   </div>
@@ -89,35 +92,37 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
         </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
-          <DialogTitle className="sr-only">Photo View</DialogTitle>
-          <DialogDescription className="sr-only">View full photo</DialogDescription>
-          {selectedPhoto && (
-            <div className="relative">
-              {selectedPhoto.is_video ? (
-                <video 
-                  controls 
-                  className="w-full h-auto" 
-                  src={selectedPhoto.url || ''} 
-                />
-              ) : (
-                <img 
-                  src={selectedPhoto.url || '/placeholder.svg'} 
-                  alt={selectedPhoto.description || 'Baby photo'} 
-                  className="w-full h-auto" 
-                />
-              )}
-              
-              {selectedPhoto.description && (
-                <div className="p-4 bg-background">
-                  <p className="text-foreground">{selectedPhoto.description}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {!isBackground && (
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">Photo View</DialogTitle>
+            <DialogDescription className="sr-only">View full photo</DialogDescription>
+            {selectedPhoto && (
+              <div className="relative">
+                {selectedPhoto.is_video ? (
+                  <video 
+                    controls 
+                    className="w-full h-auto" 
+                    src={selectedPhoto.url || ''} 
+                  />
+                ) : (
+                  <img 
+                    src={selectedPhoto.url || '/placeholder.svg'} 
+                    alt={selectedPhoto.description || 'Baby photo'} 
+                    className="w-full h-auto" 
+                  />
+                )}
+                
+                {selectedPhoto.description && (
+                  <div className="p-4 bg-background">
+                    <p className="text-foreground">{selectedPhoto.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
