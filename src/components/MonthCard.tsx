@@ -16,7 +16,7 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
   const { photos = [], isLoading } = useBabyPhotos(babyId);
   
   // Filter photos for the current month
-  const monthPhotos = photos.filter(photo => photo.month === month);
+  const monthPhotos = photos.filter(photo => photo.month_number === month);
   
   // If we have photos for this month and a babyId, show the collage as background
   const hasPhotos = babyId && monthPhotos.length > 0;
