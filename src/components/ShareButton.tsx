@@ -130,19 +130,35 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
           <div className="flex justify-between">
             {shareUrl && (
               <>
-                <FacebookShareButton url={shareUrl} quote={getShareTitle()} className="rounded-full hover:bg-muted p-1">
+                <FacebookShareButton 
+                  url={shareUrl} 
+                  quote={getShareTitle()}
+                  className="rounded-full hover:bg-muted p-1"
+                >
                   <FacebookIcon size={32} round />
                 </FacebookShareButton>
                 
-                <TwitterShareButton url={shareUrl} title={getShareTitle()} className="rounded-full hover:bg-muted p-1">
+                <TwitterShareButton 
+                  url={shareUrl} 
+                  title={getShareTitle()} 
+                  className="rounded-full hover:bg-muted p-1"
+                >
                   <TwitterIcon size={32} round />
                 </TwitterShareButton>
                 
-                <WhatsappShareButton url={shareUrl} title={getShareTitle()} className="rounded-full hover:bg-muted p-1">
+                <WhatsappShareButton 
+                  url={shareUrl} 
+                  title={getShareTitle()} 
+                  className="rounded-full hover:bg-muted p-1"
+                >
                   <WhatsappIcon size={32} round />
                 </WhatsappShareButton>
                 
-                <EmailShareButton url={shareUrl} subject={getShareTitle()} className="rounded-full hover:bg-muted p-1">
+                <EmailShareButton 
+                  url={shareUrl} 
+                  subject={getShareTitle()} 
+                  className="rounded-full hover:bg-muted p-1"
+                >
                   <EmailIcon size={32} round />
                 </EmailShareButton>
               </>
