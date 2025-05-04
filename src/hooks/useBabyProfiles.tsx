@@ -37,7 +37,7 @@ export const useBabyProfiles = () => {
       console.error("Error fetching babies:", error);
       toast("Error", {
         description: "Failed to load baby profiles",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
       setBabies([]);
     } finally {
@@ -64,7 +64,7 @@ export const useBabyProfiles = () => {
       console.error("Error deleting baby:", error);
       toast("Error", {
         description: "Failed to delete baby profile",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
     }
   };
