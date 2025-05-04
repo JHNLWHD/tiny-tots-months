@@ -40,6 +40,13 @@ const Home = () => {
     }
   }, [babies, selectedBaby]);
 
+  // This is a placeholder function to satisfy the type requirement
+  // since we removed the sharing functionality
+  const handleShareBaby = () => {
+    // Intentionally empty as sharing functionality has been removed
+    console.log('Sharing functionality has been removed');
+  };
+
   return (
     <div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
@@ -64,6 +71,7 @@ const Home = () => {
         onAddBaby={() => setIsDialogOpen(true)}
         onSelectBaby={setSelectedBaby}
         selectedBaby={selectedBaby}
+        onShareBaby={handleShareBaby} // Adding this placeholder function to satisfy type requirements
       />
       
       <MonthCardGrid 

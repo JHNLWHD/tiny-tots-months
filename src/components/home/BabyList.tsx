@@ -12,7 +12,7 @@ interface BabyListProps {
   babies: BabyType[];
   isLoading: boolean;
   onAddBaby: () => void;
-  onShareBaby: (baby: BabyType) => void;
+  onShareBaby?: (baby: BabyType) => void; // Made optional with '?'
   onSelectBaby: (baby: BabyType) => void;
   selectedBaby: BabyType | null;
 }
@@ -82,17 +82,19 @@ const BabyList: React.FC<BabyListProps> = ({
                 View Milestones
               </Button>
               
-              <Button 
-                variant="outline" 
-                className="w-full border-baby-purple/30 text-baby-purple hover:bg-baby-purple/10 hover:text-baby-purple text-xs sm:text-sm py-1 sm:py-2" 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShareBaby(baby);
-                }}
-              >
-                <Share className="mr-1.5 h-3 sm:h-4 w-3 sm:w-4" />
-                {!isMobile ? 'Share' : ''}
-              </Button>
+              {onShareBaby && (
+                <Button 
+                  variant="outline" 
+                  className="w-full border-baby-purple/30 text-baby-purple hover:bg-baby-purple/10 hover:text-baby-purple text-xs sm:text-sm py-1 sm:py-2" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShareBaby(baby);
+                  }}
+                >
+                  <Share className="mr-1.5 h-3 sm:h-4 w-3 sm:w-4" />
+                  {!isMobile ? 'Share' : ''}
+                </Button>
+              )}
             </div>
           </Card>
         ))
