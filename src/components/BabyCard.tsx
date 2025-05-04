@@ -48,7 +48,7 @@ const BabyCard = ({ baby, onDelete, backgroundClass = "bg-baby-blue" }: BabyCard
   const formattedDate = format(parseISO(baby.date_of_birth), "MMMM d, yyyy");
 
   const handleCardClick = () => {
-    navigate('/app');  // For now, just refresh the home page
+    navigate('/month/1'); // Navigate to month 1 by default
   };
 
   return (

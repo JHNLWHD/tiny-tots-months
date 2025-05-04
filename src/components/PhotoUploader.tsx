@@ -5,24 +5,62 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ImagePlus, Check, X } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { ImagePlus, Check, X, Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
+import { CreatePhotoData } from '@/hooks/usePhotos';
 
 interface PhotoUploaderProps {
+  babyId: string;
   month: number;
   onUploadComplete: () => void;
+  onUpload: (data: CreatePhotoData) => void;
+  isUploading: boolean;
 }
 
-const PhotoUploader: React.FC<PhotoUploaderProps> = ({ month, onUploadComplete }) => {
+const PhotoUploader: React.FC<PhotoUploaderProps> = ({ 
+  babyId, 
+  month, 
+  onUploadComplete,
+  onUpload,
+  isUploading
+}) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validate file size (max 50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Maximum file size is 50MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file type
+      const acceptedTypes = [
+        'image/jpeg', 
+        'image/png', 
+        'image/gif', 
+        'image/webp', 
+        'video/mp4', 
+        'video/quicktime'
+      ];
+      
+      if (!acceptedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a JPG, PNG, GIF, WebP, MP4 or QuickTime file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       setSelectedFile(file);
       
       // Create preview
@@ -41,9 +79,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ month, onUploadComplete }
   };
 
   const handleUpload = async () => {
-    // In a real app, this would upload to Supabase storage
-    // For now, we'll just simulate the upload
-    if (!selectedFile) {
+    if (!selectedFile || !babyId) {
       toast({
         title: "No file selected",
         description: "Please select an image to upload",
@@ -52,28 +88,19 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ month, onUploadComplete }
       return;
     }
 
-    setIsUploading(true);
-    
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: "Success",
-        description: "Photo uploaded successfully!",
+      await onUpload({
+        file: selectedFile,
+        baby_id: babyId,
+        month_number: month,
+        description: caption || undefined
       });
       
       clearSelection();
       onUploadComplete();
     } catch (error) {
       console.error("Upload error:", error);
-      toast({
-        title: "Upload failed",
-        description: "There was a problem uploading your photo",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
+      // Error handling is now done in the hook
     }
   };
 
@@ -93,18 +120,26 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ month, onUploadComplete }
                 id="photo-upload" 
                 type="file" 
                 className="hidden" 
-                accept="image/*" 
+                accept="image/*,video/mp4,video/quicktime" 
                 onChange={handleFileChange}
               />
             </Label>
           </div>
         ) : (
           <div className="relative">
-            <img 
-              src={preview} 
-              alt="Upload preview" 
-              className="w-full h-auto rounded-lg object-cover max-h-[300px]" 
-            />
+            {selectedFile?.type.startsWith('video/') ? (
+              <video 
+                src={preview} 
+                className="w-full h-auto rounded-lg object-cover max-h-[300px]"
+                controls
+              />
+            ) : (
+              <img 
+                src={preview} 
+                alt="Upload preview" 
+                className="w-full h-auto rounded-lg object-cover max-h-[300px]" 
+              />
+            )}
             <Button
               variant="destructive"
               size="icon"
@@ -133,7 +168,12 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({ month, onUploadComplete }
               onClick={handleUpload} 
               disabled={isUploading}
             >
-              {isUploading ? 'Uploading...' : 'Upload Photo'}
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : 'Upload Photo'}
             </Button>
           </>
         )}

@@ -1,0 +1,164 @@
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "@/components/ui/sonner";
+import { v4 as uuidv4 } from "uuid";
+
+export interface Photo {
+  id: string;
+  baby_id: string;
+  user_id: string;
+  month_number: number;
+  storage_path: string;
+  description: string | null;
+  is_video: boolean;
+  created_at: string;
+  updated_at: string;
+  url?: string; // URL for the actual image from storage
+}
+
+export interface CreatePhotoData {
+  baby_id: string;
+  month_number: number;
+  description?: string;
+  file: File;
+}
+
+export const usePhotos = (babyId?: string, monthNumber?: number) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const fetchPhotos = async (): Promise<Photo[]> => {
+    if (!user || !babyId || !monthNumber) return [];
+    
+    // First fetch the photo records
+    const { data, error } = await supabase
+      .from("photo")
+      .select("*")
+      .eq("baby_id", babyId)
+      .eq("month_number", monthNumber);
+
+    if (error) {
+      console.error("Error fetching photos:", error);
+      toast("Error loading photos", {
+        description: "Failed to load photo data",
+        className: "bg-destructive text-destructive-foreground",
+      });
+      throw error;
+    }
+    
+    // Then get signed URLs for each photo
+    const photosWithUrls = await Promise.all(
+      (data || []).map(async (photo) => {
+        // Get the URL for the file
+        const { data: fileData } = await supabase.storage
+          .from('baby_images')
+          .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+          
+        return {
+          ...photo,
+          url: fileData?.signedUrl
+        };
+      })
+    );
+    
+    return photosWithUrls;
+  };
+
+  const { data: photos = [], isLoading, refetch } = useQuery({
+    queryKey: ['photos', babyId, monthNumber],
+    queryFn: fetchPhotos,
+    enabled: !!user && !!babyId && !!monthNumber,
+  });
+
+  const uploadPhotoMutation = useMutation({
+    mutationFn: async ({ file, baby_id, month_number, description }: CreatePhotoData) => {
+      if (!user) throw new Error("User not authenticated");
+
+      // 1. Upload file to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${baby_id}/${month_number}/${uuidv4()}.${fileExt}`;
+      const isVideo = file.type.startsWith('video/');
+      
+      const { error: uploadError } = await supabase.storage
+        .from('baby_images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+      
+      // 2. Create record in the photo table
+      const { error: insertError, data: photo } = await supabase
+        .from('photo')
+        .insert({
+          baby_id,
+          user_id: user.id,
+          month_number,
+          storage_path: fileName,
+          description: description || null,
+          is_video: isVideo
+        })
+        .select()
+        .single();
+        
+      if (insertError) throw insertError;
+      
+      return photo;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['photos', babyId, monthNumber] });
+      toast("Success", {
+        description: "Photo uploaded successfully",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error uploading photo:", error);
+      toast("Error", {
+        description: "Failed to upload photo",
+        className: "bg-destructive text-destructive-foreground",
+      });
+    },
+  });
+
+  const deletePhotoMutation = useMutation({
+    mutationFn: async (photo: Photo) => {
+      // 1. Delete the file from storage
+      const { error: storageError } = await supabase.storage
+        .from('baby_images')
+        .remove([photo.storage_path]);
+        
+      if (storageError) throw storageError;
+      
+      // 2. Delete the record from the database
+      const { error: dbError } = await supabase
+        .from('photo')
+        .delete()
+        .eq('id', photo.id);
+        
+      if (dbError) throw dbError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['photos', babyId, monthNumber] });
+      toast("Success", {
+        description: "Photo deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error deleting photo:", error);
+      toast("Error", {
+        description: "Failed to delete photo",
+        className: "bg-destructive text-destructive-foreground",
+      });
+    },
+  });
+
+  return {
+    photos,
+    isLoading,
+    refetch,
+    uploadPhoto: uploadPhotoMutation.mutate,
+    deletePhoto: deletePhotoMutation.mutate,
+    isUploading: uploadPhotoMutation.isPending,
+    isDeleting: deletePhotoMutation.isPending,
+  };
+};
