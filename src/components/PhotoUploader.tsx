@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,8 +40,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       
       // Check premium subscription for video uploads
       if (isVideoFile && !isPremium) {
-        toast({
-          title: "Premium Required",
+        toast("Premium Required", {
           description: "Video uploads are only available for premium users",
           variant: "destructive",
         });
@@ -52,8 +50,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       // Validate file size (max 50MB for videos, 10MB for images)
       const maxSize = isVideoFile ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
       if (file.size > maxSize) {
-        toast({
-          title: "File too large",
+        toast(isVideoFile ? "Video too large" : "Image too large", {
           description: isVideoFile 
             ? "Maximum video size is 50MB" 
             : "Maximum image size is 10MB",
@@ -68,8 +65,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       const acceptedTypes = [...acceptedImageTypes, ...acceptedVideoTypes];
       
       if (!acceptedTypes.includes(file.type)) {
-        toast({
-          title: "Invalid file type",
+        toast("Invalid file type", {
           description: "Please upload a JPG, PNG, GIF, WebP, MP4, WebM or QuickTime file",
           variant: "destructive",
         });
@@ -95,8 +91,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 
   const handleUpload = async () => {
     if (!selectedFile || !babyId) {
-      toast({
-        title: "No file selected",
+      toast("No file selected", {
         description: "Please select an image or video to upload",
         variant: "destructive",
       });
