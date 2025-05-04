@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Baby, CheckCircle2, ArrowRight, Camera, Share2, Book } from 'lucide-react';
@@ -249,7 +248,11 @@ const Landing = () => {
               </ul>
               
               <Button asChild className="w-full bg-baby-purple hover:bg-baby-purple/90 rounded-full">
-                <Link to="/auth">Get Premium</Link>
+                {isAuthenticated ? (
+                  <Link to="/app/upgrade">Get Premium</Link>
+                ) : (
+                  <Link to="/auth">Get Premium</Link>
+                )}
               </Button>
             </div>
           </div>
