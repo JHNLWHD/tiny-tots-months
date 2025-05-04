@@ -22,9 +22,17 @@ interface BabyCardProps {
   baby: Baby;
   onDelete: (id: string) => void;
   backgroundClass?: string;
+  onClick?: () => void;
+  isSelected?: boolean;
 }
 
-const BabyCard = ({ baby, onDelete, backgroundClass = "bg-baby-blue" }: BabyCardProps) => {
+const BabyCard = ({ 
+  baby, 
+  onDelete, 
+  backgroundClass = "bg-baby-blue",
+  onClick,
+  isSelected = false
+}: BabyCardProps) => {
   const navigate = useNavigate();
   const age = calculateAge(baby.date_of_birth);
   
@@ -50,11 +58,18 @@ const BabyCard = ({ baby, onDelete, backgroundClass = "bg-baby-blue" }: BabyCard
   const formattedDate = format(parseISO(baby.date_of_birth), "MMMM d, yyyy");
 
   const handleCardClick = () => {
-    navigate('/month/1'); // Navigate to month 1 by default
+    if (onClick) {
+      onClick();
+    } else {
+      navigate('/month/1'); // Navigate to month 1 by default
+    }
   };
 
   return (
-    <Card className={`${backgroundClass} overflow-hidden transition-all hover:shadow-lg`}>
+    <Card 
+      className={`${backgroundClass} overflow-hidden transition-all hover:shadow-lg ${isSelected ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+      onClick={handleCardClick}
+    >
       <CardContent className="p-4 flex flex-col items-center text-center">
         <div className="mb-2 mt-4">
           <BabyIcon size={48} className="text-white" />
@@ -65,7 +80,10 @@ const BabyCard = ({ baby, onDelete, backgroundClass = "bg-baby-blue" }: BabyCard
       </CardContent>
       <CardFooter className="flex justify-between p-3 bg-white/20 gap-2">
         <Button 
-          onClick={handleCardClick} 
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent the card click handler from firing
+            navigate('/month/1');
+          }} 
           variant="secondary" 
           className="text-xs"
         >
@@ -78,15 +96,20 @@ const BabyCard = ({ baby, onDelete, backgroundClass = "bg-baby-blue" }: BabyCard
             babyName={baby.name}
             type="baby"
             className="text-xs"
+            onClick={(e) => e.stopPropagation()} // Prevent the card click handler from firing
           />
           
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="icon">
+              <Button 
+                variant="destructive" 
+                size="icon"
+                onClick={(e) => e.stopPropagation()} // Prevent the card click handler from firing
+              >
                 <Trash2 size={16} />
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Baby Profile</AlertDialogTitle>
                 <AlertDialogDescription>
