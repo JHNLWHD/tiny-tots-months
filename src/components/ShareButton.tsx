@@ -1,16 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import {
-  FacebookShareButton,
-  TwitterShareButton,
-  WhatsappShareButton,
-  EmailShareButton,
-  FacebookIcon,
-  TwitterIcon,
-  WhatsappIcon,
-  EmailIcon,
-} from 'react-share';
-import { Copy, Check, Share2, Loader2 } from 'lucide-react';
+import { Share2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,6 +12,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from '@/components/ui/sonner';
 import { useShareLinks, ShareType } from '@/hooks/useShareLinks';
+import { generateShareUrl } from '@/utils/shareUtils';
+import CopyLinkButton from '@/components/CopyLinkButton';
+import ShareSocialButtons from '@/components/ShareSocialButtons';
 
 interface ShareButtonProps {
   babyId: string;
@@ -32,8 +25,14 @@ interface ShareButtonProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, monthNumber, className, onClick }) => {
-  const [copied, setCopied] = useState(false);
+const ShareButton: React.FC<ShareButtonProps> = ({ 
+  babyId, 
+  babyName, 
+  type, 
+  monthNumber, 
+  className, 
+  onClick 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const { generateShareLink, isGenerating, getShareLink, shareLinks } = useShareLinks();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -82,46 +81,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
     }
   };
 
-  const generateShareUrl = (token: string, type: ShareType): string => {
-    const baseUrl = window.location.origin;
-    const path = type === 'baby' ? `/share/baby/${token}` : `/share/month/${token}`;
-    return `${baseUrl}${path}`;
-  };
-
-  const handleCopy = () => {
-    if (!shareUrl) {
-      console.error("Cannot copy - shareUrl is null");
-      return;
-    }
-    
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => {
-        setCopied(true);
-        toast("Link copied", {
-          description: "Share link copied to clipboard!",
-        });
-        
-        setTimeout(() => {
-          setCopied(false);
-        }, 2000);
-      })
-      .catch(err => {
-        console.error("Failed to copy:", err);
-        toast("Failed to copy", {
-          description: "Could not copy to clipboard. Please try again.",
-          className: "bg-destructive text-destructive-foreground",
-        });
-      });
-  };
-
-  const getShareTitle = () => {
-    if (type === 'baby') {
-      return `Check out ${babyName}'s milestone journey!`;
-    } else {
-      return `Check out ${babyName}'s Month ${monthNumber} milestones!`;
-    }
-  };
-
   console.log("ShareButton render - babyId:", babyId, "shareUrl:", shareUrl, "isGenerating:", isGenerating);
 
   return (
@@ -148,63 +107,17 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
         <DropdownMenuLabel>Share {type === 'baby' ? 'Baby Profile' : `Month ${monthNumber}`}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem
-          className="flex cursor-pointer items-center gap-2"
-          onClick={handleCopy}
-          disabled={!shareUrl}
-        >
-          {copied ? (
-            <Check className="h-4 w-4 text-green-500" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-          Copy Link
-        </DropdownMenuItem>
+        <CopyLinkButton shareUrl={shareUrl} />
         
         <DropdownMenuSeparator />
         
         <div className="p-2">
-          <div className="flex justify-between">
-            {shareUrl ? (
-              <>
-                <FacebookShareButton 
-                  url={shareUrl}
-                  hashtag="#TinyTotsMilestones"
-                  className="rounded-full hover:bg-muted p-1"
-                >
-                  <FacebookIcon size={32} round />
-                </FacebookShareButton>
-                
-                <TwitterShareButton 
-                  url={shareUrl} 
-                  title={getShareTitle()} 
-                  className="rounded-full hover:bg-muted p-1"
-                >
-                  <TwitterIcon size={32} round />
-                </TwitterShareButton>
-                
-                <WhatsappShareButton 
-                  url={shareUrl} 
-                  title={getShareTitle()} 
-                  className="rounded-full hover:bg-muted p-1"
-                >
-                  <WhatsappIcon size={32} round />
-                </WhatsappShareButton>
-                
-                <EmailShareButton 
-                  url={shareUrl} 
-                  subject={getShareTitle()} 
-                  className="rounded-full hover:bg-muted p-1"
-                >
-                  <EmailIcon size={32} round />
-                </EmailShareButton>
-              </>
-            ) : (
-              <div className="w-full flex justify-center p-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            )}
-          </div>
+          <ShareSocialButtons 
+            shareUrl={shareUrl}
+            babyName={babyName}
+            type={type}
+            monthNumber={monthNumber}
+          />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
