@@ -1,6 +1,10 @@
+
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useLocation, Link } from 'react-router-dom';
+import { Baby, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,8 +12,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requirePremium = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, signOut } = useAuth();
   const { isPremium, isPending, loading: subscriptionLoading } = useSubscription();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/app';
   
   const loading = authLoading || subscriptionLoading;
   
@@ -56,8 +62,37 @@ const ProtectedRoute = ({ children, requirePremium = false }: ProtectedRouteProp
     // Otherwise redirect to upgrade page
     return <Navigate to="/app/upgrade" replace />;
   }
-  
-  return <>{children}</>;
+
+  return (
+    <>
+      <header className="container mx-auto py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Baby size={28} className="text-baby-purple mr-2 animate-bounce-soft" />
+            <h1 className="text-xl font-bold text-baby-purple">Tiny Tots Milestones</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              onClick={signOut}
+              className="px-4 py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-sm font-medium"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
+            <Link 
+              to="/" 
+              className="px-4 py-2 bg-white/70 hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm transition-all"
+            >
+              Landing
+            </Link>
+          </div>
+        </div>
+      </header>
+      {children}
+    </>
+  );
 };
 
 export default ProtectedRoute;

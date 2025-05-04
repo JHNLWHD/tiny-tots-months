@@ -36,7 +36,7 @@ const Month = () => {
   } = useMonthPage(monthNumber);
 
   return (
-    <Layout>
+    <Layout hideHeader>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <MonthHeader 

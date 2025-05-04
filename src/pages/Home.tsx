@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import MonthCard from "@/components/MonthCard";
@@ -55,7 +56,7 @@ const Home = () => {
   console.log(`Selected baby: ${selectedBabyId}, Photos count: ${selectedBabyPhotos?.length || 0}`);
 
   return (
-    <Layout>
+    <Layout hideHeader>
       <div className="max-w-4xl mx-auto">
         {loading ? (
           <div className="flex justify-center items-center h-64">

@@ -11,7 +11,6 @@ import Month from './pages/Month';
 import Landing from './pages/Landing';
 import SharedBaby from './pages/SharedBaby';
 import SharedMonth from './pages/SharedMonth';
-import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import Upgrade from './pages/Upgrade';
@@ -35,15 +34,14 @@ function App() {
             
             <Route path="/app" element={
               <ProtectedRoute>
-                <Layout>
+                <Layout hideHeader={true}>
                   <Outlet />
                 </Layout>
               </ProtectedRoute>
             }>
               <Route index element={<Home />} />
-              <Route path="month/:monthNumber" element={<Month />} />
+              <Route path="month/:monthId" element={<Month />} />
               <Route path="upgrade" element={<Upgrade />} />
-              <Route path="admin" element={<Admin />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
