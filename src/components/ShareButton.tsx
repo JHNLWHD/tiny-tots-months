@@ -44,28 +44,34 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
     if (existingLink) {
       const url = generateShareUrl(existingLink.share_token, type);
       setShareUrl(url);
+      console.log("Set share URL from existing link:", url);
     }
-  }, [babyId, type, monthNumber, shareLinks]);
+  }, [babyId, type, monthNumber, shareLinks, getShareLink]);
   
   // Generate share URL when dropdown is opened
   useEffect(() => {
     if (isOpen && !shareUrl && !isGenerating) {
+      console.log("Dropdown opened, generating share URL");
       handleShare();
     }
-  }, [isOpen]);
+  }, [isOpen, shareUrl, isGenerating]);
   
   const handleShare = async () => {
     try {
+      console.log("Handling share for babyId:", babyId, "type:", type, "monthNumber:", monthNumber);
       const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
       
       if (existingLink) {
         const url = generateShareUrl(existingLink.share_token, type);
+        console.log("Using existing link:", existingLink, "URL:", url);
         setShareUrl(url);
         return;
       }
       
+      console.log("Generating new share link");
       const token = await generateShareLink(babyId, type, monthNumber);
       const url = generateShareUrl(token, type);
+      console.log("Generated new share link with token:", token, "URL:", url);
       setShareUrl(url);
     } catch (error) {
       console.error('Error generating share link:', error);
@@ -83,17 +89,29 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
   };
 
   const handleCopy = () => {
-    if (!shareUrl) return;
+    if (!shareUrl) {
+      console.error("Cannot copy - shareUrl is null");
+      return;
+    }
     
-    navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    toast("Link copied", {
-      description: "Share link copied to clipboard!",
-    });
-    
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        setCopied(true);
+        toast("Link copied", {
+          description: "Share link copied to clipboard!",
+        });
+        
+        setTimeout(() => {
+          setCopied(false);
+        }, 2000);
+      })
+      .catch(err => {
+        console.error("Failed to copy:", err);
+        toast("Failed to copy", {
+          description: "Could not copy to clipboard. Please try again.",
+          className: "bg-destructive text-destructive-foreground",
+        });
+      });
   };
 
   const getShareTitle = () => {
@@ -103,6 +121,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
       return `Check out ${babyName}'s Month ${monthNumber} milestones!`;
     }
   };
+
+  console.log("ShareButton render - babyId:", babyId, "shareUrl:", shareUrl, "isGenerating:", isGenerating);
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
