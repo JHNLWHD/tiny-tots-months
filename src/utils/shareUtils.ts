@@ -8,7 +8,7 @@
  */
 export const generateShareUrl = (token: string, type: 'baby' | 'month'): string => {
   const baseUrl = window.location.origin;
-  const path = type === 'baby' ? `/share/baby/${token}` : `/share/month/${token}`;
+  const path = type === 'baby' ? `/shared/baby/${token}` : `/shared/month/${token}`;
   return `${baseUrl}${path}`;
 };
 

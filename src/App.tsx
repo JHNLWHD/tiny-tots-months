@@ -35,8 +35,14 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/auth" element={<Auth />} />
+              
+              {/* Shared baby routes */}
               <Route path="/shared/baby/:shareToken" element={<SharedBaby />} />
               <Route path="/shared/month/:shareToken" element={<SharedMonth />} />
+              
+              {/* Legacy routes - redirect from old /share/ to new /shared/ paths */}
+              <Route path="/share/baby/:shareToken" element={<Navigate to={(params) => `/shared/baby/${params.shareToken}`} replace />} />
+              <Route path="/share/month/:shareToken" element={<Navigate to={(params) => `/shared/month/${params.shareToken}`} replace />} />
               
               {/* Legal and Support Pages - Moved outside protected routes */}
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
