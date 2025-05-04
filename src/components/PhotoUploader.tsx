@@ -36,7 +36,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       if (file.size > 50 * 1024 * 1024) {
         toast("File too large", {
           description: "Maximum file size is 50MB",
-          variant: "destructive",
+          className: "bg-destructive text-destructive-foreground",
         });
         return;
       }
@@ -54,7 +54,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       if (!acceptedTypes.includes(file.type)) {
         toast("Invalid file type", {
           description: "Please upload a JPG, PNG, GIF, WebP, MP4 or QuickTime file",
-          variant: "destructive",
+          className: "bg-destructive text-destructive-foreground",
         });
         return;
       }
@@ -80,7 +80,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     if (!selectedFile || !babyId) {
       toast("No file selected", {
         description: "Please select an image to upload",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
       return;
     }
