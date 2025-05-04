@@ -1,13 +1,9 @@
-
 import React from 'react';
 import { Baby, Facebook, Instagram, Twitter } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
-  return (
-    <footer className="bg-white py-12 border-t">
+  return <footer className="bg-white py-12 border-t">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8">
           <div className="flex items-center mb-6 md:mb-0">
@@ -64,13 +60,9 @@ const Footer = () => {
         <div className="text-center pt-8 border-t border-gray-100">
           <p className="text-sm text-gray-500">© {currentYear} Tiny Tots Milestones. All rights reserved.</p>
           
-          <p className="text-xs text-gray-400 mt-2">
-            Helping parents document their baby's precious moments since 2023.
-          </p>
+          <p className="text-xs text-gray-400 mt-2">Helping parents document their baby's precious moments since 2025.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
