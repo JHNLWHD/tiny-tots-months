@@ -1,239 +1,297 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Baby, ChevronRight, Camera, BookOpen, Heart, CheckCircle } from 'lucide-react';
+import { Baby, CheckCircle2, ArrowRight, Camera, Share2, Book } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useAuth } from '@/context/AuthContext';
 
 const Landing = () => {
+  const { isAuthenticated } = useAuth();
+  
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navigation */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Baby size={28} className="text-baby-blue" />
-            <span className="text-xl font-semibold text-gray-800">Tiny Tots Milestones</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/app">Demo</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/app">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-baby-blue/20 to-white pt-16 pb-20 md:pt-24 md:pb-32">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-6 leading-tight">
-                Capture Every Precious Moment of Your Baby's Journey
-              </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-lg mx-auto md:mx-0">
-                Document and share your baby's growth milestones, month by month, in a beautiful digital keepsake that lasts forever.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Button size="lg" className="px-8" asChild>
-                  <Link to="/app">
-                    Start Your Journey <ChevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" className="px-8" asChild>
-                  <Link to="/app">View Demo</Link>
-                </Button>
-              </div>
+      <section className="joyful-gradient py-16 sm:py-24">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="bg-white p-4 rounded-full shadow-lg">
+              <Baby size={48} className="text-baby-purple animate-bounce-soft" />
             </div>
-            <div className="flex-1 relative">
-              <div className="relative w-full max-w-md mx-auto">
-                <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-xl rotate-2 border-4 border-white">
-                  <img 
-                    src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9" 
-                    alt="Baby milestone tracker" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-4 -left-4 bg-white p-3 rounded-xl shadow-lg border-2 border-baby-pink/20 rotate-[-4deg]">
-                  <p className="text-sm font-medium">Month 5: First smile! 💕</p>
-                </div>
-              </div>
-            </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-6">
+            Capture Every Precious <span className="text-baby-purple">Milestone</span> of Your Little One
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Document and share your baby's developmental journey month by month with photos, videos, and milestone tracking.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button asChild size="lg" className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-8">
+              {isAuthenticated ? (
+                <Link to="/app">
+                  Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              ) : (
+                <Link to="/auth">
+                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              )}
+            </Button>
+            <Button asChild variant="outline" size="lg" className="border-baby-purple text-baby-purple hover:bg-baby-purple/10 rounded-full px-8">
+              <a href="#features">
+                Learn More
+              </a>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 md:py-24 bg-white">
+      {/* Problem/Solution Section */}
+      <section className="bg-white py-16" id="problem-solution">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Designed for Modern Parents</h2>
-          <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            Everything you need to preserve your baby's precious moments in one beautiful, easy-to-use platform.
-          </p>
-          
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Why Tiny Tots Milestones?</h2>
+            <p className="text-gray-600">
+              Parents often struggle with scattered photos, messy notes, and the challenge of sharing their baby's growth with loved ones. 
+              Tiny Tots Milestones brings it all together in one beautiful, easy-to-use app.
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Camera className="h-8 w-8 text-baby-blue" />,
-                title: "Photo Collections",
-                description: "Store unlimited photos organized by month, milestone, and special events."
-              },
-              {
-                icon: <BookOpen className="h-8 w-8 text-baby-pink" />,
-                title: "Milestone Tracking",
-                description: "Document first smiles, steps, words, and all those special 'firsts'."
-              },
-              {
-                icon: <Heart className="h-8 w-8 text-baby-mint" />,
-                title: "Family Sharing",
-                description: "Share milestones with family members while keeping them private from the public."
-              }
-            ].map((feature, index) => (
-              <Card key={index} className="p-6 hover:shadow-md transition-shadow">
-                <div className="flex flex-col items-center text-center">
-                  <div className="bg-gray-50 p-4 rounded-full mb-4">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              </Card>
-            ))}
+            <div className="bg-baby-blue/10 p-8 rounded-xl text-center">
+              <div className="bg-baby-blue/20 inline-flex p-3 rounded-full mb-4">
+                <Camera className="h-6 w-6 text-baby-blue" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Organized Memories</h3>
+              <p className="text-gray-600">
+                Effortlessly organize your baby's photos and videos month by month, never lose a precious moment again.
+              </p>
+            </div>
+            <div className="bg-baby-pink/10 p-8 rounded-xl text-center">
+              <div className="bg-baby-pink/20 inline-flex p-3 rounded-full mb-4">
+                <CheckCircle2 className="h-6 w-6 text-baby-pink" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Track Development</h3>
+              <p className="text-gray-600">
+                Record and celebrate developmental milestones with our guided suggestions for each age.
+              </p>
+            </div>
+            <div className="bg-baby-mint/10 p-8 rounded-xl text-center">
+              <div className="bg-baby-mint/20 inline-flex p-3 rounded-full mb-4">
+                <Share2 className="h-6 w-6 text-baby-mint" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Private Sharing</h3>
+              <p className="text-gray-600">
+                Securely share your baby's journey with family and friends using unique private links.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 md:py-24 bg-baby-mint/10">
+      {/* Key Features Section */}
+      <section className="bg-gray-50 py-16" id="features">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">What Parents Say</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                quote: "This app helped me create a beautiful memory book for my daughter without any effort. The month-by-month organization is perfect!",
-                author: "Sarah M., Mother of 2"
-              },
-              {
-                quote: "As a busy dad, I love how easy it is to upload photos and notes about my son's development. Grandparents absolutely love it!",
-                author: "Michael L., Father of 1"
-              },
-              {
-                quote: "The best baby milestone tracker I've used. Clean design, easy to navigate, and keeps everything organized perfectly.",
-                author: "Jessica T., Mother of 3"
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="p-6 flex flex-col">
-                <div className="mb-4 text-baby-blue">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star} className="text-yellow-400">★</span>
+          <h2 className="text-3xl font-bold text-center mb-12">Key Features</h2>
+          <div className="space-y-12 max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="md:w-1/2">
+                <h3 className="text-2xl font-semibold mb-4 text-baby-purple">Monthly Milestone Tracking</h3>
+                <p className="text-gray-600 mb-4">
+                  Document your baby's development month by month with our easy-to-use milestone tracker. Select from pre-defined milestones or add your own custom achievements.
+                </p>
+                <ul className="space-y-2">
+                  {['Organized by month', 'Pre-defined milestone suggestions', 'Custom milestone entries'].map(item => (
+                    <li key={item} className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                      <span>{item}</span>
+                    </li>
                   ))}
+                </ul>
+              </div>
+              <div className="md:w-1/2 bg-baby-purple/5 p-4 rounded-xl">
+                {/* Placeholder for screenshot/illustration */}
+                <div className="aspect-video bg-baby-purple/20 rounded-lg flex items-center justify-center">
+                  <span className="text-baby-purple">Milestone Tracker Screenshot</span>
                 </div>
-                <p className="italic text-gray-700 mb-4 flex-grow">"{testimonial.quote}"</p>
-                <p className="font-semibold text-sm">{testimonial.author}</p>
-              </Card>
-            ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
+              <div className="md:w-1/2">
+                <h3 className="text-2xl font-semibold mb-4 text-baby-pink">Photo & Video Collection</h3>
+                <p className="text-gray-600 mb-4">
+                  Upload and organize photos and videos by month, creating a beautiful visual record of your baby's growth journey.
+                </p>
+                <ul className="space-y-2">
+                  {['Upload unlimited photos (Premium)', 'Add videos of special moments (Premium)', 'Add captions to remember the context'].map(item => (
+                    <li key={item} className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="md:w-1/2 bg-baby-pink/5 p-4 rounded-xl">
+                {/* Placeholder for screenshot/illustration */}
+                <div className="aspect-video bg-baby-pink/20 rounded-lg flex items-center justify-center">
+                  <span className="text-baby-pink">Photo Gallery Screenshot</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="md:w-1/2">
+                <h3 className="text-2xl font-semibold mb-4 text-baby-blue">Private Sharing Links</h3>
+                <p className="text-gray-600 mb-4">
+                  Generate unique, secure links to share with family and friends, allowing them to view your baby's milestones without needing an account.
+                </p>
+                <ul className="space-y-2">
+                  {['Share the entire journey', 'Share specific months', 'Family sharing (Premium)'].map(item => (
+                    <li key={item} className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="md:w-1/2 bg-baby-blue/5 p-4 rounded-xl">
+                {/* Placeholder for screenshot/illustration */}
+                <div className="aspect-video bg-baby-blue/20 rounded-lg flex items-center justify-center">
+                  <span className="text-baby-blue">Sharing Features Screenshot</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row-reverse gap-8 items-center">
+              <div className="md:w-1/2">
+                <h3 className="text-2xl font-semibold mb-4 text-baby-mint">Export to PDF/Book</h3>
+                <p className="text-gray-600 mb-4">
+                  Premium subscribers can export their baby's milestones and photos into a beautifully formatted PDF or book layout, perfect for printing.
+                </p>
+                <ul className="space-y-2">
+                  {['Create beautiful keepsakes', 'Multiple design templates', 'High-resolution print quality'].map(item => (
+                    <li key={item} className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="md:w-1/2 bg-baby-mint/5 p-4 rounded-xl">
+                {/* Placeholder for screenshot/illustration */}
+                <div className="aspect-video bg-baby-mint/20 rounded-lg flex items-center justify-center">
+                  <span className="text-baby-mint">PDF Export Preview</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="py-16 md:py-24 bg-white">
+      {/* Pricing Section */}
+      <section className="bg-white py-16" id="pricing">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">Simple Pricing</h2>
-          <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">
-            Choose the perfect plan for your family's journey.
+          <h2 className="text-3xl font-bold text-center mb-4">Pricing Plans</h2>
+          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+            Choose the plan that's right for your family. Start with our free plan and upgrade anytime as your baby grows.
           </p>
           
-          <div className="flex flex-col lg:flex-row gap-8 justify-center max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
-            <Card className="border-2 p-6 flex-1 flex flex-col">
-              <h3 className="text-xl font-bold mb-2">Basic</h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold">Free</span>
-              </div>
-              <p className="text-gray-600 mb-6">Perfect for getting started</p>
-              <ul className="space-y-3 mb-8 flex-grow">
-                {['Up to 50 photos', '12 months tracking', 'Basic milestones'].map((feature, i) => (
-                  <li key={i} className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    <span>{feature}</span>
+            <div className="border border-gray-200 rounded-xl p-8 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-2xl font-bold mb-2">Free</h3>
+              <p className="text-gray-500 mb-6">Perfect for getting started</p>
+              <p className="text-3xl font-bold mb-6">$0 <span className="text-base font-normal text-gray-500">/month</span></p>
+              
+              <ul className="space-y-3 mb-8">
+                {[
+                  'Up to 50 photo uploads total',
+                  'Track milestones for up to 12 months',
+                  'Basic milestone suggestions',
+                  'Unique shareable links',
+                ].map(item => (
+                  <li key={item} className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/app">Get Started</Link>
+              
+              <Button asChild className="w-full rounded-full" variant="outline">
+                <Link to="/auth">Get Started</Link>
               </Button>
-            </Card>
+            </div>
             
             {/* Premium Plan */}
-            <Card className="border-2 border-baby-blue p-6 flex-1 flex flex-col relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-baby-blue text-white text-xs font-bold px-3 py-1 transform translate-x-[30%] translate-y-[30%] rotate-45">
-                POPULAR
+            <div className="border-2 border-baby-purple rounded-xl p-8 bg-white shadow-md relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-baby-purple text-white px-4 py-1 text-sm font-medium rounded-bl-lg">
+                MOST POPULAR
               </div>
-              <h3 className="text-xl font-bold mb-2">Premium</h3>
-              <div className="mb-4">
-                <span className="text-3xl font-bold">$4.99</span>
-                <span className="text-gray-600">/month</span>
-              </div>
-              <p className="text-gray-600 mb-6">For the complete experience</p>
-              <ul className="space-y-3 mb-8 flex-grow">
+              <h3 className="text-2xl font-bold mb-2">Premium</h3>
+              <p className="text-gray-500 mb-6">For growing families</p>
+              <p className="text-3xl font-bold mb-6">$4.99 <span className="text-base font-normal text-gray-500">/month</span></p>
+              
+              <ul className="space-y-3 mb-8">
                 {[
-                  'Unlimited photos', 
-                  'Unlimited milestones', 
-                  'Video support',
+                  'Unlimited photo uploads',
+                  'Unlimited milestone tracking',
+                  'Video uploads',
                   'Family sharing',
-                  'Export to PDF/Book',
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    <span>{feature}</span>
+                  'Export to PDF/Book format',
+                  'All premium milestone suggestions',
+                  'Priority support',
+                ].map(item => (
+                  <li key={item} className="flex items-start">
+                    <CheckCircle2 className="h-5 w-5 text-baby-purple mr-2 mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
                   </li>
                 ))}
               </ul>
-              <Button className="w-full" asChild>
-                <Link to="/app">Start 14-Day Free Trial</Link>
+              
+              <Button asChild className="w-full bg-baby-purple hover:bg-baby-purple/90 rounded-full">
+                <Link to="/auth">Start Premium</Link>
               </Button>
-            </Card>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-white to-baby-blue/20">
+      {/* CTA Section */}
+      <section className="joyful-gradient-2 py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Start Documenting Your Baby's Journey Today</h2>
-          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Don't miss a single precious milestone. Create your baby's digital memory book in just minutes.
+          <h2 className="text-3xl font-bold mb-6">Start Documenting Your Baby's Journey Today</h2>
+          <p className="text-gray-700 max-w-2xl mx-auto mb-8">
+            Don't miss a moment of your child's precious first years. Sign up now and start creating memories that will last a lifetime.
           </p>
-          <Button size="lg" className="px-8" asChild>
-            <Link to="/app">
-              Get Started For Free
-            </Link>
+          <Button asChild size="lg" className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-8">
+            {isAuthenticated ? (
+              <Link to="/app">
+                Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            ) : (
+              <Link to="/auth">
+                Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            )}
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-12">
+      <footer className="bg-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <Baby size={24} className="text-baby-blue" />
-              <span className="text-lg font-semibold text-gray-800">Tiny Tots Milestones</span>
+            <div className="flex items-center mb-6 md:mb-0">
+              <Baby className="h-8 w-8 text-baby-purple mr-2" />
+              <span className="font-bold text-lg text-baby-purple">Tiny Tots Milestones</span>
             </div>
-            <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center">
-              <Link to="/app" className="text-gray-600 hover:text-gray-900">Demo</Link>
-              <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Privacy</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Terms</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
+            <div className="flex flex-wrap gap-6 text-sm text-gray-600">
+              <a href="#" className="hover:text-baby-purple">Privacy Policy</a>
+              <a href="#" className="hover:text-baby-purple">Terms of Service</a>
+              <a href="#" className="hover:text-baby-purple">Contact Us</a>
+              <a href="#" className="hover:text-baby-purple">Help & Support</a>
             </div>
           </div>
-          <div className="mt-8 text-center text-gray-500 text-sm">
+          <div className="text-center mt-10 text-sm text-gray-500">
             <p>© {new Date().getFullYear()} Tiny Tots Milestones. All rights reserved.</p>
           </div>
         </div>

@@ -9,7 +9,204 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      baby: {
+        Row: {
+          created_at: string
+          date_of_birth: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      milestone: {
+        Row: {
+          baby_id: string
+          created_at: string
+          id: string
+          milestone_text: string
+          month_number: number
+          updated_at: string
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          id?: string
+          milestone_text: string
+          month_number: number
+          updated_at?: string
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          id?: string
+          milestone_text?: string
+          month_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestone_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "baby"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo: {
+        Row: {
+          baby_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_video: boolean
+          month_number: number
+          storage_path: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baby_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_video?: boolean
+          month_number: number
+          storage_path: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baby_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_video?: boolean
+          month_number?: number
+          storage_path?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "baby"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shared_link: {
+        Row: {
+          baby_id: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          month_number: number | null
+          share_token: string
+          user_id: string
+        }
+        Insert: {
+          baby_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          month_number?: number | null
+          share_token: string
+          user_id: string
+        }
+        Update: {
+          baby_id?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          month_number?: number | null
+          share_token?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_link_baby_id_fkey"
+            columns: ["baby_id"]
+            isOneToOne: false
+            referencedRelation: "baby"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
