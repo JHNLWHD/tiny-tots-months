@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import PhotoUploader from "@/components/PhotoUploader";
 import PhotoGrid from "@/components/PhotoGrid";
+import PhotoCollage from "@/components/PhotoCollage";
 import MilestoneList from "@/components/MilestoneList";
 import MilestoneForm from "@/components/MilestoneForm";
 import BabySelector from "@/components/BabySelector";
@@ -14,6 +15,11 @@ import { useMilestones } from "@/hooks/useMilestones";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Photo } from "@/hooks/usePhotos";
+
+type SortOption = "newest" | "oldest" | "description";
 
 const Month = () => {
   const { monthId } = useParams<{ monthId: string }>();
@@ -23,6 +29,8 @@ const Month = () => {
   
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("photos");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [viewMode, setViewMode] = useState<"grid" | "collage">("grid");
   
   // Fetch all babies
   const { babies, loading: loadingBabies } = useBabyProfiles();
@@ -46,6 +54,20 @@ const Month = () => {
     isCreating: isCreatingMilestone,
     refetch: refetchMilestones
   } = useMilestones(selectedBabyId || undefined, monthNumber);
+
+  // Sort photos based on selected option
+  const sortedPhotos = [...photos].sort((a, b) => {
+    switch (sortOption) {
+      case "newest":
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      case "oldest":
+        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      case "description":
+        return ((a.description || '') > (b.description || '')) ? 1 : -1;
+      default:
+        return 0;
+    }
+  });
 
   // Set the first baby as selected when babies load
   useEffect(() => {
@@ -75,6 +97,14 @@ const Month = () => {
     if (photoToDelete) {
       deletePhoto(photoToDelete);
     }
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortOption(value as SortOption);
+  };
+  
+  const handleViewModeChange = (value: string) => {
+    setViewMode(value as "grid" | "collage");
   };
   
   const isLoading = loadingBabies || loadingPhotos || loadingMilestones;
@@ -133,11 +163,50 @@ const Month = () => {
                     />
                     
                     <div>
-                      <h2 className="text-xl font-semibold mb-4">Photos</h2>
-                      <PhotoGrid 
-                        photos={photos} 
-                        onDelete={handleDeletePhoto}
-                      />
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+                        <h2 className="text-xl font-semibold">Photos</h2>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="view-mode" className="whitespace-nowrap">View:</Label>
+                            <Select value={viewMode} onValueChange={handleViewModeChange}>
+                              <SelectTrigger id="view-mode" className="w-[120px]">
+                                <SelectValue placeholder="View" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="grid">Grid</SelectItem>
+                                <SelectItem value="collage">Collage</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor="sort-by" className="whitespace-nowrap">Sort by:</Label>
+                            <Select value={sortOption} onValueChange={handleSortChange}>
+                              <SelectTrigger id="sort-by" className="w-[120px]">
+                                <SelectValue placeholder="Sort by" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="newest">Newest</SelectItem>
+                                <SelectItem value="oldest">Oldest</SelectItem>
+                                <SelectItem value="description">Description</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {viewMode === "grid" ? (
+                        <PhotoGrid 
+                          photos={sortedPhotos} 
+                          onDelete={handleDeletePhoto}
+                        />
+                      ) : (
+                        <PhotoCollage 
+                          photos={sortedPhotos} 
+                          maxDisplayCount={sortedPhotos.length}
+                        />
+                      )}
                     </div>
                   </TabsContent>
                   

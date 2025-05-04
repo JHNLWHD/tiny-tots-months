@@ -66,7 +66,27 @@ export const useSharedData = (shareToken: string) => {
         throw error;
       }
       
-      return data as Photo[];
+      // Generate signed URLs for each photo
+      return await Promise.all((data || []).map(async (photo: any) => {
+        try {
+          const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+            .from('baby_images')
+            .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+          
+          if (signedUrlError) {
+            console.error("Error generating signed URL:", signedUrlError);
+            throw signedUrlError;
+          }
+          
+          return {
+            ...photo,
+            url: signedUrlData?.signedUrl
+          };
+        } catch (err) {
+          console.error("Failed to get signed URL for photo:", photo.id, err);
+          return photo; // Return the photo without a URL if we fail to get a signed URL
+        }
+      }));
     },
     enabled: !!shareLink?.baby_id
   });

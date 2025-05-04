@@ -4,9 +4,12 @@ import Layout from "@/components/Layout";
 import MonthCard from "@/components/MonthCard";
 import BabyCard from "@/components/BabyCard";
 import BabyForm from "@/components/BabyForm";
+import PhotoCollage from "@/components/PhotoCollage";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
+import { useBabyPhotos } from "@/hooks/useBabyPhotos";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -25,12 +28,20 @@ const Home = () => {
   // Generate months 1-12
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  const { photos: selectedBabyPhotos, isLoading: loadingPhotos } = useBabyPhotos(
+    selectedBabyId || undefined
+  );
+
   const handleCreateBaby = () => {
     setShowBabyForm(true);
   };
 
   const handleCloseForm = () => {
     setShowBabyForm(false);
+  };
+
+  const handleBabySelect = (babyId: string) => {
+    setSelectedBabyId(babyId === selectedBabyId ? null : babyId);
   };
 
   return (
@@ -68,26 +79,46 @@ const Home = () => {
                       baby={baby}
                       onDelete={deleteBaby}
                       backgroundClass={backgroundColors[index % backgroundColors.length]}
+                      onClick={() => handleBabySelect(baby.id)}
+                      isSelected={baby.id === selectedBabyId}
                     />
                   ))}
                 </div>
                 
-                {babies.length > 0 && (
-                  <>
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 mt-8">Monthly Milestones</h2>
-                    <p className="text-gray-600 mb-6">Track your baby's special moments month by month</p>
+                {selectedBabyId && (
+                  <div className="mb-12 bg-white p-6 rounded-lg shadow-sm">
+                    <h2 className="text-xl font-bold mb-4">
+                      {babies.find(b => b.id === selectedBabyId)?.name}'s Photos
+                    </h2>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                      {months.map((month) => (
-                        <MonthCard
-                          key={month}
-                          month={month}
-                          backgroundClass={backgroundColors[month % backgroundColors.length]}
-                        />
-                      ))}
-                    </div>
-                  </>
+                    {loadingPhotos ? (
+                      <div className="flex justify-center items-center h-32">
+                        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                      </div>
+                    ) : selectedBabyPhotos.length > 0 ? (
+                      <PhotoCollage photos={selectedBabyPhotos} maxDisplayCount={10} />
+                    ) : (
+                      <p className="text-gray-500 text-center py-6">
+                        No photos uploaded yet. Add photos in the monthly milestones section.
+                      </p>
+                    )}
+                  </div>
                 )}
+                
+                <Separator className="my-8" />
+                
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 mt-8">Monthly Milestones</h2>
+                <p className="text-gray-600 mb-6">Track your baby's special moments month by month</p>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                  {months.map((month) => (
+                    <MonthCard
+                      key={month}
+                      month={month}
+                      backgroundClass={backgroundColors[month % backgroundColors.length]}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </>

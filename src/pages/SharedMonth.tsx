@@ -1,8 +1,10 @@
+
 import { useParams } from 'react-router-dom';
 import { useSharedData } from '@/hooks/useSharedData';
 import { format, parseISO } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import PhotoGrid from '@/components/PhotoGrid';
+import PhotoCollage from '@/components/PhotoCollage';
 import MilestoneList from '@/components/MilestoneList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -69,7 +71,13 @@ const SharedMonth = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Photos</h2>
                 {photos && photos.length > 0 ? (
-                  <PhotoGrid photos={photos} readOnly />
+                  <div className="space-y-6">
+                    <PhotoGrid photos={photos} readOnly />
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <h3 className="text-lg font-medium mb-4">Photo Collection</h3>
+                      <PhotoCollage photos={photos} maxDisplayCount={5} />
+                    </div>
+                  </div>
                 ) : (
                   <p className="text-gray-500 text-center py-8">No photos available for this month.</p>
                 )}

@@ -4,8 +4,10 @@ import { useSharedData } from '@/hooks/useSharedData';
 import { format, parseISO } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import MonthCard from '@/components/MonthCard';
+import PhotoCollage from '@/components/PhotoCollage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Baby as BabyIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -18,7 +20,7 @@ const backgroundColors = [
 
 const SharedBaby = () => {
   const { shareToken } = useParams<{ shareToken: string }>();
-  const { baby, isLoading } = useSharedData(shareToken || '');
+  const { baby, photos, isLoading } = useSharedData(shareToken || '');
   
   function calculateAge(dateOfBirth: string) {
     const birthDate = parseISO(dateOfBirth);
@@ -90,19 +92,58 @@ const SharedBaby = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <h2 className="text-2xl font-bold text-gray-800 mb-4 mt-8">Monthly Milestones</h2>
-          <p className="text-gray-600 mb-6">Explore {baby.name}'s special moments month by month</p>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {months.map((month) => (
-              <MonthCard
-                key={month}
-                month={month}
-                backgroundClass={backgroundColors[month % backgroundColors.length]}
-              />
-            ))}
-          </div>
+
+          <Tabs defaultValue="months" className="mb-8">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="months">Monthly Milestones</TabsTrigger>
+              <TabsTrigger value="photos">Photo Gallery</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="months">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Monthly Milestones</h2>
+              <p className="text-gray-600 mb-6">Explore {baby.name}'s special moments month by month</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {months.map((month) => (
+                  <MonthCard
+                    key={month}
+                    month={month}
+                    backgroundClass={backgroundColors[month % backgroundColors.length]}
+                  />
+                ))}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="photos">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{baby.name}'s Photo Gallery</h2>
+              <p className="text-gray-600 mb-6">View all of {baby.name}'s precious moments</p>
+              
+              {photos && photos.length > 0 ? (
+                <div className="space-y-8">
+                  {/* Group photos by month */}
+                  {Array.from({ length: 12 }, (_, i) => i + 1)
+                    .filter(month => photos.some(p => p.month_number === month))
+                    .map(month => {
+                      const monthPhotos = photos.filter(p => p.month_number === month);
+                      return (
+                        <div key={month} className="bg-white rounded-lg p-4 shadow-sm">
+                          <PhotoCollage 
+                            photos={monthPhotos} 
+                            title={`Month ${month}`}
+                            maxDisplayCount={5}
+                          />
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-white rounded-lg shadow-sm">
+                  <p className="text-gray-500">No photos available yet.</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
       
