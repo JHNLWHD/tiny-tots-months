@@ -200,14 +200,15 @@ const Landing = () => {
             <div className="border border-gray-200 rounded-xl p-8 bg-white shadow-sm hover:shadow-md transition-shadow">
               <h3 className="text-2xl font-bold mb-2">Free</h3>
               <p className="text-gray-500 mb-6">Perfect for getting started</p>
-              <p className="text-3xl font-bold mb-6">$0 <span className="text-base font-normal text-gray-500">/month</span></p>
+              <p className="text-3xl font-bold mb-6">₱0 <span className="text-base font-normal text-gray-500">forever</span></p>
               
               <ul className="space-y-3 mb-8">
                 {[
-                  'Up to 50 photo uploads total',
-                  'Track milestones for up to 12 months',
-                  'Basic milestone suggestions',
+                  'Track 1 baby only',
+                  'Track milestones up to 3 months',
+                  '5 photos per month (15 total)',
                   'Unique shareable links',
+                  'Basic milestone suggestions',
                 ].map(item => (
                   <li key={item} className="flex items-start">
                     <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -224,21 +225,21 @@ const Landing = () => {
             {/* Premium Plan */}
             <div className="border-2 border-baby-purple rounded-xl p-8 bg-white shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 bg-baby-purple text-white px-4 py-1 text-sm font-medium rounded-bl-lg">
-                MOST POPULAR
+                RECOMMENDED
               </div>
               <h3 className="text-2xl font-bold mb-2">Premium</h3>
               <p className="text-gray-500 mb-6">For growing families</p>
-              <p className="text-3xl font-bold mb-6">$4.99 <span className="text-base font-normal text-gray-500">/month</span></p>
+              <p className="text-3xl font-bold mb-6">₱1,000 <span className="text-base font-normal text-gray-500">one-time payment</span></p>
               
               <ul className="space-y-3 mb-8">
                 {[
+                  'Unlimited baby profiles',
+                  'Complete 12 months milestone tracking',
                   'Unlimited photo uploads',
-                  'Unlimited milestone tracking',
                   'Video uploads',
-                  'Family sharing',
-                  'Export to PDF/Book format',
-                  'All premium milestone suggestions',
                   'Priority support',
+                  'Unique shareable links',
+                  'Advanced milestone suggestions',
                 ].map(item => (
                   <li key={item} className="flex items-start">
                     <CheckCircle2 className="h-5 w-5 text-baby-purple mr-2 mt-0.5 flex-shrink-0" />
@@ -248,7 +249,7 @@ const Landing = () => {
               </ul>
               
               <Button asChild className="w-full bg-baby-purple hover:bg-baby-purple/90 rounded-full">
-                <Link to="/auth">Start Premium</Link>
+                <Link to="/auth">Get Premium</Link>
               </Button>
             </div>
           </div>

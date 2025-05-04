@@ -5,12 +5,17 @@ import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useSubscription } from "@/hooks/useSubscription";
+import { toast } from "@/components/ui/sonner";
 
 export const useMonthPage = (monthNumber: number) => {
   const navigate = useNavigate();
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("photos");
 
+  // Get subscription status
+  const { isPremium } = useSubscription();
+  
   // Fetch all babies
   const { babies, loading: loadingBabies } = useBabyProfiles();
   
@@ -45,12 +50,24 @@ export const useMonthPage = (monthNumber: number) => {
     }
   }, [babies, selectedBabyId]);
 
-  // Redirect if month number is invalid
+  // Redirect if month number is invalid or exceeds limits based on subscription
   useEffect(() => {
+    // Basic validation for month number
     if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
       navigate("/app");
+      return;
     }
-  }, [monthNumber, navigate]);
+    
+    // Check subscription limits
+    if (!isPremium && monthNumber > 3) {
+      toast("Premium Required", {
+        description: "Free users can only track up to 3 months. Upgrade to Premium for complete 12-month tracking.",
+        className: "bg-destructive text-destructive-foreground",
+      });
+      navigate("/app");
+      return;
+    }
+  }, [monthNumber, isPremium, navigate]);
   
   const handleBabySelect = (babyId: string) => {
     setSelectedBabyId(babyId);
@@ -67,6 +84,26 @@ export const useMonthPage = (monthNumber: number) => {
   
   const uploadPhoto = async (file: File, description?: string) => {
     if (!selectedBabyId) return null;
+    
+    // Check photo upload limits for free users
+    if (!isPremium) {
+      if (photos.length >= 5) {
+        toast("Upload Limit Reached", {
+          description: "Free users can upload maximum 5 photos per month. Upgrade to Premium for unlimited uploads.",
+          className: "bg-destructive text-destructive-foreground",
+        });
+        return null;
+      }
+      
+      // Check if uploading a video (only allowed for premium users)
+      if (file.type.startsWith('video/')) {
+        toast("Premium Required", {
+          description: "Video uploads are only available for Premium users.",
+          className: "bg-destructive text-destructive-foreground",
+        });
+        return null;
+      }
+    }
     
     return await uploadImage(file, {
       babyId: selectedBabyId,
@@ -91,6 +128,7 @@ export const useMonthPage = (monthNumber: number) => {
     loadingMilestones,
     isUploading,
     isCreatingMilestone,
+    isPremium,
     handleBabySelect,
     handleTabChange,
     uploadPhoto,

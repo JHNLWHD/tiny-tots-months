@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export interface Baby {
   id: string;
@@ -15,6 +16,7 @@ export interface Baby {
 export const useBabyProfiles = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { isPremium } = useSubscription();
   
   const fetchBabies = async (): Promise<Baby[]> => {
     if (!user) return [];
@@ -22,6 +24,7 @@ export const useBabyProfiles = () => {
     const { data, error } = await supabase
       .from("baby")
       .select("*")
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -40,6 +43,43 @@ export const useBabyProfiles = () => {
     queryKey: ['babies', user?.id],
     queryFn: fetchBabies,
     enabled: !!user,
+  });
+
+  const createBabyProfile = useMutation({
+    mutationFn: async ({ name, dateOfBirth }: { name: string, dateOfBirth: string }) => {
+      if (!user) throw new Error("User not authenticated");
+      
+      // Check for free tier limit (1 baby)
+      if (!isPremium && babies.length >= 1) {
+        throw new Error("Free users can only create one baby profile. Upgrade to Premium for unlimited profiles.");
+      }
+      
+      const { data, error } = await supabase
+        .from("baby")
+        .insert({
+          name,
+          date_of_birth: dateOfBirth,
+          user_id: user.id
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['babies', user?.id] });
+      toast("Success", {
+        description: "Baby profile created successfully",
+      });
+    },
+    onError: (error: any) => {
+      console.error("Error creating baby profile:", error);
+      toast("Error", {
+        description: error.message || "Failed to create baby profile",
+        className: "bg-destructive text-destructive-foreground",
+      });
+    },
   });
 
   const deleteBabyMutation = useMutation({
@@ -75,6 +115,9 @@ export const useBabyProfiles = () => {
     loading, 
     fetchBabies: refetch, 
     deleteBaby,
-    isDeleting: deleteBabyMutation.isPending
+    createBaby: createBabyProfile.mutate,
+    isDeleting: deleteBabyMutation.isPending,
+    isCreating: createBabyProfile.isPending,
+    canCreateNewBaby: isPremium || babies.length < 1
   };
 };
