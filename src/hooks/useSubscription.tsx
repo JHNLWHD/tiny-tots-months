@@ -16,6 +16,7 @@ export interface Subscription {
   payment_proof?: string | null;
 }
 
+// Updated status values to match the database constraint
 export const SUBSCRIPTION_STATUS = {
   FREE: "free",
   PREMIUM: "premium",
@@ -76,7 +77,7 @@ export const useSubscription = () => {
         .from("subscription")
         .upsert({
           user_id: user.id,
-          status: SUBSCRIPTION_STATUS.PENDING,
+          status: SUBSCRIPTION_STATUS.PENDING, // Make sure to use the constant defined above
           start_date: new Date().toISOString(),
           payment_proof: paymentProofPath
         })

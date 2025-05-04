@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/context/AuthContext';
 
@@ -71,6 +71,8 @@ export const usePaymentProofUpload = () => {
       setProgress(0);
       setError(null);
       
+      console.log("Starting upload for user:", user.id, "file type:", file.type);
+      
       // Generate file path specifically for payment proofs (no baby_id association)
       const fileExt = file.name.split('.').pop();
       const fileName = `payment_proofs/${user.id}/${uuidv4()}.${fileExt}`;
@@ -96,8 +98,11 @@ export const usePaymentProofUpload = () => {
       const { uploadError, uploadData } = await uploadWithProgress();
 
       if (uploadError) {
+        console.error("Storage upload error:", uploadError);
         throw uploadError;
       }
+      
+      console.log("Upload successful:", fileName);
       
       // Successfully uploaded the file
       options.onSuccess?.(fileName);
