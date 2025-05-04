@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { useBabies } from '@/hooks/useBabies';
+import { useBabyProfiles } from '@/hooks/useBabyProfiles';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useShareLinks } from '@/hooks/useShareLinks';
 import { Crown, Plus, Baby, Calendar, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,18 +14,18 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { generateShareToken } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import BabyForm from '@/components/BabyForm';
 
 const Home = () => {
   const { user } = useAuth();
-  const { babies, isLoading, createBaby, refetchBabies } = useBabies();
+  const { babies, loading: isLoading, createBaby } = useBabyProfiles();
   const { isPremium } = useSubscription();
+  const { generateShareLink, isGenerating: isGeneratingLink } = useShareLinks();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false);
   const [selectedBaby, setSelectedBaby] = React.useState<any>(null);
   const [shareLink, setShareLink] = React.useState<string>('');
-  const [isGeneratingLink, setIsGeneratingLink] = React.useState(false);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
@@ -37,8 +39,7 @@ const Home = () => {
     try {
       await createBaby({
         name: data.name,
-        birthdate: data.birthdate,
-        gender: data.gender
+        dateOfBirth: data.birthdate
       });
       reset();
       setIsDialogOpen(false);
@@ -54,33 +55,18 @@ const Home = () => {
     setShareLink('');
   };
 
-  const generateLink = async () => {
+  const handleGenerateLink = async () => {
     if (!selectedBaby) return;
     
-    setIsGeneratingLink(true);
     try {
-      // Generate a unique token
-      const token = generateShareToken();
-      
-      // Save to database
-      const { error } = await supabase
-        .from('shared_links')
-        .insert({
-          token,
-          baby_id: selectedBaby.id,
-          created_by: user?.id,
-          type: 'baby'
-        });
-        
-      if (error) throw error;
+      // Generate a share link using the useShareLinks hook
+      const token = await generateShareLink(selectedBaby.id, 'baby');
       
       // Create the shareable link
       const shareableLink = `${window.location.origin}/shared/baby/${token}`;
       setShareLink(shareableLink);
     } catch (error: any) {
       toast.error(`Failed to generate link: ${error.message}`);
-    } finally {
-      setIsGeneratingLink(false);
     }
   };
 
@@ -179,8 +165,8 @@ const Home = () => {
               </div>
               
               <div className="text-sm text-gray-500 mb-2">
-                <p>Birthdate: {format(new Date(baby.birthdate), 'MMMM d, yyyy')}</p>
-                <p className="capitalize">Gender: {baby.gender}</p>
+                <p>Birthdate: {format(new Date(baby.date_of_birth), 'MMMM d, yyyy')}</p>
+                <p className="capitalize">Gender: {baby.gender || 'Not specified'}</p>
               </div>
               
               <div className="mt-auto flex flex-col gap-2">
@@ -220,7 +206,7 @@ const Home = () => {
             
             {!shareLink ? (
               <Button 
-                onClick={generateLink} 
+                onClick={handleGenerateLink} 
                 className="w-full"
                 disabled={isGeneratingLink}
               >
