@@ -80,8 +80,7 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
 
       if (error) throw error;
       
-      toast({
-        title: "Success!",
+      toast("Success!", {
         description: `${values.name}'s profile has been created.`,
       });
       
@@ -90,8 +89,7 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
       if (onSuccess) onSuccess();
       
     } catch (error: any) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: error.message || "Failed to create baby profile",
         variant: "destructive",
       });

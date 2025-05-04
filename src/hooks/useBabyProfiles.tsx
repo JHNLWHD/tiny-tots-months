@@ -35,8 +35,7 @@ export const useBabyProfiles = () => {
       setBabies(data || []);
     } catch (error: any) {
       console.error("Error fetching babies:", error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Failed to load baby profiles",
         variant: "destructive",
       });
@@ -58,14 +57,12 @@ export const useBabyProfiles = () => {
       // Refresh the list after deletion
       fetchBabies();
       
-      toast({
-        title: "Success",
+      toast("Success", {
         description: "Baby profile deleted successfully",
       });
     } catch (error: any) {
       console.error("Error deleting baby:", error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Failed to delete baby profile",
         variant: "destructive",
       });
