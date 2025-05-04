@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Photo } from '@/hooks/usePhotos';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,11 +28,6 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
     );
   }
 
-  const getPhotoUrl = (path: string) => {
-    // Use the Supabase client to get the public URL
-    return `${supabase.storage.from('baby_images').getPublicUrl(path).data.publicUrl}`;
-  };
-
   const handlePhotoClick = (photo: Photo) => {
     setSelectedPhoto(photo);
     setIsDialogOpen(true);
@@ -56,7 +50,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
               ) : null}
               
               <img
-                src={getPhotoUrl(photo.storage_path)}
+                src={photo.url || '/placeholder.svg'}
                 alt={photo.description || 'Baby photo'}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -101,11 +95,11 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
                 <video 
                   controls 
                   className="w-full h-auto" 
-                  src={getPhotoUrl(selectedPhoto.storage_path)}
+                  src={selectedPhoto.url || ''}
                 />
               ) : (
                 <img 
-                  src={getPhotoUrl(selectedPhoto.storage_path)} 
+                  src={selectedPhoto.url || '/placeholder.svg'} 
                   alt={selectedPhoto.description || 'Baby photo'} 
                   className="w-full h-auto"
                 />

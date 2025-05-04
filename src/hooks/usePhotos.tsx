@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -47,17 +48,28 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
       throw error;
     }
     
-    // Return the photos with public URLs already generated
-    return (data || []).map(photo => {
-      const publicUrl = supabase.storage
-        .from('baby_images')
-        .getPublicUrl(photo.storage_path).data.publicUrl;
-      
-      return {
-        ...photo,
-        url: publicUrl
-      };
-    });
+    // Generate signed URLs for each photo that expire after 1 hour
+    return await Promise.all((data || []).map(async (photo) => {
+      try {
+        // Create a signed URL with a 1-hour expiry
+        const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+          .from('baby_images')
+          .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
+        
+        if (signedUrlError) {
+          console.error("Error generating signed URL:", signedUrlError);
+          throw signedUrlError;
+        }
+        
+        return {
+          ...photo,
+          url: signedUrlData?.signedUrl
+        };
+      } catch (err) {
+        console.error("Failed to get signed URL for photo:", photo.id, err);
+        return photo; // Return the photo without a URL if we fail to get a signed URL
+      }
+    }));
   };
 
   const { data: photos = [], isLoading, refetch } = useQuery({
