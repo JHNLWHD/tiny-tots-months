@@ -182,6 +182,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          payment_proof: string | null
           start_date: string
           status: string
           updated_at: string
@@ -191,6 +192,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          payment_proof?: string | null
           start_date?: string
           status: string
           updated_at?: string
@@ -200,6 +202,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          payment_proof?: string | null
           start_date?: string
           status?: string
           updated_at?: string
