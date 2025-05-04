@@ -40,7 +40,7 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
   const cardHeight = isMobile ? "h-28 sm:h-32 md:h-36 lg:h-40" : "h-40";
 
   return (
-    <Link to={`/app/month/${month}`} className="block transition-transform hover:scale-105">
+    <Link to={babyId ? `/app/month/${babyId}/${month}` : `/app/month/1`} className="block transition-transform hover:scale-105">
       <Card className={`month-card ${cardHeight} relative overflow-hidden rounded-xl shadow-lg ${!hasPhotos ? backgroundClass : ''}`}>
         {/* Show photo collage as background if we have photos */}
         {hasPhotos && (

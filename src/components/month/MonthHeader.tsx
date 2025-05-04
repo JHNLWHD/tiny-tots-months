@@ -24,6 +24,18 @@ const MonthHeader: React.FC<MonthHeaderProps> = ({ monthNumber, selectedBaby }) 
               </Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
+          {selectedBaby && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to={`/app`} className="text-gray-500 hover:text-baby-purple transition-colors">
+                    {selectedBaby.name}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink className="text-baby-purple font-medium">
@@ -35,7 +47,7 @@ const MonthHeader: React.FC<MonthHeaderProps> = ({ monthNumber, selectedBaby }) 
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-baby-purple to-baby-blue animate-fade-in">
-          Month {monthNumber} Milestones
+          {selectedBaby ? `${selectedBaby.name}'s` : ''} Month {monthNumber} Milestones
         </h1>
         
         {selectedBaby && (

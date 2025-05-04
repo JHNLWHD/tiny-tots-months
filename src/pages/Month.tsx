@@ -10,7 +10,7 @@ import MonthHeader from "@/components/month/MonthHeader";
 import { useMonthPage } from "@/hooks/useMonthPage";
 
 const Month = () => {
-  const { monthId } = useParams<{ monthId: string }>();
+  const { monthId, babyId } = useParams<{ monthId: string; babyId: string }>();
   const monthNumber = parseInt(monthId || "1", 10);
   
   const {
@@ -33,7 +33,7 @@ const Month = () => {
     refetchPhotos,
     loadingPhotos,
     loadingMilestones
-  } = useMonthPage(monthNumber);
+  } = useMonthPage(monthNumber, babyId);
 
   return (
     <Layout hideHeader>

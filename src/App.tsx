@@ -52,7 +52,7 @@ function App() {
                 </ProtectedRoute>
               }>
                 <Route index element={<Home />} />
-                <Route path="month/:monthId" element={<Month />} />
+                <Route path="month/:babyId/:monthId" element={<Month />} />
                 <Route path="upgrade" element={<Upgrade />} />
               </Route>
               

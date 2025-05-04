@@ -8,9 +8,9 @@ import { useImageUpload } from "@/hooks/useImageUpload";
 import { useSubscription } from "@/hooks/useSubscription";
 import { toast } from "@/components/ui/sonner";
 
-export const useMonthPage = (monthNumber: number) => {
+export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
   const navigate = useNavigate();
-  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
+  const [selectedBabyId, setSelectedBabyId] = useState<string | null>(initialBabyId || null);
   const [activeTab, setActiveTab] = useState("photos");
 
   // Get subscription status
@@ -43,10 +43,15 @@ export const useMonthPage = (monthNumber: number) => {
     refetch: refetchMilestones
   } = useMilestones(selectedBabyId || undefined, monthNumber);
 
-  // Set the first baby as selected when babies load
+  // Set the first baby as selected when babies load if no initial baby ID is provided
   useEffect(() => {
-    if (babies.length > 0 && !selectedBabyId) {
-      setSelectedBabyId(babies[0].id);
+    if (babies.length > 0) {
+      if (!selectedBabyId) {
+        setSelectedBabyId(babies[0].id);
+      } else if (!babies.some(baby => baby.id === selectedBabyId)) {
+        // If the selected baby ID is not in the list of babies, select the first one
+        setSelectedBabyId(babies[0].id);
+      }
     }
   }, [babies, selectedBabyId]);
 
@@ -71,6 +76,8 @@ export const useMonthPage = (monthNumber: number) => {
   
   const handleBabySelect = (babyId: string) => {
     setSelectedBabyId(babyId);
+    // Update URL when baby is selected
+    navigate(`/app/month/${babyId}/${monthNumber}`);
   };
   
   const handleTabChange = (value: string) => {

@@ -61,7 +61,7 @@ const BabyCard = ({
     if (onClick) {
       onClick();
     } else {
-      navigate('/month/1'); // Navigate to month 1 by default
+      navigate(`/app/month/${baby.id}/1`); // Navigate to month 1 for this baby
     }
   };
 
@@ -82,7 +82,7 @@ const BabyCard = ({
         <Button 
           onClick={(e) => {
             e.stopPropagation(); // Prevent the card click handler from firing
-            navigate('/month/1');
+            navigate(`/app/month/${baby.id}/1`);
           }} 
           variant="secondary" 
           className="text-xs"
