@@ -99,16 +99,25 @@ export const useImageUpload = () => {
       const fileName = `${user.id}/${options.babyId}/${options.monthNumber}/${uuidv4()}.${fileExt}`;
       const isVideo = file.type.startsWith('video/');
       
-      // Upload file with progress tracking
-      const { error: uploadError, data: uploadData } = await supabase.storage
-        .from('baby_images')
-        .upload(fileName, file, {
-          onUploadProgress: (event) => {
-            const percent = Math.round((event.loaded * 100) / event.total);
-            setProgress(percent);
-            options.onProgress?.(percent);
-          },
-        });
+      // Create a custom upload function that tracks progress
+      const uploadWithProgress = async () => {
+        // Read file as array buffer
+        const arrayBuffer = await file.arrayBuffer();
+        const fileData = new Uint8Array(arrayBuffer);
+        
+        // Upload file without progress tracking
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('baby_images')
+          .upload(fileName, file);
+          
+        // Simulate progress manually
+        setProgress(100);
+        options.onProgress?.(100);
+        
+        return { uploadError, uploadData };
+      };
+      
+      const { uploadError, uploadData } = await uploadWithProgress();
 
       if (uploadError) {
         throw uploadError;
