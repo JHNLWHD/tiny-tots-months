@@ -16,12 +16,26 @@ import EmptyState from '@/components/home/EmptyState';
 
 const Home = () => {
   const { user } = useAuth();
-  const { babies, loading: isLoading, createBaby } = useBabyProfiles();
+  const { babies, loading: isLoading, createBaby: createBabyMutation } = useBabyProfiles();
   const { isPremium } = useSubscription();
   const { generateShareLink, isGenerating: isGeneratingLink } = useShareLinks();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false);
   const [selectedBaby, setSelectedBaby] = React.useState<any>(null);
+  
+  // Wrap the mutation function to return a Promise
+  const createBaby = async (data: { name: string, dateOfBirth: string }) => {
+    return new Promise<void>((resolve, reject) => {
+      try {
+        createBabyMutation(data, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
   
   const handleShareBaby = async (baby: any) => {
     setSelectedBaby(baby);
