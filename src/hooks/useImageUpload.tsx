@@ -56,6 +56,9 @@ export const useImageUpload = () => {
       return null;
     }
     
+    // Ensure month number is at least 1 to satisfy database constraint
+    const monthNumber = Math.max(1, options.monthNumber);
+    
     // Validate file size (max 50MB)
     if (file.size > 50 * 1024 * 1024) {
       const sizeError = new Error("File too large");
@@ -96,7 +99,7 @@ export const useImageUpload = () => {
       
       // Generate file path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${options.babyId}/${options.monthNumber}/${uuidv4()}.${fileExt}`;
+      const fileName = `${user.id}/${options.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
       const isVideo = file.type.startsWith('video/');
       
       // Create a custom upload function that tracks progress
@@ -129,7 +132,7 @@ export const useImageUpload = () => {
         .insert({
           baby_id: options.babyId,
           user_id: user.id,
-          month_number: options.monthNumber,
+          month_number: monthNumber,
           storage_path: fileName,
           description: options.description || null,
           is_video: isVideo

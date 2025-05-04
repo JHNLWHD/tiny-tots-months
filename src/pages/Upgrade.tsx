@@ -63,10 +63,11 @@ const Upgrade = () => {
       
       console.log("Starting upgrade process for user:", user.id);
       
-      // First upload the receipt image - using user.id as folder name instead of "payment-proof"
+      // First upload the receipt image - using user.id as folder name and 1 as month_number
+      // Since month_number in the database has a check constraint requiring value > 0
       const result = await uploadImage(selectedFile, {
-        babyId: user.id, // Using user ID as the folder name instead of "payment-proof"
-        monthNumber: 0,  // Not relevant for payment proof
+        babyId: user.id, // Using user ID as the folder name
+        monthNumber: 1,  // Changed from 0 to 1 to satisfy the check constraint
         description: "Payment proof for premium upgrade"
       });
       
