@@ -54,7 +54,10 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
               className={`overflow-hidden cursor-pointer ${
                 index === 0 ? "col-span-2 row-span-2" : ""
               }`}
-              onClick={() => handlePhotoClick(photo)}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent navigation when inside a Link
+                handlePhotoClick(photo);
+              }}
             >
               <div className="aspect-square relative">
                 {photo.is_video ? (
