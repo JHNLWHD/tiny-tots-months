@@ -12,6 +12,8 @@ import Month from "./pages/Month";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SharedBaby from "./pages/SharedBaby";
+import SharedMonth from "./pages/SharedMonth";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +32,7 @@ const App = () => (
                 <Home />
               </ProtectedRoute>
             } />
-            <Route path="/month/:month" element={
+            <Route path="/month/:monthId" element={
               <ProtectedRoute>
                 <Month />
               </ProtectedRoute>
@@ -40,6 +42,9 @@ const App = () => (
                 <Admin />
               </ProtectedRoute>
             } />
+            {/* Public shared routes */}
+            <Route path="/share/baby/:shareToken" element={<SharedBaby />} />
+            <Route path="/share/month/:shareToken" element={<SharedMonth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

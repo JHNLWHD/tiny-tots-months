@@ -1,0 +1,101 @@
+
+import { useParams } from 'react-router-dom';
+import { useSharedData } from '@/hooks/useSharedData';
+import { format, parseISO } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+import PhotoGrid from '@/components/PhotoGrid';
+import MilestoneList from '@/components/MilestoneList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+const backgroundColors = [
+  "bg-baby-blue",
+  "bg-baby-pink",
+  "bg-baby-mint",
+  "bg-baby-yellow",
+  "bg-baby-peach",
+  "bg-baby-purple",
+];
+
+const SharedMonth = () => {
+  const { shareToken } = useParams<{ shareToken: string }>();
+  const { shareLink, baby, photos, milestones, isLoading } = useSharedData(shareToken || '');
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-2" />
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!baby || !shareLink) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Month Not Found</h1>
+          <p className="text-gray-500">This shared link may have expired or been removed.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const monthNumber = shareLink.month_number || 1;
+  const formattedDate = baby.date_of_birth ? format(parseISO(baby.date_of_birth), "MMMM d, yyyy") : '';
+  
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              {baby.name}'s Month {monthNumber} Milestones
+            </h1>
+            <p className="text-gray-600">Born on {formattedDate}</p>
+          </div>
+          
+          <div className={`w-full h-24 ${backgroundColors[monthNumber % backgroundColors.length]} rounded-lg mb-8 flex items-center justify-center`}>
+            <h2 className="text-3xl font-bold text-white drop-shadow-md">Month {monthNumber}</h2>
+          </div>
+          
+          <Tabs defaultValue="photos">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="photos">Photos</TabsTrigger>
+              <TabsTrigger value="milestones">Milestones</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="photos" className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Photos</h2>
+                {photos && photos.length > 0 ? (
+                  <PhotoGrid photos={photos} readOnly />
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No photos available for this month.</p>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="milestones">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Milestones</h2>
+                {milestones && milestones.length > 0 ? (
+                  <MilestoneList milestones={milestones} readOnly />
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No milestones recorded for this month.</p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+      
+      <footer className="text-center py-8 text-sm text-gray-500">
+        <p>Shared via Tiny Tots Milestones</p>
+      </footer>
+    </div>
+  );
+};
+
+export default SharedMonth;

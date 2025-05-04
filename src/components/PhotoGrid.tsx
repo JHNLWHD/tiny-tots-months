@@ -1,63 +1,120 @@
 
 import React from 'react';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Photo } from '@/hooks/usePhotos';
-import { Trash2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
+import { Trash2, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface PhotoGridProps {
   photos: Photo[];
-  onDelete?: (photo: Photo) => void;
-  readonly?: boolean;
+  onDelete?: (id: string) => void;
+  readOnly?: boolean;
 }
 
-const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readonly = false }) => {
-  if (photos.length === 0) {
+const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = false }) => {
+  const [selectedPhoto, setSelectedPhoto] = React.useState<Photo | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+  if (!photos || photos.length === 0) {
     return (
-      <div className="text-center py-10">
+      <div className="text-center py-8">
         <p className="text-gray-500">No photos uploaded yet.</p>
       </div>
     );
   }
-  
+
+  const getPhotoUrl = async (path: string) => {
+    const { data } = await supabase.storage.from('baby_images').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const handlePhotoClick = (photo: Photo) => {
+    setSelectedPhoto(photo);
+    setIsDialogOpen(true);
+  };
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {photos.map((photo) => (
-        <div key={photo.id} className="rounded-xl overflow-hidden shadow-md bg-white group relative">
-          <AspectRatio ratio={4/3} className="bg-muted">
-            {photo.is_video ? (
-              <video
-                src={photo.url}
-                controls
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {photos.map((photo) => (
+          <Card 
+            key={photo.id} 
+            className="overflow-hidden group relative cursor-pointer"
+            onClick={() => handlePhotoClick(photo)}
+          >
+            <div className="aspect-square relative">
+              {photo.is_video ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                  <Play className="h-8 w-8 text-white" />
+                </div>
+              ) : null}
+              
+              <img
+                src={`${supabase.storageUrl}/object/public/baby_images/${photo.storage_path}`}
+                alt={photo.description || 'Baby photo'}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
-            ) : (
-              <img 
-                src={photo.url} 
-                alt={photo.description || 'Baby milestone photo'} 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-              />
-            )}
-          </AspectRatio>
-          {photo.description && (
-            <div className="p-3">
-              <p className="text-sm text-gray-600">{photo.description}</p>
+              
+              {photo.description && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs truncate">
+                  {photo.description}
+                </div>
+              )}
+              
+              {!readOnly && onDelete && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(photo.id);
+                  }}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger className="hidden">Open</DialogTrigger>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          {selectedPhoto && (
+            <div className="relative">
+              {selectedPhoto.is_video ? (
+                <video 
+                  controls 
+                  className="w-full h-auto" 
+                  src={`${supabase.storageUrl}/object/public/baby_images/${selectedPhoto.storage_path}`}
+                />
+              ) : (
+                <img 
+                  src={`${supabase.storageUrl}/object/public/baby_images/${selectedPhoto.storage_path}`} 
+                  alt={selectedPhoto.description || 'Baby photo'} 
+                  className="w-full h-auto"
+                />
+              )}
+              
+              {selectedPhoto.description && (
+                <div className="p-4 bg-background">
+                  <p className="text-foreground">{selectedPhoto.description}</p>
+                </div>
+              )}
             </div>
           )}
-          
-          {!readonly && onDelete && (
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => onDelete(photo)}
-            >
-              <Trash2 size={16} />
-            </Button>
-          )}
-        </div>
-      ))}
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

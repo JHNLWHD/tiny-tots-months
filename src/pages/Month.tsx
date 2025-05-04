@@ -7,6 +7,7 @@ import PhotoGrid from "@/components/PhotoGrid";
 import MilestoneList from "@/components/MilestoneList";
 import MilestoneForm from "@/components/MilestoneForm";
 import BabySelector from "@/components/BabySelector";
+import ShareButton from "@/components/ShareButton";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useMilestones } from "@/hooks/useMilestones";
@@ -69,14 +70,28 @@ const Month = () => {
   };
   
   const isLoading = loadingBabies || loadingPhotos || loadingMilestones;
+  
+  // Find the selected baby for sharing
+  const selectedBaby = babies.find(baby => baby.id === selectedBabyId);
 
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-            Month {monthNumber} Milestones
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              Month {monthNumber} Milestones
+            </h1>
+            
+            {selectedBabyId && selectedBaby && (
+              <ShareButton 
+                babyId={selectedBabyId}
+                babyName={selectedBaby.name}
+                type="month"
+                monthNumber={monthNumber}
+              />
+            )}
+          </div>
           
           {isLoading ? (
             <div className="flex justify-center py-8">

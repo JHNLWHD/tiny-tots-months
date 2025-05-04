@@ -1,0 +1,116 @@
+
+import { useParams } from 'react-router-dom';
+import { useSharedData } from '@/hooks/useSharedData';
+import { format, parseISO } from 'date-fns';
+import { Loader2 } from 'lucide-react';
+import MonthCard from '@/components/MonthCard';
+import { Card, CardContent } from '@/components/ui/card';
+import { Baby as BabyIcon } from 'lucide-react';
+
+const backgroundColors = [
+  "bg-baby-blue",
+  "bg-baby-pink",
+  "bg-baby-mint",
+  "bg-baby-yellow",
+  "bg-baby-peach",
+  "bg-baby-purple",
+];
+
+const SharedBaby = () => {
+  const { shareToken } = useParams<{ shareToken: string }>();
+  const { baby, isLoading } = useSharedData(shareToken || '');
+  
+  function calculateAge(dateOfBirth: string) {
+    const birthDate = parseISO(dateOfBirth);
+    const today = new Date();
+    
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    
+    if (years > 0) {
+      return `${years} year${years !== 1 ? 's' : ''}`;
+    } else {
+      return `${months} month${months !== 1 ? 's' : ''}`;
+    }
+  }
+  
+  // Generate months 1-12
+  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-2" />
+          <p className="text-gray-500">Loading baby profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!baby) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Baby Not Found</h1>
+          <p className="text-gray-500">This shared link may have expired or been removed.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  const formattedDate = baby.date_of_birth ? format(parseISO(baby.date_of_birth), "MMMM d, yyyy") : '';
+  const age = baby.date_of_birth ? calculateAge(baby.date_of_birth) : '';
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">{baby.name}'s Milestone Journey</h1>
+            <p className="text-gray-600">
+              {baby.name} is {age} old • Born on {formattedDate}
+            </p>
+          </div>
+          
+          <Card className={`${backgroundColors[0]} overflow-hidden mb-10`}>
+            <CardContent className="p-6 flex items-center text-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="mb-2">
+                  <BabyIcon size={64} className="text-white" />
+                </div>
+                <h2 className="font-bold text-2xl text-white">{baby.name}</h2>
+                <p className="text-white/90">{age} old</p>
+                <p className="text-sm text-white/80 mt-1">Born: {formattedDate}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <h2 className="text-2xl font-bold text-gray-800 mb-4 mt-8">Monthly Milestones</h2>
+          <p className="text-gray-600 mb-6">Explore {baby.name}'s special moments month by month</p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {months.map((month) => (
+              <MonthCard
+                key={month}
+                month={month}
+                backgroundClass={backgroundColors[month % backgroundColors.length]}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <footer className="text-center py-8 text-sm text-gray-500">
+        <p>Shared via Tiny Tots Milestones</p>
+      </footer>
+    </div>
+  );
+};
+
+export default SharedBaby;
