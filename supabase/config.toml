@@ -3,6 +3,6 @@ project_id = "htxczdhdospkxjesvztw"
 
 [storage]
 [storage.baby_images]
-public = false
+public = true
 allowed_mime_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4", "video/quicktime"]
 file_size_limit = "104857600"

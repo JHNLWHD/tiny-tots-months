@@ -30,7 +30,8 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
   }
 
   const getPhotoUrl = (path: string) => {
-    return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/baby_images/${path}`;
+    // Use the public URL from Supabase storage
+    return `https://htxczdhdospkxjesvztw.supabase.co/storage/v1/object/public/baby_images/${path}`;
   };
 
   const handlePhotoClick = (photo: Photo) => {
