@@ -10,7 +10,7 @@ export type Baby = {
   created_at: string;
   name: string;
   date_of_birth: string;
-  gender: string;
+  gender: string | null; // Making gender optional by adding null
   user_id: string | undefined;
 };
 
@@ -42,7 +42,12 @@ export function useBabyProfiles() {
             console.error('Error fetching babies:', error);
             setError(error.message);
           } else {
-            setBabies(data || []);
+            // Map the database data to match our Baby type
+            const mappedData: Baby[] = (data || []).map(item => ({
+              ...item,
+              gender: item.gender || null, // Handle missing gender field
+            }));
+            setBabies(mappedData);
           }
         }
       } catch (err: any) {
@@ -68,7 +73,12 @@ export function useBabyProfiles() {
             console.error('Error refetching babies:', error);
             setError(error.message);
           } else {
-            setBabies(data || []);
+            // Map the database data to match our Baby type
+            const mappedData: Baby[] = (data || []).map(item => ({
+              ...item,
+              gender: item.gender || null, // Handle missing gender field
+            }));
+            setBabies(mappedData);
           }
           setLoading(false);
         });
@@ -78,8 +88,11 @@ export function useBabyProfiles() {
   const createBaby = (data: CreateBabyData, options?: { onSuccess?: () => void, onError?: (err: Error) => void }) => {
     setCreating(true);
     
+    // Format the data to match what Supabase expects
     const newBaby = {
-      ...data,
+      name: data.name,
+      date_of_birth: data.dateOfBirth, // Use date_of_birth instead of dateOfBirth
+      gender: data.gender,
       user_id: user?.id,
     };
     
@@ -110,9 +123,8 @@ export function useBabyProfiles() {
           refetch();
           options?.onSuccess?.();
         }
-      })
-      .finally(() => {
-        setCreating(false);
+        
+        setCreating(false); // Move this inside then() instead of using finally()
       });
   };
 
