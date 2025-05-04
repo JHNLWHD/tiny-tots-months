@@ -91,7 +91,8 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
     } catch (error: any) {
       toast("Error", {
         description: error.message || "Failed to create baby profile",
-        variant: "destructive",
+        // Using className instead of variant for error styling
+        className: "bg-destructive text-destructive-foreground",
       });
     } finally {
       setIsSubmitting(false);
