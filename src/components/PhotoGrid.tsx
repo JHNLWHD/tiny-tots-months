@@ -29,9 +29,8 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
     );
   }
 
-  const getPhotoUrl = async (path: string) => {
-    const { data } = await supabase.storage.from('baby_images').getPublicUrl(path);
-    return data.publicUrl;
+  const getPhotoUrl = (path: string) => {
+    return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/baby_images/${path}`;
   };
 
   const handlePhotoClick = (photo: Photo) => {
@@ -56,7 +55,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
               ) : null}
               
               <img
-                src={`${supabase.storageUrl}/object/public/baby_images/${photo.storage_path}`}
+                src={getPhotoUrl(photo.storage_path)}
                 alt={photo.description || 'Baby photo'}
                 className="w-full h-full object-cover"
                 loading="lazy"
@@ -95,11 +94,11 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
                 <video 
                   controls 
                   className="w-full h-auto" 
-                  src={`${supabase.storageUrl}/object/public/baby_images/${selectedPhoto.storage_path}`}
+                  src={getPhotoUrl(selectedPhoto.storage_path)}
                 />
               ) : (
                 <img 
-                  src={`${supabase.storageUrl}/object/public/baby_images/${selectedPhoto.storage_path}`} 
+                  src={getPhotoUrl(selectedPhoto.storage_path)} 
                   alt={selectedPhoto.description || 'Baby photo'} 
                   className="w-full h-auto"
                 />

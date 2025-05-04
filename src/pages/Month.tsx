@@ -68,6 +68,14 @@ const Month = () => {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
+
+  // Handle photo deletion with proper type conversion
+  const handleDeletePhoto = (id: string) => {
+    const photoToDelete = photos.find(photo => photo.id === id);
+    if (photoToDelete) {
+      deletePhoto(photoToDelete);
+    }
+  };
   
   const isLoading = loadingBabies || loadingPhotos || loadingMilestones;
   
@@ -128,7 +136,7 @@ const Month = () => {
                       <h2 className="text-xl font-semibold mb-4">Photos</h2>
                       <PhotoGrid 
                         photos={photos} 
-                        onDelete={deletePhoto}
+                        onDelete={handleDeletePhoto}
                       />
                     </div>
                   </TabsContent>
