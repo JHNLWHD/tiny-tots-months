@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import HeroSection from '@/components/landing/HeroSection';
 import ProblemSolutionSection from '@/components/landing/ProblemSolutionSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
@@ -15,6 +16,25 @@ const Landing = () => {
   
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <meta name="description" content="Capture and document your baby's milestones month by month. Share precious moments with family and friends through our easy-to-use app." />
+        <meta name="keywords" content="baby milestones, baby development tracker, baby photos, milestone app, parenting app" />
+        
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content="Tiny Tots Milestones - Track Your Baby's Development" />
+        <meta property="og:description" content="Capture and document your baby's milestones month by month. Share precious moments with family and friends." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        
+        {/* Twitter Card data */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Tiny Tots Milestones - Baby Development Tracker" />
+        <meta name="twitter:description" content="Document and share your baby's growth journey with our easy-to-use milestone tracker." />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={window.location.href} />
+      </Helmet>
+
       {/* Hero Section */}
       <HeroSection />
 
