@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import MonthCard from "@/components/MonthCard";
@@ -43,6 +42,9 @@ const Home = () => {
   const handleBabySelect = (babyId: string) => {
     setSelectedBabyId(babyId === selectedBabyId ? null : babyId);
   };
+
+  // Debug log to check the selected baby and photo count
+  console.log(`Selected baby: ${selectedBabyId}, Photos count: ${selectedBabyPhotos?.length || 0}`);
 
   return (
     <Layout>

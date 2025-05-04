@@ -10,6 +10,8 @@ export const useBabyPhotos = (babyId?: string) => {
   const fetchAllBabyPhotos = async (): Promise<Photo[]> => {
     if (!user || !babyId) return [];
     
+    console.log(`Fetching photos for baby: ${babyId}`);
+    
     // Fetch all photos for the baby across all months
     const { data, error } = await supabase
       .from("photo")
@@ -21,6 +23,8 @@ export const useBabyPhotos = (babyId?: string) => {
       console.error("Error fetching baby photos:", error);
       throw error;
     }
+    
+    console.log(`Found ${data?.length || 0} photos for baby ${babyId}`);
     
     // Generate signed URLs for each photo that expire after 1 hour
     return await Promise.all((data || []).map(async (photo) => {

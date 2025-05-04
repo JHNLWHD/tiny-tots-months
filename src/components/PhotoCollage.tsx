@@ -1,12 +1,12 @@
 
 import React from 'react';
 import { Photo } from '@/hooks/usePhotos';
-import { Card } from '@/components/ui/card';
 import { Play } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 
 interface PhotoCollageProps {
@@ -90,8 +90,9 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger className="hidden">Open</DialogTrigger>
         <DialogContent className="max-w-3xl p-0 overflow-hidden">
+          <DialogTitle className="sr-only">Photo View</DialogTitle>
+          <DialogDescription className="sr-only">View full photo</DialogDescription>
           {selectedPhoto && (
             <div className="relative">
               {selectedPhoto.is_video ? (
