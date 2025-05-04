@@ -29,9 +29,10 @@ interface ShareButtonProps {
   type: ShareType;
   monthNumber?: number;
   className?: string;
+  onClick?: (e: React.MouseEvent) => void; // Add onClick prop
 }
 
-const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, monthNumber, className }) => {
+const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, monthNumber, className, onClick }) => {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { generateShareLink, isGenerating, getShareLink } = useShareLinks();
@@ -93,7 +94,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
         <Button 
           variant="outline" 
           className={className}
-          onClick={() => {
+          onClick={(e) => {
+            if (onClick) {
+              onClick(e);
+            }
             if (!shareUrl && !isGenerating) {
               handleShare();
             }
