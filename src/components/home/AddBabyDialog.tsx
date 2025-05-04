@@ -27,7 +27,7 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
 
   // Handler for the Select component (gender)
   const handleGenderChange = (value: string) => {
-    setValue('gender', value);
+    setValue('gender', value, { shouldValidate: true });
   };
 
   const onSubmit = async (data: any) => {
@@ -44,6 +44,13 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
       toast.error(`Failed to add baby: ${error.message}`);
     }
   };
+
+  // Reset form when dialog closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -74,8 +81,8 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
           
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select defaultValue={gender} onValueChange={handleGenderChange}>
-              <SelectTrigger>
+            <Select value={gender} onValueChange={handleGenderChange}>
+              <SelectTrigger id="gender">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -84,7 +91,8 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
-            <input type="hidden" {...register("gender")} />
+            <input type="hidden" {...register("gender")} value={gender} />
+            {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message?.toString()}</p>}
           </div>
           
           <div className="flex justify-end gap-2 pt-4">

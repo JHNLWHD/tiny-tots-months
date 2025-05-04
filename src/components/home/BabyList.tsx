@@ -51,7 +51,11 @@ const BabyList: React.FC<BabyListProps> = ({
         babies.map((baby: any) => (
           <Card 
             key={baby.id} 
-            className={`p-4 sm:p-6 h-48 sm:h-64 flex flex-col cursor-pointer hover:shadow-md transition-all rounded-xl baby-card-shadow transform hover:scale-105 duration-300 bg-gradient-to-br from-white to-baby-purple/5 ${selectedBaby?.id === baby.id ? 'ring-2 ring-baby-purple' : ''}`}
+            className={`p-4 sm:p-6 h-48 sm:h-64 flex flex-col cursor-pointer hover:shadow-md transition-all rounded-xl baby-card-shadow transform hover:scale-105 duration-300 bg-gradient-to-br from-white to-baby-purple/5 ${
+              selectedBaby?.id === baby.id 
+                ? 'ring-4 ring-baby-purple/50 border-2 border-baby-purple shadow-lg' 
+                : ''
+            }`}
             onClick={() => onSelectBaby(baby)}
           >
             <div className="flex items-center mb-2 sm:mb-4">

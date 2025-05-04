@@ -26,8 +26,8 @@ export const useBabyProfiles = () => {
       .from("baby")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
+      .order("date_of_birth", { ascending: true }); // Order by birth date ascending
+      
     if (error) {
       console.error("Error fetching babies:", error);
       toast("Error", {
