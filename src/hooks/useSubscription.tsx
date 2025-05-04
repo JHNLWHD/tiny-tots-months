@@ -28,6 +28,8 @@ export const useSubscription = () => {
   const fetchSubscription = async (): Promise<Subscription | null> => {
     if (!user) return null;
     
+    console.log("Fetching subscription for user:", user.id);
+    
     // First, check if user already has a subscription
     const { data, error } = await supabase
       .from("subscription")
@@ -37,29 +39,7 @@ export const useSubscription = () => {
       
     if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
       console.error("Error fetching subscription:", error);
-      toast.error("Failed to load subscription status");
       throw error;
-    }
-    
-    // If no subscription exists, create a free one
-    if (!data) {
-      console.log("No subscription found, creating a free subscription");
-      const { data: newSubscription, error: createError } = await supabase
-        .from("subscription")
-        .insert({
-          user_id: user.id,
-          status: SUBSCRIPTION_STATUS.FREE
-        })
-        .select()
-        .single();
-        
-      if (createError) {
-        console.error("Error creating subscription:", createError);
-        toast.error("Failed to create subscription");
-        throw createError;
-      }
-      
-      return newSubscription;
     }
     
     return data;
@@ -75,6 +55,7 @@ export const useSubscription = () => {
     queryKey: ['subscription', user?.id],
     queryFn: fetchSubscription,
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
   // Check if user has premium subscription
@@ -87,27 +68,19 @@ export const useSubscription = () => {
       
       console.log("Upgrading subscription to premium for user:", user.id);
       
-      // Check if subscription exists first
-      const { data: existingSub } = await supabase
-        .from("subscription")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      // Use upsert to either update existing or create new
+      // Use upsert to handle both creation and update
       const { data, error } = await supabase
         .from("subscription")
         .upsert({
           user_id: user.id,
           status: SUBSCRIPTION_STATUS.PREMIUM,
           start_date: new Date().toISOString(),
-          ...(existingSub?.id ? { id: existingSub.id } : {}) // Include ID if updating
         })
         .select()
         .single();
         
       if (error) {
-        console.error("Upgrade error details:", error);
+        console.error("Upgrade error:", error);
         throw error;
       }
       
@@ -119,7 +92,7 @@ export const useSubscription = () => {
     },
     onError: (error: any) => {
       console.error("Error upgrading subscription:", error);
-      toast.error("Failed to upgrade subscription");
+      toast.error(`Subscription upgrade failed: ${error.message || 'Please try again later'}`);
     },
   });
 

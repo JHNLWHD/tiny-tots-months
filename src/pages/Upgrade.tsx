@@ -1,22 +1,27 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 const Upgrade = () => {
   const navigate = useNavigate();
-  const { isPremium, upgradeToPremium, isUpgrading } = useSubscription();
+  const { user } = useAuth();
+  const { isPremium, upgradeToPremium, isUpgrading, subscription, loading } = useSubscription();
 
   const handleUpgrade = async () => {
-    // In a real implementation, this would integrate with a payment gateway
-    // For this demo, we'll just upgrade the user directly
     try {
+      if (!user) {
+        toast.error("You must be logged in to upgrade");
+        return;
+      }
+      
+      console.log("Starting upgrade process for user:", user.id);
       upgradeToPremium();
-      // Toast and navigation happens in the success callback of the mutation
     } catch (error) {
       console.error('Upgrade error:', error);
       toast.error("There was a problem processing your upgrade");
@@ -38,7 +43,11 @@ const Upgrade = () => {
         <h1 className="text-3xl font-bold text-center mb-8">Upgrade to Premium</h1>
 
         <div className="max-w-4xl mx-auto">
-          {isPremium ? (
+          {loading ? (
+            <Card className="p-8 text-center">
+              <div className="animate-pulse text-baby-purple">Loading subscription status...</div>
+            </Card>
+          ) : isPremium ? (
             <Card className="p-8 text-center">
               <div className="flex justify-center mb-4">
                 <CheckCircle2 className="h-16 w-16 text-green-500" />
