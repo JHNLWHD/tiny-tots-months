@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowLeft, Loader2, Info, Upload, Clock } from 'lucide-react';
@@ -62,7 +63,7 @@ const Upgrade = () => {
       
       console.log("Starting upgrade process for user:", user.id);
       
-      // Upload the payment proof using our new dedicated function
+      // Upload the payment proof using our dedicated function
       const storagePath = await uploadPaymentProof(selectedFile, {
         description: "Payment proof for premium upgrade",
         onSuccess: (path) => {
@@ -70,6 +71,10 @@ const Upgrade = () => {
           // Request premium upgrade with the storage path
           requestPremiumUpgrade(path);
           clearSelection();
+        },
+        onError: (error) => {
+          console.error("Failed to upload payment proof:", error);
+          toast.error("Failed to upload payment receipt. Please try again.");
         }
       });
       

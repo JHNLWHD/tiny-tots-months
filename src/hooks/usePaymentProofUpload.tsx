@@ -29,10 +29,7 @@ export const usePaymentProofUpload = () => {
       const authError = new Error("User not authenticated");
       setError(authError);
       options.onError?.(authError);
-      toast("Authentication Error", {
-        description: "You must be logged in to upload files",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error("You must be logged in to upload files");
       return null;
     }
     
@@ -40,10 +37,7 @@ export const usePaymentProofUpload = () => {
       const fileError = new Error("No file selected");
       setError(fileError);
       options.onError?.(fileError);
-      toast("Upload Error", {
-        description: "No file selected for upload",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error("No file selected for upload");
       return null;
     }
     
@@ -52,10 +46,7 @@ export const usePaymentProofUpload = () => {
       const sizeError = new Error("File too large");
       setError(sizeError);
       options.onError?.(sizeError);
-      toast("File too large", {
-        description: "Maximum file size is 50MB",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error("Maximum file size is 50MB");
       return null;
     }
     
@@ -71,10 +62,7 @@ export const usePaymentProofUpload = () => {
       const typeError = new Error("Invalid file type");
       setError(typeError);
       options.onError?.(typeError);
-      toast("Invalid file type", {
-        description: "Please upload a JPG, PNG, GIF or WebP file",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error("Please upload a JPG, PNG, GIF or WebP file");
       return null;
     }
     
@@ -83,7 +71,7 @@ export const usePaymentProofUpload = () => {
       setProgress(0);
       setError(null);
       
-      // Generate file path specifically for payment proofs
+      // Generate file path specifically for payment proofs (no baby_id association)
       const fileExt = file.name.split('.').pop();
       const fileName = `payment_proofs/${user.id}/${uuidv4()}.${fileExt}`;
       
@@ -93,12 +81,12 @@ export const usePaymentProofUpload = () => {
         const arrayBuffer = await file.arrayBuffer();
         const fileData = new Uint8Array(arrayBuffer);
         
-        // Upload file
+        // Upload file to baby_images bucket but in payment_proofs folder
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('baby_images')
           .upload(fileName, file);
           
-        // Simulate progress manually
+        // Simulate progress manually since we don't have a proper progress API
         setProgress(100);
         options.onProgress?.(100);
         
@@ -114,9 +102,7 @@ export const usePaymentProofUpload = () => {
       // Successfully uploaded the file
       options.onSuccess?.(fileName);
       
-      toast("Upload Complete", {
-        description: "Your payment proof was uploaded successfully",
-      });
+      toast.success("Your payment proof was uploaded successfully");
       
       return fileName;
     } catch (err) {
@@ -125,10 +111,7 @@ export const usePaymentProofUpload = () => {
       setError(uploadError);
       options.onError?.(uploadError);
       
-      toast("Upload Error", {
-        description: uploadError.message || "Failed to upload payment proof",
-        className: "bg-destructive text-destructive-foreground",
-      });
+      toast.error(uploadError.message || "Failed to upload payment proof");
       return null;
     } finally {
       setIsUploading(false);

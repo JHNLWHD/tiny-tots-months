@@ -69,7 +69,7 @@ export const useSubscription = () => {
     mutationFn: async (paymentProofPath: string): Promise<Subscription> => {
       if (!user) throw new Error("User not authenticated");
       
-      console.log("Requesting premium upgrade for user:", user.id);
+      console.log("Requesting premium upgrade for user:", user.id, "with payment proof:", paymentProofPath);
       
       // Use upsert to handle both creation and update
       const { data, error } = await supabase
