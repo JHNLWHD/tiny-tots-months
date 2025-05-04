@@ -139,44 +139,6 @@ export type Database = {
         }
         Relationships: []
       }
-      shared_link: {
-        Row: {
-          baby_id: string | null
-          created_at: string
-          expires_at: string | null
-          id: string
-          month_number: number | null
-          share_token: string
-          user_id: string
-        }
-        Insert: {
-          baby_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          month_number?: number | null
-          share_token: string
-          user_id: string
-        }
-        Update: {
-          baby_id?: string | null
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          month_number?: number | null
-          share_token?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shared_link_baby_id_fkey"
-            columns: ["baby_id"]
-            isOneToOne: false
-            referencedRelation: "baby"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscription: {
         Row: {
           created_at: string

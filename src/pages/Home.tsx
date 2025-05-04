@@ -4,23 +4,19 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBabyProfiles } from '@/hooks/useBabyProfiles';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useShareLinks } from '@/hooks/useShareLinks';
 import { Crown, Plus } from 'lucide-react';
 
 // Component imports
 import BabyList from '@/components/home/BabyList';
 import AddBabyDialog from '@/components/home/AddBabyDialog';
 import MonthCardGrid from '@/components/home/MonthCardGrid';
-import ShareBabyDialog from '@/components/home/ShareBabyDialog';
 import EmptyState from '@/components/home/EmptyState';
 
 const Home = () => {
   const { user } = useAuth();
   const { babies, loading: isLoading, createBaby: createBabyMutation } = useBabyProfiles();
   const { isPremium } = useSubscription();
-  const { generateShareLink, isGenerating: isGeneratingLink } = useShareLinks();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [shareDialogOpen, setShareDialogOpen] = React.useState(false);
   const [selectedBaby, setSelectedBaby] = React.useState<any>(null);
   
   // Wrap the mutation function to return a Promise
@@ -35,11 +31,6 @@ const Home = () => {
         reject(error);
       }
     });
-  };
-  
-  const handleShareBaby = async (baby: any) => {
-    setSelectedBaby(baby);
-    setShareDialogOpen(true);
   };
 
   // Set first baby as selected when babies load if none is selected
@@ -71,7 +62,6 @@ const Home = () => {
         babies={babies}
         isLoading={isLoading}
         onAddBaby={() => setIsDialogOpen(true)}
-        onShareBaby={handleShareBaby}
         onSelectBaby={setSelectedBaby}
         selectedBaby={selectedBaby}
       />
@@ -86,14 +76,6 @@ const Home = () => {
         isOpen={isDialogOpen}
         setIsOpen={setIsDialogOpen}
         createBaby={createBaby}
-      />
-      
-      <ShareBabyDialog 
-        isOpen={shareDialogOpen}
-        setIsOpen={setShareDialogOpen}
-        selectedBaby={selectedBaby}
-        generateShareLink={generateShareLink}
-        isGenerating={isGeneratingLink}
       />
       
       {babies.length === 0 && !isLoading && (

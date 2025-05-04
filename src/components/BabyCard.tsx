@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2, Baby as BabyIcon } from "lucide-react";
-import ShareButton from "@/components/ShareButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,44 +84,34 @@ const BabyCard = ({
             navigate(`/app/month/${baby.id}/1`);
           }} 
           variant="secondary" 
-          className="text-xs"
+          className="text-xs w-full"
         >
           View Milestones
         </Button>
         
-        <div className="flex gap-2">
-          <ShareButton 
-            babyId={baby.id}
-            babyName={baby.name}
-            type="baby"
-            className="text-xs"
-            onClick={(e) => e.stopPropagation()} // Prevent the card click handler from firing
-          />
-          
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button 
-                variant="destructive" 
-                size="icon"
-                onClick={(e) => e.stopPropagation()} // Prevent the card click handler from firing
-              >
-                <Trash2 size={16} />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Baby Profile</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete {baby.name}'s profile? This action cannot be undone and will remove all associated milestones and photos.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(baby.id)}>Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="destructive" 
+              size="icon"
+              onClick={(e) => e.stopPropagation()} // Prevent the card click handler from firing
+            >
+              <Trash2 size={16} />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Baby Profile</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete {baby.name}'s profile? This action cannot be undone and will remove all associated milestones and photos.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => onDelete(baby.id)}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardFooter>
     </Card>
   );

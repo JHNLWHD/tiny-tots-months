@@ -1,6 +1,5 @@
 
 import React from "react";
-import ShareButton from "@/components/ShareButton";
 import { Baby } from "@/hooks/useBabyProfiles";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
@@ -46,20 +45,9 @@ const MonthHeader: React.FC<MonthHeaderProps> = ({ monthNumber, selectedBaby }) 
       </Breadcrumb>
       
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-baby-purple to-baby-blue animate-fade-in">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-baby-purple to-baby-blue animate-fade-in w-full">
           {selectedBaby ? `${selectedBaby.name}'s` : ''} Month {monthNumber} Milestones
         </h1>
-        
-        {selectedBaby && (
-          <div className="w-full sm:w-auto animate-fade-in">
-            <ShareButton 
-              babyId={selectedBaby.id}
-              babyName={selectedBaby.name}
-              type="month"
-              monthNumber={monthNumber}
-            />
-          </div>
-        )}
       </div>
     </div>
   );
