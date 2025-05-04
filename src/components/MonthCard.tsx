@@ -21,7 +21,7 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
   // If we have photos for this month and a babyId, show the collage as background
   const hasPhotos = babyId && monthPhotos.length > 0;
 
-  console.log(`Month ${month}: hasPhotos=${hasPhotos}, photoCount=${monthPhotos.length}, babyId=${babyId}`);
+  console.log(`Month ${month}: hasPhotos=${hasPhotos}, photoCount=${monthPhotos.length}, babyId=${babyId}, validPhotos=${monthPhotos.filter(p => p.url).length}`);
 
   return (
     <Link to={`/month/${month}`} className="block transition-transform hover:scale-105">

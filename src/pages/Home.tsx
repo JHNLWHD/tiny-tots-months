@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import MonthCard from "@/components/MonthCard";
 import BabyCard from "@/components/BabyCard";
@@ -23,6 +23,14 @@ const Home = () => {
   const [showBabyForm, setShowBabyForm] = useState(false);
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
   const { babies, loading, deleteBaby, isDeleting } = useBabyProfiles();
+  
+  // Auto-select the first baby when babies list loads or changes
+  useEffect(() => {
+    if (babies.length > 0 && !selectedBabyId) {
+      setSelectedBabyId(babies[0].id);
+      console.log(`Auto-selected baby: ${babies[0].id}`);
+    }
+  }, [babies, selectedBabyId]);
   
   // Generate months 1-12
   const months = Array.from({ length: 12 }, (_, i) => i + 1);

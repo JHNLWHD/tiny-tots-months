@@ -34,8 +34,8 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 
   if (!validPhotos || validPhotos.length === 0) {
     return (
-      <div className="text-center py-6">
-        <p className="text-gray-500">No photos available.</p>
+      <div className={`${isBackground ? 'h-full w-full bg-gray-200' : 'text-center py-6'}`}>
+        {!isBackground && <p className="text-gray-500">No photos available.</p>}
       </div>
     );
   }
@@ -45,6 +45,19 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
     setSelectedPhoto(photo);
     setIsDialogOpen(true);
   };
+
+  // For background mode, just show the first photo as full background
+  if (isBackground && validPhotos.length > 0) {
+    return (
+      <div className="h-full w-full">
+        <img
+          src={validPhotos[0].url}
+          alt="Background"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
 
   return (
     <>
