@@ -27,7 +27,15 @@ const SharedBaby = () => {
   // Additional logging to help debug
   useEffect(() => {
     console.log('SharedBaby component rendered with token:', shareToken);
-    console.log('Share data state:', { shareLink, babyExists: !!baby, photoCount: photos?.length, isLoading, notFound });
+    console.log('Share data state:', { 
+      shareLink, 
+      shareLinkId: shareLink?.id,
+      babyId: shareLink?.baby_id,
+      babyExists: !!baby, 
+      photoCount: photos?.length, 
+      isLoading, 
+      notFound 
+    });
     if (error) console.error('Share data error:', error);
   }, [shareToken, shareLink, baby, photos, isLoading, notFound, error]);
 
@@ -78,6 +86,11 @@ const SharedBaby = () => {
           </Alert>
           <p className="text-gray-500">
             Share token: {shareToken}
+          </p>
+          <p className="text-gray-500 mt-2">
+            Debug info: {notFound ? 'Not found flag set' : 'Not found flag not set'}, 
+            {shareLink ? 'Share link exists' : 'No share link'}, 
+            {baby ? 'Baby data exists' : 'No baby data'}
           </p>
         </div>
       </div>

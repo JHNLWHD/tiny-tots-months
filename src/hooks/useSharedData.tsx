@@ -21,6 +21,8 @@ export const useSharedData = (shareToken: string) => {
     queryFn: async () => {
       try {
         console.log('Fetching share link for token:', shareToken);
+        
+        // First try with .maybeSingle() which won't throw when no rows are found
         const { data, error } = await supabase
           .from('shared_link')
           .select('*')
@@ -52,8 +54,9 @@ export const useSharedData = (shareToken: string) => {
       }
     },
     enabled: !!shareToken,
-    retry: 1, // Retry once in case of temporary network issues
+    retry: 2, // Retry twice in case of temporary network issues
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   // Fetch baby data based on the share link
@@ -179,6 +182,20 @@ export const useSharedData = (shareToken: string) => {
     },
     enabled: !!shareLink?.baby_id
   });
+
+  // For debugging, log the state of the data
+  useEffect(() => {
+    console.log('useSharedData state:', { 
+      shareToken, 
+      shareLink, 
+      babyId: shareLink?.baby_id,
+      baby,
+      photoCount: photos?.length,
+      milestoneCount: milestones?.length,
+      isLoading: loadingShareLink || loadingBaby || loadingPhotos || loadingMilestones,
+      notFound
+    });
+  }, [shareToken, shareLink, baby, photos, milestones, loadingShareLink, loadingBaby, loadingPhotos, loadingMilestones, notFound]);
 
   return {
     shareLink,

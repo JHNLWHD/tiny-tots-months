@@ -28,6 +28,9 @@ const SharedMonth = () => {
     console.log('SharedMonth component rendered with token:', shareToken);
     console.log('Share data state:', { 
       shareLink, 
+      shareLinkId: shareLink?.id,
+      babyId: shareLink?.baby_id,
+      monthNumber: shareLink?.month_number,
       babyExists: !!baby, 
       photoCount: photos?.length, 
       milestoneCount: milestones?.length,
@@ -61,6 +64,11 @@ const SharedMonth = () => {
           </Alert>
           <p className="text-gray-500">
             Share token: {shareToken}
+          </p>
+          <p className="text-gray-500 mt-2">
+            Debug info: {notFound ? 'Not found flag set' : 'Not found flag not set'}, 
+            {shareLink ? 'Share link exists' : 'No share link'}, 
+            {baby ? 'Baby data exists' : 'No baby data'}
           </p>
         </div>
       </div>
