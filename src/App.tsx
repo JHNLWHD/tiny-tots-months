@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useParams } from 'react-router-dom';
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
@@ -25,6 +25,17 @@ import './App.css';
 // Create a client
 const queryClient = new QueryClient();
 
+// Custom redirect components that grab parameters and forward them
+const BabyRedirect = () => {
+  const { shareToken } = useParams();
+  return <Navigate to={`/shared/baby/${shareToken}`} replace />;
+};
+
+const MonthRedirect = () => {
+  const { shareToken } = useParams();
+  return <Navigate to={`/shared/month/${shareToken}`} replace />;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -41,14 +52,8 @@ function App() {
               <Route path="/shared/month/:shareToken" element={<SharedMonth />} />
               
               {/* Legacy routes - redirect from old /share/ to new /shared/ paths */}
-              <Route 
-                path="/share/baby/:shareToken" 
-                element={<Navigate to={params => `/shared/baby/${params.shareToken}`} replace />} 
-              />
-              <Route 
-                path="/share/month/:shareToken" 
-                element={<Navigate to={params => `/shared/month/${params.shareToken}`} replace />} 
-              />
+              <Route path="/share/baby/:shareToken" element={<BabyRedirect />} />
+              <Route path="/share/month/:shareToken" element={<MonthRedirect />} />
               
               {/* Legal and Support Pages - Moved outside protected routes */}
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
