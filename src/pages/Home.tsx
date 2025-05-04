@@ -20,7 +20,7 @@ const backgroundColors = [
 const Home = () => {
   const [showBabyForm, setShowBabyForm] = useState(false);
   const [selectedBabyId, setSelectedBabyId] = useState<string | null>(null);
-  const { babies, loading, fetchBabies, deleteBaby } = useBabyProfiles();
+  const { babies, loading, deleteBaby, isDeleting } = useBabyProfiles();
   
   // Generate months 1-12
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -31,10 +31,6 @@ const Home = () => {
 
   const handleCloseForm = () => {
     setShowBabyForm(false);
-  };
-
-  const handleBabyCreated = () => {
-    fetchBabies();
   };
 
   return (
@@ -101,7 +97,6 @@ const Home = () => {
       <BabyForm 
         isOpen={showBabyForm} 
         onClose={handleCloseForm} 
-        onSuccess={handleBabyCreated} 
       />
     </Layout>
   );

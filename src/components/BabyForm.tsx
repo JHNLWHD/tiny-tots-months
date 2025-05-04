@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   Form,
@@ -52,9 +53,9 @@ interface BabyFormProps {
 }
 
 const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -63,11 +64,10 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
     },
   });
 
-  const handleSubmit = async (values: FormValues) => {
-    if (!user) return;
-    
-    setIsSubmitting(true);
-    try {
+  const createBabyMutation = useMutation({
+    mutationFn: async (values: FormValues) => {
+      if (!user) throw new Error("User not authenticated");
+      
       const { data, error } = await supabase
         .from("baby")
         .insert({
@@ -79,24 +79,28 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
         .single();
 
       if (error) throw error;
-      
+      return data;
+    },
+    onSuccess: (data, variables) => {
       toast("Success!", {
-        description: `${values.name}'s profile has been created.`,
+        description: `${variables.name}'s profile has been created.`,
       });
       
+      queryClient.invalidateQueries({ queryKey: ['babies', user?.id] });
       form.reset();
       onClose();
       if (onSuccess) onSuccess();
-      
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast("Error", {
         description: error.message || "Failed to create baby profile",
-        // Using className instead of variant for error styling
         className: "bg-destructive text-destructive-foreground",
       });
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+  });
+
+  const handleSubmit = (values: FormValues) => {
+    createBabyMutation.mutate(values);
   };
 
   return (
@@ -167,8 +171,8 @@ const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Profile"}
+              <Button type="submit" disabled={createBabyMutation.isPending}>
+                {createBabyMutation.isPending ? "Creating..." : "Create Profile"}
               </Button>
             </div>
           </form>

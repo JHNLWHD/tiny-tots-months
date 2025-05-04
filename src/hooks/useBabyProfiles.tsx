@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/components/ui/sonner";
@@ -13,65 +13,68 @@ export interface Baby {
 }
 
 export const useBabyProfiles = () => {
-  const [babies, setBabies] = useState<Baby[]>([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const fetchBabies = async (): Promise<Baby[]> => {
+    if (!user) return [];
+    
+    const { data, error } = await supabase
+      .from("baby")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  const fetchBabies = async () => {
-    if (!user) {
-      setBabies([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("baby")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setBabies(data || []);
-    } catch (error: any) {
+    if (error) {
       console.error("Error fetching babies:", error);
       toast("Error", {
         description: "Failed to load baby profiles",
         className: "bg-destructive text-destructive-foreground",
       });
-      setBabies([]);
-    } finally {
-      setLoading(false);
+      throw error;
     }
+    
+    return data || [];
   };
 
-  const deleteBaby = async (id: string) => {
-    try {
+  const { data: babies = [], isLoading: loading, refetch } = useQuery({
+    queryKey: ['babies', user?.id],
+    queryFn: fetchBabies,
+    enabled: !!user,
+  });
+
+  const deleteBabyMutation = useMutation({
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from("baby")
         .delete()
         .eq("id", id);
 
       if (error) throw error;
-      
-      // Refresh the list after deletion
-      fetchBabies();
-      
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['babies', user?.id] });
       toast("Success", {
         description: "Baby profile deleted successfully",
       });
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       console.error("Error deleting baby:", error);
       toast("Error", {
         description: "Failed to delete baby profile",
         className: "bg-destructive text-destructive-foreground",
       });
-    }
+    },
+  });
+
+  const deleteBaby = (id: string) => {
+    deleteBabyMutation.mutate(id);
   };
 
-  useEffect(() => {
-    fetchBabies();
-  }, [user]);
-
-  return { babies, loading, fetchBabies, deleteBaby };
+  return { 
+    babies, 
+    loading, 
+    fetchBabies: refetch, 
+    deleteBaby,
+    isDeleting: deleteBabyMutation.isPending
+  };
 };
