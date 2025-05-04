@@ -1,4 +1,3 @@
-
 import { format, parseISO } from "date-fns";
 import { Baby } from "@/hooks/useBabyProfiles";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +18,7 @@ import {
 
 interface BabyCardProps {
   baby: Baby;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (id: string) => void; // Changed from Promise<void> to void
   backgroundClass?: string;
 }
 
