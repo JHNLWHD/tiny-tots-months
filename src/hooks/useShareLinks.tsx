@@ -24,7 +24,7 @@ export const useShareLinks = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch all share links for the current user
-  const { data: shareLinks, isLoading: loadingShareLinks } = useQuery({
+  const { data: shareLinks = [], isLoading: loadingShareLinks } = useQuery({
     queryKey: ['shareLinks', user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -55,11 +55,10 @@ export const useShareLinks = () => {
   };
 
   // Generate a new share link
-  const generateShareLink = async (babyId: string, type: ShareType, monthNumber?: number): Promise<string> => {
-    if (!user) throw new Error('User not authenticated');
-    setIsGenerating(true);
-    
-    try {
+  const generateShareLinkMutation = useMutation({
+    mutationFn: async ({ babyId, type, monthNumber }: { babyId: string; type: ShareType; monthNumber?: number }) => {
+      if (!user) throw new Error('User not authenticated');
+      
       // Check if share link already exists
       const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
       
@@ -87,10 +86,24 @@ export const useShareLinks = () => {
         throw error;
       }
       
-      // Invalidate query cache to refresh share links
-      queryClient.invalidateQueries({ queryKey: ['shareLinks', user.id] });
-      
       return data.share_token;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['shareLinks', user?.id] });
+    },
+    onError: (error) => {
+      toast("Failed to generate share link", {
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        className: "bg-destructive text-destructive-foreground",
+      });
+    }
+  });
+
+  // Generate a new share link (wrapper for mutation)
+  const generateShareLink = async (babyId: string, type: ShareType, monthNumber?: number): Promise<string> => {
+    setIsGenerating(true);
+    try {
+      return await generateShareLinkMutation.mutateAsync({ babyId, type, monthNumber });
     } finally {
       setIsGenerating(false);
     }
@@ -126,7 +139,7 @@ export const useShareLinks = () => {
   return {
     shareLinks,
     loadingShareLinks,
-    isGenerating,
+    isGenerating: isGenerating || generateShareLinkMutation.isPending,
     generateShareLink,
     getShareLink,
     deleteShareLink

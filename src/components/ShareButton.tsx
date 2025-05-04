@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FacebookShareButton,
   TwitterShareButton,
@@ -29,19 +29,35 @@ interface ShareButtonProps {
   type: ShareType;
   monthNumber?: number;
   className?: string;
-  onClick?: (e: React.MouseEvent) => void; // Add onClick prop
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, monthNumber, className, onClick }) => {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { generateShareLink, isGenerating, getShareLink } = useShareLinks();
+  const { generateShareLink, isGenerating, getShareLink, shareLinks } = useShareLinks();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   
-  const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
+  // Generate or retrieve share URL when the component mounts or when shareLinks change
+  useEffect(() => {
+    const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
+    if (existingLink) {
+      const url = generateShareUrl(existingLink.share_token, type);
+      setShareUrl(url);
+    }
+  }, [babyId, type, monthNumber, shareLinks]);
+  
+  // Generate share URL when dropdown is opened
+  useEffect(() => {
+    if (isOpen && !shareUrl && !isGenerating) {
+      handleShare();
+    }
+  }, [isOpen]);
   
   const handleShare = async () => {
     try {
+      const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
+      
       if (existingLink) {
         const url = generateShareUrl(existingLink.share_token, type);
         setShareUrl(url);
@@ -98,9 +114,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
             if (onClick) {
               onClick(e);
             }
-            if (!shareUrl && !isGenerating) {
-              handleShare();
-            }
           }}
         >
           {isGenerating ? (
@@ -132,7 +145,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
         
         <div className="p-2">
           <div className="flex justify-between">
-            {shareUrl && (
+            {shareUrl ? (
               <>
                 <FacebookShareButton 
                   url={shareUrl}
@@ -166,6 +179,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
                   <EmailIcon size={32} round />
                 </EmailShareButton>
               </>
+            ) : (
+              <div className="w-full flex justify-center p-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
             )}
           </div>
         </div>
