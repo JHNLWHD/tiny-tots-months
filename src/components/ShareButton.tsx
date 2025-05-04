@@ -131,8 +131,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ babyId, babyName, type, month
             {shareUrl && (
               <>
                 <FacebookShareButton 
-                  url={shareUrl} 
-                  quote={getShareTitle()}
+                  url={shareUrl}
+                  hashtag="#TinyTotsMilestones"
                   className="rounded-full hover:bg-muted p-1"
                 >
                   <FacebookIcon size={32} round />
