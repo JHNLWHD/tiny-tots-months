@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,7 +43,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       if (isVideoFile && !isPremium) {
         toast("Premium Required", {
           description: "Video uploads are only available for premium users",
-          variant: "destructive",
+          className: "bg-destructive text-destructive-foreground",
         });
         return;
       }
@@ -54,7 +55,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
           description: isVideoFile 
             ? "Maximum video size is 50MB" 
             : "Maximum image size is 10MB",
-          variant: "destructive",
+          className: "bg-destructive text-destructive-foreground",
         });
         return;
       }
@@ -67,7 +68,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       if (!acceptedTypes.includes(file.type)) {
         toast("Invalid file type", {
           description: "Please upload a JPG, PNG, GIF, WebP, MP4, WebM or QuickTime file",
-          variant: "destructive",
+          className: "bg-destructive text-destructive-foreground",
         });
         return;
       }
@@ -93,7 +94,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     if (!selectedFile || !babyId) {
       toast("No file selected", {
         description: "Please select an image or video to upload",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
       return;
     }

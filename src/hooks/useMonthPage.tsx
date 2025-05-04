@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
@@ -98,7 +99,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
     if (isVideo && !isPremium) {
       toast("Premium Feature", {
         description: "Video uploads are only available for premium users. Please upgrade to premium to upload videos.",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
       return null;
     }
@@ -118,7 +119,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
     if (isVideo && file.size > 50 * 1024 * 1024) {
       toast("File Too Large", {
         description: "Video files must be under 50MB. Please compress your video or upload a shorter clip.",
-        variant: "destructive",
+        className: "bg-destructive text-destructive-foreground",
       });
       return null;
     }
