@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface PlanFeature {
   text: string;
+  isNegative?: boolean;
 }
 
 interface PlanCardProps {
@@ -41,8 +42,12 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       <ul className="space-y-2 mb-6">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start">
-            <CheckCircle2 className={`h-5 w-5 ${textColor} mr-2 mt-0.5 flex-shrink-0`} />
-            <span>{feature.text}</span>
+            {feature.isNegative ? (
+              <XCircle className="h-5 w-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
+            ) : (
+              <CheckCircle2 className={`h-5 w-5 ${textColor} mr-2 mt-0.5 flex-shrink-0`} />
+            )}
+            <span className={feature.isNegative ? "text-gray-400 line-through" : ""}>{feature.text}</span>
           </li>
         ))}
       </ul>

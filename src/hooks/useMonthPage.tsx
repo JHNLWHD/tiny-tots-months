@@ -92,6 +92,19 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
   const uploadPhoto = async (file: File, description?: string) => {
     if (!selectedBabyId) return null;
     
+    // Check if file is a video
+    const isVideo = file.type.startsWith('video/');
+    
+    // Check premium status for video uploads
+    if (isVideo && !isPremium) {
+      toast({
+        title: "Premium Feature",
+        description: "Video uploads are only available for premium users. Please upgrade to premium to upload videos.",
+        variant: "destructive",
+      });
+      return null;
+    }
+    
     // Check photo upload limits for free users
     if (!isPremium) {
       if (photos.length >= 5) {
@@ -101,15 +114,16 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
         });
         return null;
       }
-      
-      // Check if uploading a video (only allowed for premium users)
-      if (file.type.startsWith('video/')) {
-        toast("Premium Required", {
-          description: "Video uploads are only available for Premium users.",
-          className: "bg-destructive text-destructive-foreground",
-        });
-        return null;
-      }
+    }
+    
+    // Check file size for videos (max 50MB)
+    if (isVideo && file.size > 50 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Video files must be under 50MB. Please compress your video or upload a shorter clip.",
+        variant: "destructive",
+      });
+      return null;
     }
     
     return await uploadImage(file, {

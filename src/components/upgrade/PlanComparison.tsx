@@ -9,13 +9,14 @@ export const PlanComparison: React.FC = () => {
     { text: "Track milestones up to 3 months" },
     { text: "5 photos per month (15 total)" },
     { text: "Unique shareable links" },
+    { text: "No video uploads", isNegative: true },
   ];
   
   const premiumPlanFeatures = [
     { text: "Unlimited baby profiles" },
     { text: "Complete 12 months milestone tracking" },
     { text: "Unlimited photo uploads" },
-    { text: "Video uploads" },
+    { text: "Video uploads (up to 50MB)" },
     { text: "Priority support" },
     { text: "Advanced milestone suggestions" },
   ];

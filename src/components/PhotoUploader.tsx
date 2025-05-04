@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { ImagePlus, Check, X, Loader2 } from 'lucide-react';
+import { ImagePlus, VideoIcon, X, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { CreatePhotoData } from '@/hooks/usePhotos';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface PhotoUploaderProps {
   babyId: string;
@@ -27,34 +28,50 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
+  const { isPremium } = useSubscription();
+  
+  const isVideo = selectedFile?.type.startsWith('video/');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Validate file size (max 50MB)
-      if (file.size > 50 * 1024 * 1024) {
-        toast("File too large", {
-          description: "Maximum file size is 50MB",
-          className: "bg-destructive text-destructive-foreground",
+      // Check if file is a video
+      const isVideoFile = file.type.startsWith('video/');
+      
+      // Check premium subscription for video uploads
+      if (isVideoFile && !isPremium) {
+        toast({
+          title: "Premium Required",
+          description: "Video uploads are only available for premium users",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 50MB for videos, 10MB for images)
+      const maxSize = isVideoFile ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: isVideoFile 
+            ? "Maximum video size is 50MB" 
+            : "Maximum image size is 10MB",
+          variant: "destructive",
         });
         return;
       }
       
       // Validate file type
-      const acceptedTypes = [
-        'image/jpeg', 
-        'image/png', 
-        'image/gif', 
-        'image/webp', 
-        'video/mp4', 
-        'video/quicktime'
-      ];
+      const acceptedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      const acceptedVideoTypes = ['video/mp4', 'video/quicktime', 'video/webm'];
+      const acceptedTypes = [...acceptedImageTypes, ...acceptedVideoTypes];
       
       if (!acceptedTypes.includes(file.type)) {
-        toast("Invalid file type", {
-          description: "Please upload a JPG, PNG, GIF, WebP, MP4 or QuickTime file",
-          className: "bg-destructive text-destructive-foreground",
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a JPG, PNG, GIF, WebP, MP4, WebM or QuickTime file",
+          variant: "destructive",
         });
         return;
       }
@@ -78,9 +95,10 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 
   const handleUpload = async () => {
     if (!selectedFile || !babyId) {
-      toast("No file selected", {
-        description: "Please select an image to upload",
-        className: "bg-destructive text-destructive-foreground",
+      toast({
+        title: "No file selected",
+        description: "Please select an image or video to upload",
+        variant: "destructive",
       });
       return;
     }
@@ -103,28 +121,44 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 
   return (
     <Card className="p-6 bg-white/90 rounded-xl">
-      <h3 className="text-lg font-medium mb-4">Upload New Photo for Month {month}</h3>
+      <h3 className="text-lg font-medium mb-4">
+        Upload New {isPremium ? "Photo or Video" : "Photo"} for Month {month}
+      </h3>
       
       <div className="space-y-4">
         {!preview ? (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             <Label htmlFor="photo-upload" className="cursor-pointer">
               <div className="flex flex-col items-center justify-center space-y-2">
-                <ImagePlus className="h-8 w-8 text-gray-400" />
-                <span className="text-sm text-gray-500">Click to select an image</span>
+                {isPremium ? (
+                  <div className="flex space-x-2">
+                    <ImagePlus className="h-8 w-8 text-gray-400" />
+                    <VideoIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                ) : (
+                  <ImagePlus className="h-8 w-8 text-gray-400" />
+                )}
+                <span className="text-sm text-gray-500">
+                  Click to select {isPremium ? "an image or video" : "an image"}
+                </span>
+                {isPremium && (
+                  <span className="text-xs text-gray-400">(Videos must be under 50MB)</span>
+                )}
               </div>
               <Input 
                 id="photo-upload" 
                 type="file" 
                 className="hidden" 
-                accept="image/*,video/mp4,video/quicktime" 
+                accept={isPremium 
+                  ? "image/*,video/mp4,video/quicktime,video/webm" 
+                  : "image/*"} 
                 onChange={handleFileChange}
               />
             </Label>
           </div>
         ) : (
           <div className="relative">
-            {selectedFile?.type.startsWith('video/') ? (
+            {isVideo ? (
               <video 
                 src={preview} 
                 className="w-full h-auto rounded-lg object-cover max-h-[300px]"
@@ -145,6 +179,12 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
             >
               <X size={16} />
             </Button>
+            
+            {isVideo && (
+              <div className="absolute bottom-2 left-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                {selectedFile?.name}
+              </div>
+            )}
           </div>
         )}
         
@@ -154,7 +194,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
               <Label htmlFor="caption">Caption (optional)</Label>
               <Textarea
                 id="caption"
-                placeholder="Add a caption for this photo..."
+                placeholder={`Add a caption for this ${isVideo ? 'video' : 'photo'}...`}
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
               />
@@ -170,7 +210,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Uploading...
                 </>
-              ) : 'Upload Photo'}
+              ) : `Upload ${isVideo ? 'Video' : 'Photo'}`}
             </Button>
           </>
         )}

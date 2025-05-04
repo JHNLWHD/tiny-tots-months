@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import VideoPlayer from './VideoPlayer';
 
 interface PhotoGridProps {
   photos: Photo[];
@@ -92,10 +93,10 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
           {selectedPhoto && (
             <div className="relative">
               {selectedPhoto.is_video ? (
-                <video 
-                  controls 
-                  className="w-full h-auto" 
-                  src={selectedPhoto.url || ''}
+                <VideoPlayer 
+                  src={selectedPhoto.url || ''} 
+                  className="w-full" 
+                  onError={(e) => console.error("Video failed to load:", e)}
                 />
               ) : (
                 <img 

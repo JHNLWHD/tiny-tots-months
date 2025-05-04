@@ -17,6 +17,7 @@ const PricingSection = () => {
       '5 photos per month (15 total)',
       'Unique shareable links',
       'Basic milestone suggestions',
+      '❌ No video uploads',
     ],
     ctaLink: "/auth",
     ctaText: "Get Started"
@@ -31,7 +32,7 @@ const PricingSection = () => {
       'Unlimited baby profiles',
       'Complete 12 months milestone tracking',
       'Unlimited photo uploads',
-      'Video uploads',
+      'Video uploads (up to 50MB)',
       'Priority support',
       'Unique shareable links',
       'Advanced milestone suggestions',
