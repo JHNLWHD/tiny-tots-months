@@ -40,7 +40,7 @@ export const useSharedData = (shareToken: string) => {
         }
         
         if (!data) {
-          console.error('Share link not found for token:', shareToken);
+          console.error('Share link not found for token:', shareToken, data);
           setNotFound(true);
           return null;
         }
