@@ -30,9 +30,11 @@ export const useShareLinks = () => {
       if (!user) return [];
       
       try {
+        console.log('Fetching share links for user:', user.id);
         const { data, error } = await supabase
           .from('shared_link')
           .select('*')
+          .eq('user_id', user.id)  // Make sure we're only getting the current user's links
           .order('created_at', { ascending: false });
           
         if (error) {
@@ -40,6 +42,7 @@ export const useShareLinks = () => {
           throw error;
         }
         
+        console.log(`Found ${data?.length || 0} share links for user`);
         return data as ShareLink[];
       } catch (error) {
         console.error('Error in shareLinks query:', error);
@@ -53,10 +56,13 @@ export const useShareLinks = () => {
   const getShareLink = (babyId: string | undefined, monthNumber?: number) => {
     if (!babyId || !shareLinks) return null;
     
-    return shareLinks.find(link => 
+    const link = shareLinks.find(link => 
       link.baby_id === babyId && 
       (monthNumber ? link.month_number === monthNumber : link.month_number === null)
     );
+    
+    console.log('Found existing link for babyId:', babyId, 'monthNumber:', monthNumber, ':', link || 'none');
+    return link;
   };
 
   // Generate a new share link
@@ -68,13 +74,16 @@ export const useShareLinks = () => {
       const existingLink = getShareLink(babyId, type === 'month' ? monthNumber : undefined);
       
       if (existingLink) {
+        console.log('Using existing share token:', existingLink.share_token);
         return existingLink.share_token;
       }
 
       // Generate a new unique token
       const shareToken = uuidv4();
+      console.log('Generated new share token:', shareToken);
       
       try {
+        console.log('Creating new share link in database with token:', shareToken);
         // Insert the new share link
         const { data, error } = await supabase
           .from('shared_link')
@@ -85,7 +94,7 @@ export const useShareLinks = () => {
             share_token: shareToken
           })
           .select('*')
-          .maybeSingle(); // Use maybeSingle() instead of single() to prevent errors if no row is returned
+          .maybeSingle();
           
         if (error) {
           console.error('Error generating share link:', error);
@@ -93,9 +102,11 @@ export const useShareLinks = () => {
         }
         
         if (!data) {
+          console.error('Failed to create share link - no data returned');
           throw new Error('Failed to create share link');
         }
         
+        console.log('Successfully created share link with ID:', data.id);
         return data.share_token;
       } catch (error) {
         console.error('Error in generateShareLinkMutation:', error);
@@ -117,6 +128,7 @@ export const useShareLinks = () => {
   const generateShareLink = async (babyId: string, type: ShareType, monthNumber?: number): Promise<string> => {
     setIsGenerating(true);
     try {
+      console.log('Generating share link for babyId:', babyId, 'type:', type, 'monthNumber:', monthNumber);
       return await generateShareLinkMutation.mutateAsync({ babyId, type, monthNumber });
     } finally {
       setIsGenerating(false);
@@ -127,6 +139,7 @@ export const useShareLinks = () => {
   const deleteShareLink = useMutation({
     mutationFn: async (linkId: string) => {
       try {
+        console.log('Deleting share link with ID:', linkId);
         const { error } = await supabase
           .from('shared_link')
           .delete()
@@ -136,6 +149,8 @@ export const useShareLinks = () => {
           console.error('Error deleting share link:', error);
           throw error;
         }
+        
+        console.log('Successfully deleted share link');
       } catch (error) {
         console.error('Error in deleteShareLink:', error);
         throw error;

@@ -7,6 +7,7 @@ import PhotoGrid from '@/components/PhotoGrid';
 import PhotoCollage from '@/components/PhotoCollage';
 import MilestoneList from '@/components/MilestoneList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -19,7 +20,7 @@ const backgroundColors = [
 
 const SharedMonth = () => {
   const { shareToken } = useParams<{ shareToken: string }>();
-  const { shareLink, baby, photos, milestones, isLoading } = useSharedData(shareToken || '');
+  const { shareLink, baby, photos, milestones, isLoading, notFound } = useSharedData(shareToken || '');
   
   if (isLoading) {
     return (
@@ -32,12 +33,21 @@ const SharedMonth = () => {
     );
   }
 
-  if (!baby || !shareLink) {
+  if (notFound || !baby || !shareLink) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Month Not Found</h1>
-          <p className="text-gray-500">This shared link may have expired or been removed.</p>
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Month Not Found</h1>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Invalid or Expired Link</AlertTitle>
+            <AlertDescription>
+              This shared link may have been deleted, expired, or never existed. 
+              If you received this link from someone, ask them to generate a new one.
+            </AlertDescription>
+          </Alert>
+          <p className="text-gray-500">
+            Share token: {shareToken}
+          </p>
         </div>
       </div>
     );

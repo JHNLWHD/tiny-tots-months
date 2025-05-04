@@ -4,18 +4,27 @@ import { supabase } from '@/integrations/supabase/client';
 import { Baby } from '@/hooks/useBabyProfiles';
 import { Photo } from '@/hooks/usePhotos';
 import { Milestone } from '@/hooks/useMilestones';
+import { useState, useEffect } from 'react';
 
 export const useSharedData = (shareToken: string) => {
+  const [notFound, setNotFound] = useState(false);
+
+  // Log the token for debugging purposes
+  useEffect(() => {
+    console.log('Attempting to fetch shared data for token:', shareToken);
+  }, [shareToken]);
+
   // Fetch the share link details
-  const { data: shareLink, isLoading: loadingShareLink } = useQuery({
+  const { data: shareLink, isLoading: loadingShareLink, error: shareLinkError } = useQuery({
     queryKey: ['shareLink', shareToken],
     queryFn: async () => {
       try {
+        console.log('Fetching share link for token:', shareToken);
         const { data, error } = await supabase
           .from('shared_link')
           .select('*')
           .eq('share_token', shareToken)
-          .maybeSingle(); // Using maybeSingle() instead of single()
+          .maybeSingle();
           
         if (error) {
           console.error('Error fetching share link:', error);
@@ -24,16 +33,19 @@ export const useSharedData = (shareToken: string) => {
         
         if (!data) {
           console.error('Share link not found for token:', shareToken);
+          setNotFound(true);
           return null;
         }
         
+        console.log('Successfully found share link:', data);
         return data;
       } catch (error) {
         console.error('Error in shareLink query:', error);
         return null;
       }
     },
-    enabled: !!shareToken
+    enabled: !!shareToken,
+    retry: false // Don't retry if the share link doesn't exist
   });
 
   // Fetch baby data based on the share link
@@ -43,11 +55,12 @@ export const useSharedData = (shareToken: string) => {
       try {
         if (!shareLink?.baby_id) return null;
         
+        console.log('Fetching baby data for ID:', shareLink.baby_id);
         const { data, error } = await supabase
           .from('baby')
           .select('*')
           .eq('id', shareLink.baby_id)
-          .maybeSingle(); // Using maybeSingle() instead of single()
+          .maybeSingle();
           
         if (error) {
           console.error('Error fetching baby data:', error);
@@ -59,6 +72,7 @@ export const useSharedData = (shareToken: string) => {
           return null;
         }
         
+        console.log('Successfully found baby data:', data);
         return data as Baby;
       } catch (error) {
         console.error('Error in sharedBaby query:', error);
@@ -75,6 +89,7 @@ export const useSharedData = (shareToken: string) => {
       try {
         if (!shareLink?.baby_id) return [];
         
+        console.log('Fetching photos for baby ID:', shareLink.baby_id, 'and month:', shareLink.month_number || 'all months');
         let query = supabase
           .from('photo')
           .select('*')
@@ -92,7 +107,7 @@ export const useSharedData = (shareToken: string) => {
         }
         
         // Generate signed URLs for each photo
-        return await Promise.all((data || []).map(async (photo: any) => {
+        const photosWithUrls = await Promise.all((data || []).map(async (photo: any) => {
           try {
             const { data: signedUrlData, error: signedUrlError } = await supabase.storage
               .from('baby_images')
@@ -112,6 +127,9 @@ export const useSharedData = (shareToken: string) => {
             return photo; // Return the photo without a URL if we fail to get a signed URL
           }
         }));
+
+        console.log(`Successfully fetched ${photosWithUrls.length} photos`);
+        return photosWithUrls;
       } catch (error) {
         console.error('Error in sharedPhotos query:', error);
         return [];
@@ -127,6 +145,7 @@ export const useSharedData = (shareToken: string) => {
       try {
         if (!shareLink?.baby_id) return [];
         
+        console.log('Fetching milestones for baby ID:', shareLink.baby_id, 'and month:', shareLink.month_number || 'all months');
         let query = supabase
           .from('milestone')
           .select('*')
@@ -143,6 +162,7 @@ export const useSharedData = (shareToken: string) => {
           throw error;
         }
         
+        console.log(`Successfully fetched ${data?.length || 0} milestones`);
         return data as Milestone[];
       } catch (error) {
         console.error('Error in sharedMilestones query:', error);
@@ -157,6 +177,8 @@ export const useSharedData = (shareToken: string) => {
     baby,
     photos: photos || [],
     milestones: milestones || [],
-    isLoading: loadingShareLink || loadingBaby || loadingPhotos || loadingMilestones
+    isLoading: loadingShareLink || loadingBaby || loadingPhotos || loadingMilestones,
+    notFound: notFound || shareLinkError !== null,
+    error: shareLinkError
   };
 };

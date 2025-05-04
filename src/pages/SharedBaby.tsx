@@ -8,6 +8,7 @@ import PhotoCollage from '@/components/PhotoCollage';
 import { Card, CardContent } from '@/components/ui/card';
 import { Baby as BabyIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -20,7 +21,7 @@ const backgroundColors = [
 
 const SharedBaby = () => {
   const { shareToken } = useParams<{ shareToken: string }>();
-  const { baby, photos, isLoading } = useSharedData(shareToken || '');
+  const { baby, photos, isLoading, notFound, error } = useSharedData(shareToken || '');
   
   function calculateAge(dateOfBirth: string) {
     const birthDate = parseISO(dateOfBirth);
@@ -55,12 +56,21 @@ const SharedBaby = () => {
     );
   }
 
-  if (!baby) {
+  if (notFound || !baby) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Baby Not Found</h1>
-          <p className="text-gray-500">This shared link may have expired or been removed.</p>
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Baby Profile Not Found</h1>
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Invalid or Expired Link</AlertTitle>
+            <AlertDescription>
+              This shared link may have been deleted, expired, or never existed. 
+              If you received this link from someone, ask them to generate a new one.
+            </AlertDescription>
+          </Alert>
+          <p className="text-gray-500">
+            Share token: {shareToken}
+          </p>
         </div>
       </div>
     );
