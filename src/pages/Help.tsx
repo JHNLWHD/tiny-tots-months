@@ -2,7 +2,7 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/Layout';
-import { LifeBuoy, Book, Info, Help as HelpIcon } from 'lucide-react';
+import { LifeBuoy, Book, Info, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ const Help = () => {
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <HelpIcon className="h-5 w-5 text-baby-purple" />
+                <HelpCircle className="h-5 w-5 text-baby-purple" />
                 <span>Contact Support</span>
               </CardTitle>
               <CardDescription>Get personalized assistance</CardDescription>
