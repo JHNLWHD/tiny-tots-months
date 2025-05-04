@@ -27,10 +27,8 @@ const MonthCard: React.FC<MonthCardProps> = ({ month, backgroundClass, babyId })
   const hasPhotos = babyId && monthPhotos.length > 0;
   const hasMilestones = milestones.length > 0;
 
-  console.log(`Month ${month}: hasPhotos=${hasPhotos}, photoCount=${monthPhotos.length}, milestonesCount=${milestones.length}, babyId=${babyId}`);
-
   return (
-    <Link to={`/month/${month}`} className="block transition-transform hover:scale-105">
+    <Link to={`/app/month/${month}`} className="block transition-transform hover:scale-105">
       <Card className={`month-card h-40 relative overflow-hidden ${!hasPhotos ? backgroundClass : ''}`}>
         {/* Show photo collage as background if we have photos */}
         {hasPhotos && (

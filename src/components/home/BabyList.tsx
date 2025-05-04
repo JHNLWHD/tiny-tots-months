@@ -1,21 +1,29 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Baby, Calendar, Share, Plus } from 'lucide-react';
 import { Baby as BabyType } from '@/hooks/useBabyProfiles';
 import { useSubscription } from '@/hooks/useSubscription';
+import { format } from 'date-fns';
 
 interface BabyListProps {
   babies: BabyType[];
   isLoading: boolean;
   onAddBaby: () => void;
   onShareBaby: (baby: BabyType) => void;
+  onSelectBaby: (baby: BabyType) => void;
+  selectedBaby: BabyType | null;
 }
 
-const BabyList: React.FC<BabyListProps> = ({ babies, isLoading, onAddBaby, onShareBaby }) => {
+const BabyList: React.FC<BabyListProps> = ({ 
+  babies, 
+  isLoading, 
+  onAddBaby, 
+  onShareBaby, 
+  onSelectBaby,
+  selectedBaby 
+}) => {
   const { isPremium } = useSubscription();
   
   return (
@@ -37,7 +45,11 @@ const BabyList: React.FC<BabyListProps> = ({ babies, isLoading, onAddBaby, onSha
         </Card>
       ) : (
         babies.map((baby: any) => (
-          <Card key={baby.id} className="p-6 h-64 flex flex-col">
+          <Card 
+            key={baby.id} 
+            className={`p-6 h-64 flex flex-col cursor-pointer hover:shadow-md transition-all ${selectedBaby?.id === baby.id ? 'ring-2 ring-baby-purple' : ''}`}
+            onClick={() => onSelectBaby(baby)}
+          >
             <div className="flex items-center mb-4">
               <Baby className="h-8 w-8 text-baby-purple mr-2" />
               <h2 className="text-xl font-bold">{baby.name}</h2>
@@ -49,18 +61,24 @@ const BabyList: React.FC<BabyListProps> = ({ babies, isLoading, onAddBaby, onSha
             </div>
             
             <div className="mt-auto flex flex-col gap-2">
-              <Link 
-                to={`/app/month/1`} 
+              <Button 
                 className="w-full px-4 py-2 bg-baby-purple text-white rounded-lg flex items-center justify-center hover:bg-baby-purple/90"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectBaby(baby);
+                }}
               >
                 <Calendar className="mr-2 h-4 w-4" />
                 View Milestones
-              </Link>
+              </Button>
               
               <Button 
                 variant="outline" 
                 className="w-full" 
-                onClick={() => onShareBaby(baby)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShareBaby(baby);
+                }}
               >
                 <Share className="mr-2 h-4 w-4" />
                 Share

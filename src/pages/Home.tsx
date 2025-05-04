@@ -42,6 +42,13 @@ const Home = () => {
     setShareDialogOpen(true);
   };
 
+  // Set first baby as selected when babies load if none is selected
+  React.useEffect(() => {
+    if (babies.length > 0 && !selectedBaby) {
+      setSelectedBaby(babies[0]);
+    }
+  }, [babies, selectedBaby]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center mb-8">
@@ -65,11 +72,13 @@ const Home = () => {
         isLoading={isLoading}
         onAddBaby={() => setIsDialogOpen(true)}
         onShareBaby={handleShareBaby}
+        onSelectBaby={setSelectedBaby}
+        selectedBaby={selectedBaby}
       />
       
       <MonthCardGrid 
-        babyId={babies.length > 0 ? babies[0]?.id : undefined}
-        showGrid={babies.length > 0 && !isLoading}
+        babyId={selectedBaby?.id}
+        showGrid={selectedBaby !== null && !isLoading}
       />
       
       <AddBabyDialog 
