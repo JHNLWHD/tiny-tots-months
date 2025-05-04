@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useMilestones } from "@/hooks/useMilestones";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export const useMonthPage = (monthNumber: number) => {
   const navigate = useNavigate();
@@ -17,11 +18,15 @@ export const useMonthPage = (monthNumber: number) => {
   const { 
     photos, 
     isLoading: loadingPhotos,
-    uploadPhoto,
     deletePhoto,
-    isUploading,
     refetch: refetchPhotos
   } = usePhotos(selectedBabyId || undefined, monthNumber);
+  
+  // Image upload hook
+  const { 
+    uploadImage, 
+    isUploading 
+  } = useImageUpload();
   
   // Fetch milestones for selected baby and month
   const { 
@@ -59,6 +64,19 @@ export const useMonthPage = (monthNumber: number) => {
   
   // Find the selected baby for sharing
   const selectedBaby = babies.find(baby => baby.id === selectedBabyId);
+  
+  const uploadPhoto = async (file: File, description?: string) => {
+    if (!selectedBabyId) return null;
+    
+    return await uploadImage(file, {
+      babyId: selectedBabyId,
+      monthNumber: monthNumber,
+      description,
+      onSuccess: () => {
+        refetchPhotos();
+      }
+    });
+  };
 
   return {
     babies,

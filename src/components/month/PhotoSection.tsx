@@ -3,7 +3,7 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import PhotoUploader from "@/components/PhotoUploader";
+import ImageUploader from "@/components/ImageUploader";
 import PhotoGrid from "@/components/PhotoGrid";
 import PhotoCollage from "@/components/PhotoCollage";
 import { Photo } from "@/hooks/usePhotos";
@@ -26,8 +26,6 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
   babyId,
   monthNumber,
   photos,
-  isUploading,
-  uploadPhoto,
   deletePhoto,
   refetchPhotos,
   isLoading
@@ -75,12 +73,10 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      <PhotoUploader
+      <ImageUploader
         babyId={babyId}
         month={monthNumber}
-        onUploadComplete={refetchPhotos}
-        onUpload={uploadPhoto}
-        isUploading={isUploading}
+        onUploadComplete={() => refetchPhotos()}
       />
       
       <div>
