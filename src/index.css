@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 85%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 346 100% 94%;
+    --secondary: 326 100% 74%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    --accent: 277 75% 78%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -86,7 +86,30 @@
     @apply rounded-3xl transition-all duration-300 hover:shadow-lg;
   }
   
+  /* Updated background gradients */
   .baby-gradient-bg {
-    background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+    background: linear-gradient(135deg, #fdfcfb 0%, #FFD166 100%);
+  }
+  
+  /* New gradient backgrounds */
+  .joyful-gradient-1 {
+    background: linear-gradient(90deg, #FF9A76 0%, #FFD166 100%);
+  }
+  
+  .joyful-gradient-2 {
+    background: linear-gradient(90deg, #33C3F0 0%, #7EEDC2 100%);
+  }
+  
+  .joyful-gradient-3 {
+    background: linear-gradient(90deg, #F97CAB 0%, #8B5CF6 100%);
+  }
+  
+  .joyful-gradient-4 {
+    background: linear-gradient(60deg, #7EEDC2 0%, #FFD166 100%);
+  }
+  
+  /* Hover effects */
+  .hover-bounce:hover {
+    @apply animate-bounce-soft;
   }
 }

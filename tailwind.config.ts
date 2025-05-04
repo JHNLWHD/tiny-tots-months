@@ -63,14 +63,16 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Baby-friendly color palette
+				// Updated baby-friendly color palette with more vibrant colors
 				baby: {
-					blue: '#D3E4FD',
-					pink: '#FFDEE2',
-					mint: '#F2FCE2',
-					yellow: '#FEF7CD',
-					peach: '#FDE1D3',
-					purple: '#E5DEFF',
+					blue: '#33C3F0',       // Bright sky blue
+					pink: '#F97CAB',       // Vibrant pink
+					mint: '#7EEDC2',       // Bright mint
+					yellow: '#FFD166',     // Sunny yellow
+					peach: '#FF9A76',      // Bright peach
+					purple: '#8B5CF6',     // Vibrant purple
+					orange: '#F97316',     // Bright orange
+					green: '#65D573',      // Fresh green
 				}
 			},
 			borderRadius: {
@@ -102,6 +104,10 @@ export default {
 				'slide-out': {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(-100%)' }
+				},
+				'bounce-soft': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
@@ -110,7 +116,8 @@ export default {
 				'fade-in': 'fade-in 0.4s ease-out',
 				'fade-out': 'fade-out 0.4s ease-out',
 				'slide-in': 'slide-in 0.4s ease-out',
-				'slide-out': 'slide-out 0.4s ease-out'
+				'slide-out': 'slide-out 0.4s ease-out',
+				'bounce-soft': 'bounce-soft 2s infinite ease-in-out'
 			}
 		}
 	},
