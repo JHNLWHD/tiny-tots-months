@@ -30,8 +30,8 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
   }
 
   const getPhotoUrl = (path: string) => {
-    // Use the public URL from Supabase storage
-    return `https://htxczdhdospkxjesvztw.supabase.co/storage/v1/object/public/baby_images/${path}`;
+    // Use the Supabase client to get the public URL
+    return `${supabase.storage.from('baby_images').getPublicUrl(path).data.publicUrl}`;
   };
 
   const handlePhotoClick = (photo: Photo) => {
@@ -60,6 +60,12 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({ photos, onDelete, readOnly = fals
                 alt={photo.description || 'Baby photo'}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={(e) => {
+                  console.error("Image failed to load:", photo.storage_path);
+                  const imgElement = e.currentTarget;
+                  imgElement.onerror = null; // Prevent infinite error loops
+                  imgElement.src = "/placeholder.svg"; // Fallback image
+                }}
               />
               
               {photo.description && (

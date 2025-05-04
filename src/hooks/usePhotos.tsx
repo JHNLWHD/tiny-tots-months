@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -48,22 +47,17 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
       throw error;
     }
     
-    // Then get signed URLs for each photo
-    const photosWithUrls = await Promise.all(
-      (data || []).map(async (photo) => {
-        // Get the URL for the file
-        const { data: fileData } = await supabase.storage
-          .from('baby_images')
-          .createSignedUrl(photo.storage_path, 3600); // 1 hour expiry
-          
-        return {
-          ...photo,
-          url: fileData?.signedUrl
-        };
-      })
-    );
-    
-    return photosWithUrls;
+    // Return the photos with public URLs already generated
+    return (data || []).map(photo => {
+      const publicUrl = supabase.storage
+        .from('baby_images')
+        .getPublicUrl(photo.storage_path).data.publicUrl;
+      
+      return {
+        ...photo,
+        url: publicUrl
+      };
+    });
   };
 
   const { data: photos = [], isLoading, refetch } = useQuery({
