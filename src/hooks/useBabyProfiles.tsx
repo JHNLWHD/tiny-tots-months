@@ -1,8 +1,9 @@
+
 // Import the analytics tracking function
 import { trackEvent } from '@/lib/analytics';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export type Baby = {
   id: string;

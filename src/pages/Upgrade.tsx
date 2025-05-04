@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SubscriptionStatus } from '@/components/upgrade/SubscriptionStatus';
 import { PlanComparison } from '@/components/upgrade/PlanComparison';
-import { trackPageView } from '@/lib/analytics';
+import { trackPageView, trackEvent } from '@/lib/analytics';
 
 const Upgrade = () => {
   const navigate = useNavigate();
