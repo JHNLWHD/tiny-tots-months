@@ -8,6 +8,7 @@ import PhotoCollage from '@/components/PhotoCollage';
 import MilestoneList from '@/components/MilestoneList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useEffect } from 'react';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -21,6 +22,19 @@ const backgroundColors = [
 const SharedMonth = () => {
   const { shareToken } = useParams<{ shareToken: string }>();
   const { shareLink, baby, photos, milestones, isLoading, notFound } = useSharedData(shareToken || '');
+  
+  // Additional logging to help debug
+  useEffect(() => {
+    console.log('SharedMonth component rendered with token:', shareToken);
+    console.log('Share data state:', { 
+      shareLink, 
+      babyExists: !!baby, 
+      photoCount: photos?.length, 
+      milestoneCount: milestones?.length,
+      isLoading, 
+      notFound 
+    });
+  }, [shareToken, shareLink, baby, photos, milestones, isLoading, notFound]);
   
   if (isLoading) {
     return (

@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Baby as BabyIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useEffect } from 'react';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -21,8 +22,15 @@ const backgroundColors = [
 
 const SharedBaby = () => {
   const { shareToken } = useParams<{ shareToken: string }>();
-  const { baby, photos, isLoading, notFound, error } = useSharedData(shareToken || '');
+  const { shareLink, baby, photos, isLoading, notFound, error } = useSharedData(shareToken || '');
   
+  // Additional logging to help debug
+  useEffect(() => {
+    console.log('SharedBaby component rendered with token:', shareToken);
+    console.log('Share data state:', { shareLink, babyExists: !!baby, photoCount: photos?.length, isLoading, notFound });
+    if (error) console.error('Share data error:', error);
+  }, [shareToken, shareLink, baby, photos, isLoading, notFound, error]);
+
   function calculateAge(dateOfBirth: string) {
     const birthDate = parseISO(dateOfBirth);
     const today = new Date();
@@ -56,7 +64,7 @@ const SharedBaby = () => {
     );
   }
 
-  if (notFound || !baby) {
+  if (notFound || !shareLink || !baby) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center max-w-md">

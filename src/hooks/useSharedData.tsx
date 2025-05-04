@@ -5,6 +5,7 @@ import { Baby } from '@/hooks/useBabyProfiles';
 import { Photo } from '@/hooks/usePhotos';
 import { Milestone } from '@/hooks/useMilestones';
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/sonner';
 
 export const useSharedData = (shareToken: string) => {
   const [notFound, setNotFound] = useState(false);
@@ -28,6 +29,11 @@ export const useSharedData = (shareToken: string) => {
           
         if (error) {
           console.error('Error fetching share link:', error);
+          setNotFound(true);
+          toast("Error retrieving shared content", {
+            description: "There was a problem accessing the shared content.",
+            className: "bg-destructive text-destructive-foreground",
+          });
           throw error;
         }
         
@@ -41,11 +47,13 @@ export const useSharedData = (shareToken: string) => {
         return data;
       } catch (error) {
         console.error('Error in shareLink query:', error);
+        setNotFound(true);
         return null;
       }
     },
     enabled: !!shareToken,
-    retry: false // Don't retry if the share link doesn't exist
+    retry: 1, // Retry once in case of temporary network issues
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Fetch baby data based on the share link
