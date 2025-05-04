@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { CreatePhotoData } from '@/hooks/usePhotos';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,6 +16,7 @@ const Admin = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(1);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -75,6 +77,19 @@ const Admin = () => {
       title: "Success",
       description: `Photo for Month ${selectedMonth} has been uploaded`,
     });
+  };
+
+  // Mock implementation of photo upload for Admin page
+  const mockUploadPhoto = async (data: CreatePhotoData) => {
+    setIsUploading(true);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log("Photo upload data:", data);
+      return { id: 'mock-photo-id' };
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -140,7 +155,13 @@ const Admin = () => {
               </select>
             </div>
             
-            <PhotoUploader month={selectedMonth} onUploadComplete={handleUploadComplete} />
+            <PhotoUploader 
+              month={selectedMonth} 
+              onUploadComplete={handleUploadComplete}
+              babyId="admin-demo-baby" // Providing mock babyId
+              onUpload={mockUploadPhoto}
+              isUploading={isUploading}
+            />
           </div>
         )}
       </div>
