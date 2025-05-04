@@ -13,11 +13,13 @@ export interface Subscription {
   end_date: string | null;
   created_at: string;
   updated_at: string;
+  payment_proof?: string | null;
 }
 
 export const SUBSCRIPTION_STATUS = {
   FREE: "free",
-  PREMIUM: "premium"
+  PREMIUM: "premium",
+  PENDING: "pending"
 };
 
 export const useSubscription = () => {
@@ -60,27 +62,29 @@ export const useSubscription = () => {
   
   // Check if user has premium subscription
   const isPremium = subscription?.status === SUBSCRIPTION_STATUS.PREMIUM;
+  const isPending = subscription?.status === SUBSCRIPTION_STATUS.PENDING;
   
-  // Mutation to upgrade to premium
-  const upgradeToPremium = useMutation({
-    mutationFn: async () => {
+  // Mutation to request premium upgrade
+  const requestPremiumUpgrade = useMutation({
+    mutationFn: async (paymentProofPath: string): Promise<Subscription> => {
       if (!user) throw new Error("User not authenticated");
       
-      console.log("Upgrading subscription to premium for user:", user.id);
+      console.log("Requesting premium upgrade for user:", user.id);
       
       // Use upsert to handle both creation and update
       const { data, error } = await supabase
         .from("subscription")
         .upsert({
           user_id: user.id,
-          status: SUBSCRIPTION_STATUS.PREMIUM,
+          status: SUBSCRIPTION_STATUS.PENDING,
           start_date: new Date().toISOString(),
+          payment_proof: paymentProofPath
         })
         .select()
         .single();
         
       if (error) {
-        console.error("Upgrade error:", error);
+        console.error("Upgrade request error:", error);
         throw error;
       }
       
@@ -88,11 +92,11 @@ export const useSubscription = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', user?.id] });
-      toast.success("Your subscription has been upgraded to Premium!");
+      toast.success("Your upgrade request has been submitted! Premium access will be activated within 24 hours.");
     },
     onError: (error: any) => {
-      console.error("Error upgrading subscription:", error);
-      toast.error(`Subscription upgrade failed: ${error.message || 'Please try again later'}`);
+      console.error("Error requesting upgrade:", error);
+      toast.error(`Subscription upgrade request failed: ${error.message || 'Please try again later'}`);
     },
   });
 
@@ -100,8 +104,9 @@ export const useSubscription = () => {
     subscription,
     loading,
     isPremium,
-    upgradeToPremium: upgradeToPremium.mutate,
-    isUpgrading: upgradeToPremium.isPending,
+    isPending,
+    requestPremiumUpgrade: requestPremiumUpgrade.mutate,
+    isProcessing: requestPremiumUpgrade.isPending,
     refetch
   };
 };

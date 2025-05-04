@@ -1,17 +1,53 @@
 
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, AlertCircle, Loader2, Info, Upload, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { useImageUpload } from '@/hooks/useImageUpload';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
+
+// QR Code for payment
+const PAYMENT_QR_URL = "https://placehold.co/400x400/png?text=GCash+QR+Code";
 
 const Upgrade = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isPremium, upgradeToPremium, isUpgrading, subscription, loading } = useSubscription();
+  const { isPremium, isPending, requestPremiumUpgrade, isProcessing, subscription, loading } = useSubscription();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  
+  const { 
+    uploadImage, 
+    isUploading, 
+    progress, 
+    resetUploadState 
+  } = useImageUpload();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedFile(null);
+    setPreview(null);
+    resetUploadState();
+  };
 
   const handleUpgrade = async () => {
     try {
@@ -20,11 +56,28 @@ const Upgrade = () => {
         return;
       }
       
+      if (!selectedFile) {
+        toast.error("Please upload your payment receipt");
+        return;
+      }
+      
       console.log("Starting upgrade process for user:", user.id);
-      upgradeToPremium();
+      
+      // First upload the receipt image
+      const result = await uploadImage(selectedFile, {
+        babyId: "payment-proof", // Using this as a folder name
+        monthNumber: 0, // Not relevant for payment proof
+        description: "Payment proof for premium upgrade"
+      });
+      
+      if (result?.storage_path) {
+        // Now request the premium upgrade with the storage path
+        requestPremiumUpgrade(result.storage_path);
+        clearSelection();
+      }
     } catch (error) {
       console.error('Upgrade error:', error);
-      toast.error("There was a problem processing your upgrade");
+      toast.error("There was a problem processing your upgrade request");
     }
   };
 
@@ -60,6 +113,19 @@ const Upgrade = () => {
                 Go to Dashboard
               </Button>
             </Card>
+          ) : isPending ? (
+            <Card className="p-8 text-center">
+              <div className="flex justify-center mb-4">
+                <Clock className="h-16 w-16 text-amber-500" />
+              </div>
+              <h2 className="text-2xl font-bold mb-4">Your Premium Request is Pending</h2>
+              <p className="text-gray-600 mb-6">
+                We've received your payment proof and are currently processing your request. Your premium features will be activated within 24 hours.
+              </p>
+              <Button onClick={() => navigate('/app')}>
+                Go to Dashboard
+              </Button>
+            </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Free Plan */}
@@ -88,7 +154,7 @@ const Upgrade = () => {
                 </ul>
               </Card>
               
-              {/* Premium Plan */}
+              {/* Premium Plan with QR Payment */}
               <Card className="p-6 border-2 border-baby-purple bg-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-baby-purple text-white px-4 py-1 text-sm font-medium rounded-bl-lg">
                   RECOMMENDED
@@ -124,13 +190,82 @@ const Upgrade = () => {
                     <span>Advanced milestone suggestions</span>
                   </li>
                 </ul>
-                <Button 
-                  className="w-full bg-baby-purple hover:bg-baby-purple/90" 
-                  onClick={handleUpgrade}
-                  disabled={isUpgrading}
-                >
-                  {isUpgrading ? "Processing..." : "Upgrade Now"}
-                </Button>
+                
+                <div className="space-y-6">
+                  <div className="flex flex-col items-center p-4 border border-gray-200 rounded-lg">
+                    <h4 className="text-md font-medium mb-2 flex items-center">
+                      <Info size={16} className="mr-2 text-baby-purple" />
+                      Scan QR to Pay
+                    </h4>
+                    <img 
+                      src={PAYMENT_QR_URL} 
+                      alt="Payment QR Code" 
+                      className="w-48 h-48 mb-2"
+                    />
+                    <p className="text-sm text-center text-gray-500">
+                      Send ₱1,000 to this account via GCash
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="receipt-upload">Upload Payment Receipt</Label>
+                    
+                    {!preview ? (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer" onClick={() => document.getElementById('receipt-upload')?.click()}>
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <Upload className="h-8 w-8 text-gray-400" />
+                          <span className="text-sm text-gray-500">Click to upload receipt</span>
+                          <Input
+                            id="receipt-upload"
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <img
+                          src={preview}
+                          alt="Receipt preview"
+                          className="w-full h-auto rounded-lg object-cover max-h-[200px]"
+                        />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 rounded-full"
+                          onClick={clearSelection}
+                        >
+                          <ArrowLeft size={16} />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {isUploading && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm text-gray-500">
+                          <span>Uploading receipt...</span>
+                          <span>{progress}%</span>
+                        </div>
+                        <Progress value={progress} className="h-2" />
+                      </div>
+                    )}
+                    
+                    <Button 
+                      className="w-full bg-baby-purple hover:bg-baby-purple/90" 
+                      onClick={handleUpgrade}
+                      disabled={isProcessing || isUploading || !selectedFile}
+                    >
+                      {isProcessing || isUploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {isUploading ? "Uploading Receipt..." : "Processing Request..."}
+                        </>
+                      ) : "Submit Payment Proof"}
+                    </Button>
+                  </div>
+                </div>
               </Card>
             </div>
           )}
