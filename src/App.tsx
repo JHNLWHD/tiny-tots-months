@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
@@ -14,7 +14,6 @@ import SharedMonth from './pages/SharedMonth';
 import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
-import Index from './pages/Index';
 import Upgrade from './pages/Upgrade';
 
 import './App.css';
@@ -28,15 +27,17 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/landing" element={<Landing />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/landing" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/shared/baby/:shareToken" element={<SharedBaby />} />
             <Route path="/shared/month/:shareToken" element={<SharedMonth />} />
             
             <Route path="/app" element={
               <ProtectedRoute>
-                <Layout />
+                <Layout>
+                  <Outlet />
+                </Layout>
               </ProtectedRoute>
             }>
               <Route index element={<Home />} />
