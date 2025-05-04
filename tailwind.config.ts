@@ -67,6 +67,9 @@ export default {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        comic: ['Comic Neue', 'cursive'],
+        bubblegum: ['Bubblegum Sans', 'cursive'],
+        baloo: ['Baloo 2', 'cursive'],
       },
       keyframes: {
         "accordion-down": {
@@ -77,10 +80,24 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-3deg)' },
+          '50%': { transform: 'rotate(3deg)' },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "float": "float 6s ease-in-out infinite",
+        "wiggle": "wiggle 2s ease-in-out infinite",
+      },
+      boxShadow: {
+        'soft': '0 4px 10px rgba(0, 0, 0, 0.05)',
+        'card': '0 10px 15px -3px rgba(167, 139, 250, 0.1), 0 4px 6px -2px rgba(167, 139, 250, 0.05)',
       },
     },
   },

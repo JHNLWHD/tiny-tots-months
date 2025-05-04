@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Baby, LogOut } from 'lucide-react';
+import { Baby, LogOut, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,13 +14,15 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
   const { user, signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className="min-h-screen bg-gradient-to-b from-white to-baby-purple/5 pb-12">
       {!hideHeader && (
-        <header className="container mx-auto py-4">
+        <header className="container mx-auto py-6 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Baby size={28} className="text-baby-purple mr-2 animate-bounce-soft" />
-              <h1 className="text-xl font-bold text-baby-purple">Tiny Tots Milestones</h1>
+              <div className="w-12 h-12 bg-baby-purple rounded-full flex items-center justify-center mr-3 shadow-lg">
+                <Baby size={24} className="text-white animate-bounce-soft" />
+              </div>
+              <h1 className="text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
             </div>
             
             <div className="flex items-center gap-3">
@@ -34,8 +36,9 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
               </Button>
               <Link 
                 to="/" 
-                className="px-4 py-2 bg-white/70 hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm transition-all"
+                className="px-4 py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
               >
+                <Home className="mr-2 h-4 w-4" />
                 Landing
               </Link>
             </div>
@@ -47,8 +50,10 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
         <header className="container mx-auto py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Baby size={28} className="text-baby-purple mr-2 animate-bounce-soft" />
-              <h1 className="text-xl font-bold text-baby-purple">Tiny Tots Milestones</h1>
+              <div className="w-12 h-12 bg-baby-purple rounded-full flex items-center justify-center mr-3 shadow-lg">
+                <Baby size={24} className="text-white animate-bounce-soft" />
+              </div>
+              <h1 className="text-2xl font-bold text-baby-purple font-bubblegum">Tiny Tots Milestones</h1>
             </div>
             
             <div className="flex items-center gap-3">
@@ -62,8 +67,9 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
               </Button>
               <Link 
                 to="/" 
-                className="px-4 py-2 bg-white/70 hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm transition-all"
+                className="px-4 py-2 bg-white hover:bg-white hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-md transition-all flex items-center"
               >
+                <Home className="mr-2 h-4 w-4" />
                 Landing
               </Link>
             </div>
@@ -71,7 +77,7 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
         </header>
       )}
       
-      <main>
+      <main className="container mx-auto px-4 py-4 animate-fade-in">
         {children}
       </main>
     </div>
