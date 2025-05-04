@@ -17,7 +17,7 @@ const Contact = () => {
   };
   
   return (
-    <Layout>
+    <Layout hideHeader={false}>
       <Helmet>
         <title>Contact Us - Tiny Tots Milestones</title>
         <meta name="description" content="Get in touch with the Tiny Tots Milestones team. We're here to help with any questions or concerns." />

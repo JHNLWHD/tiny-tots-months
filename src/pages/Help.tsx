@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 const Help = () => {
   return (
-    <Layout>
+    <Layout hideHeader={false}>
       <Helmet>
         <title>Help & Support - Tiny Tots Milestones</title>
         <meta name="description" content="Find answers to common questions and get support for your Tiny Tots Milestones account." />

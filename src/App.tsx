@@ -38,7 +38,7 @@ function App() {
               <Route path="/shared/baby/:shareToken" element={<SharedBaby />} />
               <Route path="/shared/month/:shareToken" element={<SharedMonth />} />
               
-              {/* Legal and Support Pages */}
+              {/* Legal and Support Pages - Moved outside protected routes */}
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/contact" element={<Contact />} />

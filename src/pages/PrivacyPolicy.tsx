@@ -2,12 +2,12 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/Layout';
-import { Baby, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const PrivacyPolicy = () => {
   return (
-    <Layout>
+    <Layout hideHeader={false}>
       <Helmet>
         <title>Privacy Policy - Tiny Tots Milestones</title>
         <meta name="description" content="Privacy Policy for Tiny Tots Milestones - Learn how we protect your data and your baby's information." />

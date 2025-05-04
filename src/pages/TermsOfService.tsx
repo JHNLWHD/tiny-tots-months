@@ -2,12 +2,12 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Layout from '@/components/Layout';
-import { Baby, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TermsOfService = () => {
   return (
-    <Layout>
+    <Layout hideHeader={false}>
       <Helmet>
         <title>Terms of Service - Tiny Tots Milestones</title>
         <meta name="description" content="Terms of Service for Tiny Tots Milestones - Please read our terms before using our service." />
