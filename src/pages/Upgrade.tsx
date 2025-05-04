@@ -63,10 +63,10 @@ const Upgrade = () => {
       
       console.log("Starting upgrade process for user:", user.id);
       
-      // First upload the receipt image
+      // First upload the receipt image - using user.id as folder name instead of "payment-proof"
       const result = await uploadImage(selectedFile, {
-        babyId: "payment-proof", // Using this as a folder name
-        monthNumber: 0, // Not relevant for payment proof
+        babyId: user.id, // Using user ID as the folder name instead of "payment-proof"
+        monthNumber: 0,  // Not relevant for payment proof
         description: "Payment proof for premium upgrade"
       });
       
