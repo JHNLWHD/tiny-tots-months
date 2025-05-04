@@ -113,7 +113,6 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
         </header>
       )}
       
-      {/* Remove duplicate header when user is logged in */}
       <main className="container mx-auto px-3 md:px-4 py-4 md:py-6 animate-fade-in">
         {children}
       </main>

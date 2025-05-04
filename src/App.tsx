@@ -34,7 +34,7 @@ function App() {
             
             <Route path="/app" element={
               <ProtectedRoute>
-                <Layout hideHeader={true}>
+                <Layout>
                   <Outlet />
                 </Layout>
               </ProtectedRoute>
