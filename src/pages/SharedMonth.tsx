@@ -9,6 +9,8 @@ import MilestoneList from '@/components/MilestoneList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useEffect } from 'react';
+import MilestoneDisplay from '@/components/MilestoneDisplay';
+import { Star } from 'lucide-react';
 
 const backgroundColors = [
   "bg-baby-blue",
@@ -120,7 +122,26 @@ const SharedMonth = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Milestones</h2>
                 {milestones && milestones.length > 0 ? (
-                  <MilestoneList milestones={milestones} readOnly />
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {milestones.slice(0, 4).map((milestone) => (
+                        <MilestoneDisplay 
+                          key={milestone.id}
+                          title={milestone.milestone_text.split('\n')[0] || 'Milestone'}
+                          description={milestone.milestone_text}
+                          icon={<Star className="h-5 w-5" />}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* If we have more than 4 milestones, show the rest in a list */}
+                    {milestones.length > 4 && (
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Additional Milestones</h3>
+                        <MilestoneList milestones={milestones.slice(4)} readOnly />
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-gray-500 text-center py-8">No milestones recorded for this month.</p>
                 )}
