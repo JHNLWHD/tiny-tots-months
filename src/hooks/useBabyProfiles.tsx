@@ -9,6 +9,7 @@ export interface Baby {
   id: string;
   name: string;
   date_of_birth: string;
+  gender?: string;
   created_at: string;
   user_id: string;
 }
@@ -46,7 +47,7 @@ export const useBabyProfiles = () => {
   });
 
   const createBabyProfile = useMutation({
-    mutationFn: async ({ name, dateOfBirth }: { name: string, dateOfBirth: string }) => {
+    mutationFn: async ({ name, dateOfBirth, gender = 'other' }: { name: string, dateOfBirth: string, gender?: string }) => {
       if (!user) throw new Error("User not authenticated");
       
       // Check for free tier limit (1 baby)
@@ -59,6 +60,7 @@ export const useBabyProfiles = () => {
         .insert({
           name,
           date_of_birth: dateOfBirth,
+          gender,
           user_id: user.id
         })
         .select()

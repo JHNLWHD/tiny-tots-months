@@ -6,15 +6,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AddBabyDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  createBaby: (data: { name: string, dateOfBirth: string }) => Promise<void>;
+  createBaby: (data: { name: string, dateOfBirth: string, gender: string }) => Promise<void>;
 }
 
 const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, createBaby }) => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
     defaultValues: {
       name: '',
       birthdate: '',
@@ -22,11 +23,19 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
     }
   });
 
+  const gender = watch('gender');
+
+  // Handler for the Select component (gender)
+  const handleGenderChange = (value: string) => {
+    setValue('gender', value);
+  };
+
   const onSubmit = async (data: any) => {
     try {
       await createBaby({
         name: data.name,
-        dateOfBirth: data.birthdate
+        dateOfBirth: data.birthdate,
+        gender: data.gender
       });
       reset();
       setIsOpen(false);
@@ -65,15 +74,17 @@ const AddBabyDialog: React.FC<AddBabyDialogProps> = ({ isOpen, setIsOpen, create
           
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
-            <select 
-              id="gender"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              {...register("gender")}
-            >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+            <Select defaultValue={gender} onValueChange={handleGenderChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+            <input type="hidden" {...register("gender")} />
           </div>
           
           <div className="flex justify-end gap-2 pt-4">

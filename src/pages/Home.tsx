@@ -24,7 +24,7 @@ const Home = () => {
   const [selectedBaby, setSelectedBaby] = React.useState<any>(null);
   
   // Wrap the mutation function to return a Promise
-  const createBaby = async (data: { name: string, dateOfBirth: string }) => {
+  const createBaby = async (data: { name: string, dateOfBirth: string, gender: string }) => {
     return new Promise<void>((resolve, reject) => {
       try {
         createBabyMutation(data, {
@@ -78,6 +78,7 @@ const Home = () => {
       
       <MonthCardGrid 
         babyId={selectedBaby?.id}
+        babyName={selectedBaby?.name}
         showGrid={selectedBaby !== null && !isLoading}
       />
       
