@@ -1,13 +1,12 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, ArrowLeft, AlertCircle, Loader2, Info, Upload, Clock } from 'lucide-react';
+import { CheckCircle2, ArrowLeft, Loader2, Info, Upload, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { useImageUpload } from '@/hooks/useImageUpload';
+import { usePaymentProofUpload } from '@/hooks/usePaymentProofUpload';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
@@ -23,11 +22,11 @@ const Upgrade = () => {
   const [preview, setPreview] = useState<string | null>(null);
   
   const { 
-    uploadImage, 
+    uploadPaymentProof, 
     isUploading, 
     progress, 
     resetUploadState 
-  } = useImageUpload();
+  } = usePaymentProofUpload();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -63,19 +62,17 @@ const Upgrade = () => {
       
       console.log("Starting upgrade process for user:", user.id);
       
-      // First upload the receipt image - using user.id as folder name and 1 as month_number
-      // Since month_number in the database has a check constraint requiring value > 0
-      const result = await uploadImage(selectedFile, {
-        babyId: user.id, // Using user ID as the folder name
-        monthNumber: 1,  // Changed from 0 to 1 to satisfy the check constraint
-        description: "Payment proof for premium upgrade"
+      // Upload the payment proof using our new dedicated function
+      const storagePath = await uploadPaymentProof(selectedFile, {
+        description: "Payment proof for premium upgrade",
+        onSuccess: (path) => {
+          console.log("Payment proof uploaded successfully:", path);
+          // Request premium upgrade with the storage path
+          requestPremiumUpgrade(path);
+          clearSelection();
+        }
       });
       
-      if (result?.storage_path) {
-        // Now request the premium upgrade with the storage path
-        requestPremiumUpgrade(result.storage_path);
-        clearSelection();
-      }
     } catch (error) {
       console.error('Upgrade error:', error);
       toast.error("There was a problem processing your upgrade request");
