@@ -1,125 +1,124 @@
+// Import the analytics tracking function
+import { trackEvent } from '@/lib/analytics';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
-import { toast } from "@/components/ui/sonner";
-import { useSubscription } from "@/hooks/useSubscription";
-
-export interface Baby {
+export type Baby = {
   id: string;
+  created_at: string;
   name: string;
   date_of_birth: string;
-  gender?: string;
-  created_at: string;
-  user_id: string;
-}
-
-export const useBabyProfiles = () => {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const { isPremium } = useSubscription();
-  
-  const fetchBabies = async (): Promise<Baby[]> => {
-    if (!user) return [];
-    
-    const { data, error } = await supabase
-      .from("baby")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("date_of_birth", { ascending: true }); // Order by birth date ascending
-      
-    if (error) {
-      console.error("Error fetching babies:", error);
-      toast("Error", {
-        description: "Failed to load baby profiles",
-        className: "bg-destructive text-destructive-foreground",
-      });
-      throw error;
-    }
-    
-    return data || [];
-  };
-
-  const { data: babies = [], isLoading: loading, refetch } = useQuery({
-    queryKey: ['babies', user?.id],
-    queryFn: fetchBabies,
-    enabled: !!user,
-  });
-
-  const createBabyProfile = useMutation({
-    mutationFn: async ({ name, dateOfBirth, gender = 'other' }: { name: string, dateOfBirth: string, gender?: string }) => {
-      if (!user) throw new Error("User not authenticated");
-      
-      // Check for free tier limit (1 baby)
-      if (!isPremium && babies.length >= 1) {
-        throw new Error("Free users can only create one baby profile. Upgrade to Premium for unlimited profiles.");
-      }
-      
-      const { data, error } = await supabase
-        .from("baby")
-        .insert({
-          name,
-          date_of_birth: dateOfBirth,
-          gender,
-          user_id: user.id
-        })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['babies', user?.id] });
-      toast("Success", {
-        description: "Baby profile created successfully",
-      });
-    },
-    onError: (error: any) => {
-      console.error("Error creating baby profile:", error);
-      toast("Error", {
-        description: error.message || "Failed to create baby profile",
-        className: "bg-destructive text-destructive-foreground",
-      });
-    },
-  });
-
-  const deleteBabyMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("baby")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['babies', user?.id] });
-      toast("Success", {
-        description: "Baby profile deleted successfully",
-      });
-    },
-    onError: (error: any) => {
-      console.error("Error deleting baby:", error);
-      toast("Error", {
-        description: "Failed to delete baby profile",
-        className: "bg-destructive text-destructive-foreground",
-      });
-    },
-  });
-
-  const deleteBaby = (id: string) => {
-    deleteBabyMutation.mutate(id);
-  };
-
-  return { 
-    babies, 
-    loading, 
-    fetchBabies: refetch, 
-    deleteBaby,
-    createBaby: createBabyProfile.mutate,
-    isDeleting: deleteBabyMutation.isPending,
-    isCreating: createBabyProfile.isPending,
-    canCreateNewBaby: isPremium || babies.length < 1
-  };
+  gender: string;
+  user_id: string | undefined;
 };
+
+type CreateBabyData = {
+  name: string;
+  dateOfBirth: string;
+  gender: string;
+};
+
+export function useBabyProfiles() {
+  const { user } = useAuth();
+  const [babies, setBabies] = useState<Baby[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBabies = async () => {
+      setLoading(true);
+      try {
+        if (user) {
+          const { data, error } = await supabase
+            .from('baby')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error('Error fetching babies:', error);
+            setError(error.message);
+          } else {
+            setBabies(data || []);
+          }
+        }
+      } catch (err: any) {
+        console.error('Unexpected error fetching babies:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBabies();
+  }, [user]);
+
+  const refetch = () => {
+    if (user) {
+      supabase
+        .from('baby')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error refetching babies:', error);
+            setError(error.message);
+          } else {
+            setBabies(data || []);
+          }
+          setLoading(false);
+        });
+    }
+  };
+  
+  const createBaby = (data: CreateBabyData, options?: { onSuccess?: () => void, onError?: (err: Error) => void }) => {
+    setCreating(true);
+    
+    const newBaby = {
+      ...data,
+      user_id: user?.id,
+    };
+    
+    supabase
+      .from('baby')
+      .insert([newBaby])
+      .select()
+      .then(({ data: newBabyData, error }) => {
+        if (error) {
+          console.error('Error creating baby:', error);
+          setError(error.message);
+          
+          // Track error event
+          trackEvent('baby_creation_failed', {
+            error_message: error.message
+          });
+          
+          options?.onError?.(new Error(error.message));
+        } else {
+          console.log('Baby created:', newBabyData);
+          
+          // Track successful baby creation
+          trackEvent('baby_created', {
+            baby_name: data.name,
+            baby_gender: data.gender
+          });
+          
+          refetch();
+          options?.onSuccess?.();
+        }
+      })
+      .finally(() => {
+        setCreating(false);
+      });
+  };
+
+  return {
+    babies,
+    loading,
+    error,
+    createBaby,
+  };
+}

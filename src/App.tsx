@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
+import { AuthWrapper } from '@/context/AuthWrapper';
 import { HelmetProvider } from 'react-helmet-async';
 
 import Layout from './components/Layout';
@@ -29,32 +30,34 @@ function App() {
       <HelmetProvider>
         <Router>
           <AuthProvider>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/landing" element={<Navigate to="/" replace />} />
-              <Route path="/auth" element={<Auth />} />
-              
-              {/* Legal and Support Pages - Moved outside protected routes */}
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/help" element={<Help />} />
-              
-              <Route path="/app" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Outlet />
-                  </Layout>
-                </ProtectedRoute>
-              }>
-                <Route index element={<Home />} />
-                <Route path="month/:babyId/:monthId" element={<Month />} />
-                <Route path="upgrade" element={<Upgrade />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
+            <AuthWrapper>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/landing" element={<Navigate to="/" replace />} />
+                <Route path="/auth" element={<Auth />} />
+                
+                {/* Legal and Support Pages - Moved outside protected routes */}
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/help" element={<Help />} />
+                
+                <Route path="/app" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Outlet />
+                    </Layout>
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Home />} />
+                  <Route path="month/:babyId/:monthId" element={<Month />} />
+                  <Route path="upgrade" element={<Upgrade />} />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </AuthWrapper>
           </AuthProvider>
         </Router>
       </HelmetProvider>

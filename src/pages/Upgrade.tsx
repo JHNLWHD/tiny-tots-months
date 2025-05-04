@@ -1,16 +1,25 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SubscriptionStatus } from '@/components/upgrade/SubscriptionStatus';
 import { PlanComparison } from '@/components/upgrade/PlanComparison';
+import { trackPageView } from '@/lib/analytics';
 
 const Upgrade = () => {
   const navigate = useNavigate();
   const { isPremium, isPending, loading } = useSubscription();
+  
+  // Track page view with additional details
+  useEffect(() => {
+    trackPageView();
+    // Track additional page details
+    const pageType = isPremium ? 'already_premium' : isPending ? 'pending_upgrade' : 'can_upgrade';
+    trackEvent('viewed_upgrade_page', { page_type: pageType });
+  }, [isPremium, isPending]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">

@@ -1,11 +1,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { CreateMilestoneData } from '@/hooks/useMilestones';
+import { trackEvent } from '@/lib/analytics';
 
 interface MilestoneFormProps {
   babyId: string;
@@ -26,13 +26,21 @@ const MilestoneForm: React.FC<MilestoneFormProps> = ({
     e.preventDefault();
     
     if (!milestoneText.trim()) return;
-    
-    onSubmit({
+
+    const milestoneData = {
       baby_id: babyId,
       milestone_text: milestoneText.trim(),
       month_number: monthNumber
+    };
+    
+    // Track milestone creation
+    trackEvent('milestone_created', {
+      baby_id: babyId,
+      month_number: monthNumber,
+      text_length: milestoneText.trim().length
     });
     
+    onSubmit(milestoneData);
     setMilestoneText('');
   };
 
