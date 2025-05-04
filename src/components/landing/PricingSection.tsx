@@ -25,7 +25,7 @@ const PricingSection = () => {
   const premiumPlan = {
     title: "Premium",
     description: "For growing families",
-    price: "₱1,000",
+    price: "₱500",
     pricePeriod: "one-time payment",
     features: [
       'Unlimited baby profiles',

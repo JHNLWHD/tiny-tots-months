@@ -137,7 +137,7 @@ export const PaymentForm: React.FC = () => {
           />
         )}
         <p className="text-sm text-center text-gray-500">
-          Send ₱1,000 to this account via GCash
+          Send ₱500 to this account via GCash
         </p>
       </div>
       

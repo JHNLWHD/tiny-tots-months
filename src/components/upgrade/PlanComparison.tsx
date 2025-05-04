@@ -32,7 +32,7 @@ export const PlanComparison: React.FC = () => {
       {/* Premium Plan */}
       <PlanCard 
         title="Premium Plan"
-        price="₱1,000"
+        price="₱500"
         features={premiumPlanFeatures}
         priceSubtext="one-time payment"
         isPremium
