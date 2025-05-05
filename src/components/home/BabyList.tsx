@@ -6,7 +6,6 @@ import { Baby, Calendar, Share, Plus } from 'lucide-react';
 import { Baby as BabyType } from '@/hooks/useBabyProfiles';
 import { useSubscription } from '@/hooks/useSubscription';
 import { format } from 'date-fns';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BabyListProps {
   babies: BabyType[];
@@ -21,12 +20,10 @@ const BabyList: React.FC<BabyListProps> = ({
   babies, 
   isLoading, 
   onAddBaby, 
-  onShareBaby, 
   onSelectBaby,
   selectedBaby 
 }) => {
   const { isPremium } = useSubscription();
-  const isMobile = useIsMobile();
   
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 md:mb-8">
@@ -81,20 +78,6 @@ const BabyList: React.FC<BabyListProps> = ({
                 <Calendar className="mr-1.5 h-3 sm:h-4 w-3 sm:w-4" />
                 View Milestones
               </Button>
-              
-              {onShareBaby && (
-                <Button 
-                  variant="outline" 
-                  className="w-full border-baby-purple/30 text-baby-purple hover:bg-baby-purple/10 hover:text-baby-purple text-xs sm:text-sm py-1 sm:py-2" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShareBaby(baby);
-                  }}
-                >
-                  <Share className="mr-1.5 h-3 sm:h-4 w-3 sm:w-4" />
-                  {!isMobile ? 'Share' : ''}
-                </Button>
-              )}
             </div>
           </Card>
         ))
