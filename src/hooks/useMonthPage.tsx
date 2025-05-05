@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
@@ -6,6 +5,7 @@ import { usePhotos } from "@/hooks/usePhotos";
 import { useMilestones } from "@/hooks/useMilestones";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useSubscription } from "@/hooks/useSubscription";
+import { validateFile } from "@/components/photoUploader/validateFile";
 import { toast } from "@/components/ui/sonner";
 
 export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
@@ -97,7 +97,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       selectedBabyId, 
       fileName: file.name, 
       fileSize: file.size, 
-      fileType: file.type
+      fileType: file.type || "unknown"
     });
     
     if (!selectedBabyId) {
@@ -105,27 +105,13 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       return null;
     }
     
-    // Safety check for file.type
-    if (!file.type) {
-      console.error("Cannot determine file type - file.type is undefined");
-      toast("Upload Error", {
-        description: "Cannot determine file type",
-        className: "bg-destructive text-destructive-foreground",
-      });
-      return null;
-    }
+    // Use the improved file validation
+    console.log("Validating file using validateFile utility...");
+    const validation = await validateFile(file, isPremium);
+    console.log("Validation result in useMonthPage:", validation);
     
-    // Check if file is a video
-    const isVideo = file.type.startsWith('video/');
-    console.log(`File is ${isVideo ? 'video' : 'image'}`);
-    
-    // Check premium status for video uploads
-    if (isVideo && !isPremium) {
-      console.log("Video upload attempted without premium subscription");
-      toast("Premium Feature", {
-        description: "Video uploads are only available for premium users. Please upgrade to premium to upload videos.",
-        className: "bg-destructive text-destructive-foreground",
-      });
+    if (!validation.isValid) {
+      console.log("File validation failed in useMonthPage");
       return null;
     }
     
@@ -141,23 +127,14 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       }
     }
     
-    // Check file size for videos (max 50MB)
-    if (isVideo && file.size > 50 * 1024 * 1024) {
-      console.log("Video file too large:", file.size);
-      toast("File Too Large", {
-        description: "Video files must be under 50MB. Please compress your video or upload a shorter clip.",
-        className: "bg-destructive text-destructive-foreground",
-      });
-      return null;
-    }
-    
-    console.log("Starting upload via API...");
+    console.log("Starting upload via API with isVideo flag:", validation.isVideo);
     try {
       const result = await uploadPhotoApi({
         file: file,
         baby_id: selectedBabyId,
         month_number: monthNumber,
-        description
+        description,
+        is_video: validation.isVideo
       });
       console.log("Upload completed successfully:", result);
       return result;

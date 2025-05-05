@@ -23,6 +23,7 @@ export interface CreatePhotoData {
   month_number: number;
   description?: string;
   file: File;
+  is_video?: boolean; // Make is_video optional with a default in the mutation
 }
 
 export const usePhotos = (babyId?: string, monthNumber?: number) => {
@@ -79,22 +80,24 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
   });
 
   const uploadPhotoMutation = useMutation({
-    mutationFn: async ({ file, baby_id, month_number, description }: CreatePhotoData) => {
+    mutationFn: async ({ file, baby_id, month_number, description, is_video }: CreatePhotoData) => {
       if (!user) throw new Error("User not authenticated");
+
+      // Determine if the file is a video based on the passed is_video parameter or fallback to file.type check
+      const isVideoFile = is_video !== undefined ? is_video : (file.type?.startsWith('video/') || false);
 
       console.log("Starting file upload process with file:", {
         name: file.name,
         size: file.size,
-        type: file.type,
-        isVideo: file.type?.startsWith('video/') || false
+        type: file.type || "unknown",
+        isVideo: isVideoFile
       });
 
       // 1. Upload file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${baby_id}/${month_number}/${uuidv4()}.${fileExt}`;
-      const isVideo = file.type?.startsWith('video/') || false;
       
-      console.log(`Uploading ${isVideo ? 'video' : 'photo'} to path: ${fileName}`);
+      console.log(`Uploading ${isVideoFile ? 'video' : 'photo'} to path: ${fileName}`);
       
       try {
         const { error: uploadError, data: uploadResult } = await supabase.storage
@@ -112,7 +115,7 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
         console.log("File successfully uploaded to storage:", uploadResult);
         
         // 2. Create record in the photo table
-        console.log("Creating database record for the uploaded file");
+        console.log("Creating database record for the uploaded file with isVideo:", isVideoFile);
         const { error: insertError, data: photo } = await supabase
           .from('photo')
           .insert({
@@ -121,7 +124,7 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
             month_number,
             storage_path: fileName,
             description: description || null,
-            is_video: isVideo
+            is_video: isVideoFile
           })
           .select()
           .single();
