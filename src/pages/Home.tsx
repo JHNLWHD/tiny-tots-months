@@ -11,13 +11,14 @@ import BabyList from '@/components/home/BabyList';
 import AddBabyDialog from '@/components/home/AddBabyDialog';
 import MonthCardGrid from '@/components/home/MonthCardGrid';
 import EmptyState from '@/components/home/EmptyState';
+import {toast} from "@/components/ui/sonner.tsx";
 
 const Home = () => {
   const { user } = useAuth();
   const { babies, loading: isLoading, createBaby: createBabyMutation } = useBabyProfiles();
-  const { isPremium } = useSubscription();
+  const { isPremium, isFree, createSubscription, subscription } = useSubscription();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [selectedBaby, setSelectedBaby] = React.useState<any>(null);
+  const [selectedBaby, setSelectedBaby] = React.useState(null);
   
   // Wrap the mutation function to return a Promise
   const createBaby = async (data: { name: string, dateOfBirth: string, gender: string }) => {
@@ -33,19 +34,32 @@ const Home = () => {
     });
   };
 
+  function handleOnAddBaby() {
+      if(isFree && !isPremium) {
+          toast("Premium Required", {
+              description: "Free users can only add 1 baby profile. Upgrade to Premium to create unlimited baby profiles.",
+              className: "bg-destructive text-destructive-foreground",
+          });
+          return;
+      }
+
+      setIsDialogOpen(true);
+  }
+
+  React.useEffect(() => {
+      if (subscription && isFree) {
+          return;
+      }
+
+      createSubscription();
+  }, [isFree, subscription]);
+
   // Set first baby as selected when babies load if none is selected
   React.useEffect(() => {
     if (babies.length > 0 && !selectedBaby) {
       setSelectedBaby(babies[0]);
     }
   }, [babies, selectedBaby]);
-
-  // This is a placeholder function to satisfy the type requirement
-  // since we removed the sharing functionality
-  const handleShareBaby = () => {
-    // Intentionally empty as sharing functionality has been removed
-    console.log('Sharing functionality has been removed');
-  };
 
   return (
     <div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8">
@@ -68,7 +82,7 @@ const Home = () => {
       <BabyList 
         babies={babies}
         isLoading={isLoading}
-        onAddBaby={() => setIsDialogOpen(true)}
+        onAddBaby={handleOnAddBaby}
         onSelectBaby={setSelectedBaby}
         selectedBaby={selectedBaby}
       />

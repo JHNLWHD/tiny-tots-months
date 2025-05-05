@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       navigate('/app');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Sign up failed',
         description: error.message || 'An error occurred during sign up',
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       navigate('/app');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Sign in failed',
         description: error.message || 'Invalid email or password',
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/');
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: 'Sign out failed',
         description: error.message || 'An error occurred during sign out',

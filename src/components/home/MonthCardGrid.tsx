@@ -10,8 +10,6 @@ interface MonthCardGridProps {
 }
 
 const MonthCardGrid: React.FC<MonthCardGridProps> = ({ babyId, babyName, showGrid }) => {
-  const isMobile = useIsMobile();
-
   // Monthly background classes with gradients for the month cards
   const monthlyBackgroundClasses = [
     'bg-gradient-to-br from-blue-100 to-blue-200',
