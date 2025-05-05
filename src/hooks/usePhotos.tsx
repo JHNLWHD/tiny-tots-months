@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -83,8 +82,8 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
     mutationFn: async ({ file, baby_id, month_number, description, is_video }: CreatePhotoData) => {
       if (!user) throw new Error("User not authenticated");
 
-      // Determine if the file is a video based on the passed is_video parameter or fallback to file.type check
-      const isVideoFile = is_video !== undefined ? is_video : (file.type?.startsWith('video/') || false);
+      // Trust the is_video parameter passed from the component
+      const isVideoFile = is_video === true;
 
       console.log("Starting file upload process with file:", {
         name: file.name,

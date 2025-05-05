@@ -5,35 +5,43 @@ import { fileTypeFromBlob } from 'file-type';
 export interface FileValidationResult {
   isValid: boolean;
   isVideo: boolean;
+  effectiveMimeType: string;
 }
 
 export const validateFile = async (file: File | null, isPremium: boolean): Promise<FileValidationResult> => {
   if (!file) {
     console.log("File validation failed: No file provided");
-    return { isValid: false, isVideo: false };
+    return { isValid: false, isVideo: false, effectiveMimeType: '' };
   }
 
   console.log(`Starting validation for file: ${file.name}, size: ${file.size} bytes`);
   
-  // Try to detect file type from binary data rather than relying on file.type
-  let fileTypeResult;
+  // Get the MIME type reported by the browser
+  const reportedMimeType = file.type || '';
+  console.log("Browser-reported MIME type:", reportedMimeType);
+  
+  // Try to detect file type from binary data for more accurate type detection
+  let detectedMimeType = '';
   try {
     console.log("Detecting file type from binary data...");
-    fileTypeResult = await fileTypeFromBlob(file);
-    console.log("File type detection result:", fileTypeResult);
+    const fileTypeResult = await fileTypeFromBlob(file);
+    if (fileTypeResult) {
+      detectedMimeType = fileTypeResult.mime;
+      console.log("Successfully detected MIME type from binary:", detectedMimeType);
+    } else {
+      console.log("fileTypeFromBlob returned null or undefined");
+    }
   } catch (error) {
     console.error("Error detecting file type:", error);
   }
   
-  // Determine if the file is a video using file-type library or fallback to MIME type
-  const mimeType = file.type || '';
-  const detectedMimeType = fileTypeResult?.mime || '';
-  const effectiveMimeType = detectedMimeType || mimeType;
+  // Use detected MIME type if available, otherwise fall back to browser-reported type
+  const effectiveMimeType = detectedMimeType || reportedMimeType;
   
-  console.log("File type information:", {
-    reportedMimeType: mimeType,
-    detectedMimeType: detectedMimeType,
-    effectiveMimeType: effectiveMimeType
+  console.log("File type determination:", {
+    reportedMimeType,
+    detectedMimeType,
+    effectiveMimeType
   });
   
   if (!effectiveMimeType) {
@@ -42,10 +50,10 @@ export const validateFile = async (file: File | null, isPremium: boolean): Promi
       description: "Could not determine file type",
       className: "bg-destructive text-destructive-foreground",
     });
-    return { isValid: false, isVideo: false };
+    return { isValid: false, isVideo: false, effectiveMimeType: '' };
   }
 
-  // Check if file is a video
+  // Check if file is a video based on effective MIME type
   const isVideo = effectiveMimeType.startsWith('video/');
   console.log(`File is determined to be a ${isVideo ? 'video' : 'image'}`);
   
@@ -56,7 +64,7 @@ export const validateFile = async (file: File | null, isPremium: boolean): Promi
       description: "Video uploads are only available for premium users",
       className: "bg-destructive text-destructive-foreground",
     });
-    return { isValid: false, isVideo };
+    return { isValid: false, isVideo, effectiveMimeType };
   }
   
   // Validate file size (max 50MB for videos, 10MB for images)
@@ -69,7 +77,7 @@ export const validateFile = async (file: File | null, isPremium: boolean): Promi
         : "Maximum image size is 10MB",
       className: "bg-destructive text-destructive-foreground",
     });
-    return { isValid: false, isVideo };
+    return { isValid: false, isVideo, effectiveMimeType };
   }
   
   // Define accepted file types based on detected MIME type
@@ -83,9 +91,9 @@ export const validateFile = async (file: File | null, isPremium: boolean): Promi
       description: "Please upload a JPG, PNG, GIF, WebP, MP4, WebM or QuickTime file",
       className: "bg-destructive text-destructive-foreground",
     });
-    return { isValid: false, isVideo };
+    return { isValid: false, isVideo, effectiveMimeType };
   }
   
   console.log("File validation passed successfully");
-  return { isValid: true, isVideo };
+  return { isValid: true, isVideo, effectiveMimeType };
 };

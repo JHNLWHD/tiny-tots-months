@@ -92,12 +92,13 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
   // Find the selected baby for sharing
   const selectedBaby = babies.find(baby => baby.id === selectedBabyId);
   
-  const uploadPhoto = async (file: File, description?: string) => {
+  const uploadPhoto = async (data: any) => {
     console.log("uploadPhoto called in useMonthPage", { 
-      selectedBabyId, 
-      fileName: file.name, 
-      fileSize: file.size, 
-      fileType: file.type || "unknown"
+      selectedBabyId,
+      fileName: data.file.name, 
+      fileSize: data.file.size, 
+      fileType: data.file.type || "unknown",
+      isVideo: data.is_video
     });
     
     if (!selectedBabyId) {
@@ -105,19 +106,9 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       return null;
     }
     
-    // Use the improved file validation
-    console.log("Validating file using validateFile utility...");
-    const validation = await validateFile(file, isPremium);
-    console.log("Validation result in useMonthPage:", validation);
-    
-    if (!validation.isValid) {
-      console.log("File validation failed in useMonthPage");
-      return null;
-    }
-    
     // Check photo upload limits for free users
     if (!isPremium) {
-      if (photos.length >= 5) {
+      if (!data.is_video && photos.length >= 5) {
         console.log("Free user reached upload limit");
         toast("Upload Limit Reached", {
           description: "Free users can upload maximum 5 photos per month. Upgrade to Premium for unlimited uploads.",
@@ -127,14 +118,14 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       }
     }
     
-    console.log("Starting upload via API with isVideo flag:", validation.isVideo);
+    console.log("Starting upload via API with isVideo flag:", data.is_video);
     try {
       const result = await uploadPhotoApi({
-        file: file,
+        file: data.file,
         baby_id: selectedBabyId,
         month_number: monthNumber,
-        description,
-        is_video: validation.isVideo
+        description: data.description,
+        is_video: data.is_video
       });
       console.log("Upload completed successfully:", result);
       return result;

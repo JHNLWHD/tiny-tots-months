@@ -28,6 +28,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const [isVideo, setIsVideo] = useState(false);
+  const [effectiveMimeType, setEffectiveMimeType] = useState<string>('');
   const { isPremium } = useSubscription();
   
   console.log("PhotoUploader rendered with subscription status:", { isPremium });
@@ -53,6 +54,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       
       setSelectedFile(file);
       setIsVideo(validation.isVideo);
+      setEffectiveMimeType(validation.effectiveMimeType);
       
       // Create preview
       const reader = new FileReader();
@@ -69,6 +71,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     setPreview(null);
     setCaption('');
     setIsVideo(false);
+    setEffectiveMimeType('');
     console.log("File selection cleared");
   };
 
@@ -84,6 +87,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     console.log("Starting upload process for:", {
       fileName: selectedFile.name,
       fileType: selectedFile.type || "unknown",
+      effectiveMimeType: effectiveMimeType,
       fileSize: selectedFile.size,
       isVideo: isVideo,
       babyId,
@@ -92,7 +96,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     });
 
     try {
-      console.log("Calling uploadPhoto API function");
+      console.log("Calling uploadPhoto API function with isVideo:", isVideo);
       await onUpload({
         file: selectedFile,
         baby_id: babyId,
