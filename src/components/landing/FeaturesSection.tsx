@@ -1,7 +1,7 @@
 
 import React from 'react';
 import FeatureCard from './FeatureCard';
-import { Camera, Check, Star, Rocket } from 'lucide-react';
+import { Camera, Check, Star, Rocket, Lightbulb, BookOpen, Award } from 'lucide-react';
 
 const FeaturesSection = () => {
   const features = [
@@ -15,7 +15,8 @@ const FeaturesSection = () => {
       ],
       imageTitle: 'Milestone Tracker Screenshot',
       colorClass: 'text-baby-purple',
-      imagePosition: 'left' as const
+      imagePosition: 'left' as const,
+      icon: <Lightbulb size={64} className="text-baby-purple" />
     },
     {
       title: 'Photo & Video Collection',
@@ -27,7 +28,8 @@ const FeaturesSection = () => {
       ],
       imageTitle: 'Photo Gallery Screenshot',
       colorClass: 'text-baby-pink',
-      imagePosition: 'right' as const
+      imagePosition: 'right' as const,
+      icon: <Camera size={64} className="text-baby-pink" />
     },
     {
       title: 'Export to PDF/Book',
@@ -39,7 +41,8 @@ const FeaturesSection = () => {
       ],
       imageTitle: 'PDF Export Preview',
       colorClass: 'text-baby-mint',
-      imagePosition: 'left' as const
+      imagePosition: 'left' as const,
+      icon: <BookOpen size={64} className="text-baby-mint" />
     }
   ];
 
@@ -57,6 +60,7 @@ const FeaturesSection = () => {
               imageTitle={feature.imageTitle}
               colorClass={feature.colorClass}
               imagePosition={feature.imagePosition}
+              icon={feature.icon}
             />
           ))}
         </div>

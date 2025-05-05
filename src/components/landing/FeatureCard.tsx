@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Lightbulb, Camera, BookOpen } from 'lucide-react';
 
 interface FeatureItem {
   text: string;
@@ -14,6 +14,7 @@ interface FeatureCardProps {
   imageTitle: string;
   colorClass: string;
   imagePosition: 'left' | 'right';
+  icon?: React.ReactNode; // New prop for the main feature icon
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
@@ -22,9 +23,18 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   features,
   imageTitle,
   colorClass,
-  imagePosition
+  imagePosition,
+  icon // Default icon if none provided
 }) => {
   const contentOrder = imagePosition === 'left' ? 'md:flex-row' : 'md:flex-row-reverse';
+  
+  // Determine which icon to show based on the title if no icon is provided
+  const getDefaultIcon = () => {
+    if (title.includes('Milestone')) return <Lightbulb size={64} className={`${colorClass}`} />;
+    if (title.includes('Photo')) return <Camera size={64} className={`${colorClass}`} />;
+    if (title.includes('Export')) return <BookOpen size={64} className={`${colorClass}`} />;
+    return <CheckCircle2 size={64} className={`${colorClass}`} />;
+  };
   
   return (
     <article className={`flex flex-col ${contentOrder} gap-8 items-center`}>
@@ -38,21 +48,21 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             // Check if the item is a string or an object with text and icon properties
             const isString = typeof item === 'string';
             const text = isString ? item : item.text;
-            const icon = isString ? <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" /> : item.icon;
+            const itemIcon = isString ? <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" /> : item.icon;
             
             return (
               <li key={text || index} className="flex items-center">
-                {icon || <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" />}
+                {itemIcon || <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" />}
                 <span>{text}</span>
               </li>
             );
           })}
         </ul>
       </div>
-      <div className={`md:w-1/2 ${colorClass.replace('text', 'bg')}/5 p-4 rounded-xl`}>
-        <figure className={`aspect-video ${colorClass.replace('text', 'bg')}/20 rounded-lg flex items-center justify-center`}>
-          <figcaption className={`${colorClass}`}>{imageTitle}</figcaption>
-        </figure>
+      <div className={`md:w-1/2 ${colorClass.replace('text', 'bg')}/5 p-4 rounded-xl flex items-center justify-center`}>
+        <div className={`w-32 h-32 rounded-full ${colorClass.replace('text', 'bg')}/20 flex items-center justify-center`}>
+          {icon || getDefaultIcon()}
+        </div>
       </div>
     </article>
   );
