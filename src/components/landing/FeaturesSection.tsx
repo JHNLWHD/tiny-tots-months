@@ -21,20 +21,12 @@ const FeaturesSection = () => {
       imagePosition: 'right' as const
     },
     {
-      title: 'Private Sharing Links',
-      description: 'Generate unique, secure links to share with family and friends, allowing them to view your baby\'s milestones without needing an account.',
-      features: ['Share the entire journey', 'Share specific months', 'Family sharing (Premium)'],
-      imageTitle: 'Sharing Features Screenshot',
-      colorClass: 'text-baby-blue',
-      imagePosition: 'left' as const
-    },
-    {
       title: 'Export to PDF/Book',
       description: 'Premium subscribers can export their baby\'s milestones and photos into a beautifully formatted PDF or book layout, perfect for printing.',
       features: ['Create beautiful keepsakes', 'Multiple design templates', 'High-resolution print quality'],
       imageTitle: 'PDF Export Preview',
       colorClass: 'text-baby-mint',
-      imagePosition: 'right' as const
+      imagePosition: 'left' as const
     }
   ];
 
