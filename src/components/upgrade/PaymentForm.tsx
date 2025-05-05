@@ -13,7 +13,7 @@ import { trackEvent } from '@/lib/analytics';
 import { toast } from 'sonner';
 
 // QR Code for payment
-const PAYMENT_QR_URL = "https://placehold.co/400x400/png?text=GCash+QR+Code";
+const PAYMENT_QR_URL = "/gcash-tiny-tots.jpg";
 
 export const PaymentForm: React.FC = () => {
   const { user } = useAuth();
@@ -172,7 +172,7 @@ export const PaymentForm: React.FC = () => {
           <img 
             src={PAYMENT_QR_URL} 
             alt="Payment QR Code" 
-            className="w-48 h-48 mb-2"
+            className="w-48 h-96 mb-2"
           />
         )}
         <p className="text-sm text-center text-gray-500">
