@@ -29,13 +29,25 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   const [preview, setPreview] = useState<string | null>(null);
   const { isPremium } = useSubscription();
   
-  const isVideo = selectedFile?.type.startsWith('video/');
-
+  // Safe check for file type
+  const isVideo = selectedFile?.type?.startsWith('video/') || false;
+  
+  console.log("Subscription status:", { isPremium });
+  
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
+      console.log("File selected:", { 
+        name: file.name, 
+        size: file.size, 
+        type: file.type, 
+        lastModified: new Date(file.lastModified).toISOString() 
+      });
+      
       const validation = validateFile(file, isPremium);
+      console.log("File validation result:", validation);
+      
       if (!validation.isValid) {
         return;
       }
@@ -46,6 +58,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result as string);
+        console.log("Preview created successfully");
       };
       reader.readAsDataURL(file);
     }
@@ -55,6 +68,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
     setSelectedFile(null);
     setPreview(null);
     setCaption('');
+    console.log("File selection cleared");
   };
 
   const handleUpload = async () => {
@@ -66,7 +80,18 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
       return;
     }
 
+    console.log("Starting upload process for:", {
+      fileName: selectedFile.name,
+      fileType: selectedFile.type,
+      fileSize: selectedFile.size,
+      isVideo: selectedFile.type?.startsWith('video/'),
+      babyId,
+      month,
+      caption: caption || "(no caption)"
+    });
+
     try {
+      console.log("Calling uploadPhoto API function");
       await onUpload({
         file: selectedFile,
         baby_id: babyId,
@@ -74,10 +99,11 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         description: caption || undefined
       });
       
+      console.log("Upload API call complete");
       clearSelection();
       onUploadComplete();
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Upload error in component:", error);
       // Error handling is now done in the hook
     }
   };
@@ -97,7 +123,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         ) : (
           <MediaPreview 
             preview={preview} 
-            isVideo={Boolean(isVideo)} 
+            isVideo={isVideo} 
             onClear={clearSelection}
           />
         )}
@@ -107,7 +133,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
             caption={caption}
             onCaptionChange={setCaption}
             onUpload={handleUpload}
-            isVideo={Boolean(isVideo)}
+            isVideo={isVideo}
             isUploading={isUploading}
           />
         )}

@@ -82,45 +82,77 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
     mutationFn: async ({ file, baby_id, month_number, description }: CreatePhotoData) => {
       if (!user) throw new Error("User not authenticated");
 
+      console.log("Starting file upload process with file:", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        isVideo: file.type?.startsWith('video/') || false
+      });
+
       // 1. Upload file to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${baby_id}/${month_number}/${uuidv4()}.${fileExt}`;
-      const isVideo = file.type.startsWith('video/');
+      const isVideo = file.type?.startsWith('video/') || false;
       
-      const { error: uploadError } = await supabase.storage
-        .from('baby_images')
-        .upload(fileName, file);
+      console.log(`Uploading ${isVideo ? 'video' : 'photo'} to path: ${fileName}`);
+      
+      try {
+        const { error: uploadError, data: uploadResult } = await supabase.storage
+          .from('baby_images')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (uploadError) throw uploadError;
-      
-      // 2. Create record in the photo table
-      const { error: insertError, data: photo } = await supabase
-        .from('photo')
-        .insert({
-          baby_id,
-          user_id: user.id,
-          month_number,
-          storage_path: fileName,
-          description: description || null,
-          is_video: isVideo
-        })
-        .select()
-        .single();
+        if (uploadError) {
+          console.error("Storage upload error:", uploadError);
+          throw uploadError;
+        }
         
-      if (insertError) throw insertError;
-      
-      return photo;
+        console.log("File successfully uploaded to storage:", uploadResult);
+        
+        // 2. Create record in the photo table
+        console.log("Creating database record for the uploaded file");
+        const { error: insertError, data: photo } = await supabase
+          .from('photo')
+          .insert({
+            baby_id,
+            user_id: user.id,
+            month_number,
+            storage_path: fileName,
+            description: description || null,
+            is_video: isVideo
+          })
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error("Database insert error:", insertError);
+          // If record creation fails, clean up the uploaded file
+          await supabase.storage
+            .from('baby_images')
+            .remove([fileName]);
+          throw insertError;
+        }
+        
+        console.log("Database record created successfully:", photo);
+        return photo;
+      } catch (error) {
+        console.error("Upload process failed:", error);
+        throw error;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Upload mutation completed successfully:", data);
       queryClient.invalidateQueries({ queryKey: ['photos', babyId, monthNumber] });
       toast("Success", {
         description: "File uploaded successfully",
       });
     },
     onError: (error: any) => {
-      console.error("Error uploading file:", error);
+      console.error("Error uploading file (mutation error handler):", error);
       toast("Error", {
-        description: "Failed to upload file",
+        description: `Failed to upload file: ${error.message || "Unknown error"}`,
         className: "bg-destructive text-destructive-foreground",
       });
     },

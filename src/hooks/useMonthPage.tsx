@@ -15,6 +15,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 
   // Get subscription status
   const { isPremium } = useSubscription();
+  console.log("useMonthPage - Subscription status:", { isPremium });
   
   // Fetch all babies
   const { babies, loading: loadingBabies } = useBabyProfiles();
@@ -92,13 +93,35 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
   const selectedBaby = babies.find(baby => baby.id === selectedBabyId);
   
   const uploadPhoto = async (file: File, description?: string) => {
-    if (!selectedBabyId) return null;
+    console.log("uploadPhoto called in useMonthPage", { 
+      selectedBabyId, 
+      fileName: file.name, 
+      fileSize: file.size, 
+      fileType: file.type
+    });
+    
+    if (!selectedBabyId) {
+      console.error("Cannot upload: No baby selected");
+      return null;
+    }
+    
+    // Safety check for file.type
+    if (!file.type) {
+      console.error("Cannot determine file type - file.type is undefined");
+      toast("Upload Error", {
+        description: "Cannot determine file type",
+        className: "bg-destructive text-destructive-foreground",
+      });
+      return null;
+    }
     
     // Check if file is a video
     const isVideo = file.type.startsWith('video/');
+    console.log(`File is ${isVideo ? 'video' : 'image'}`);
     
     // Check premium status for video uploads
     if (isVideo && !isPremium) {
+      console.log("Video upload attempted without premium subscription");
       toast("Premium Feature", {
         description: "Video uploads are only available for premium users. Please upgrade to premium to upload videos.",
         className: "bg-destructive text-destructive-foreground",
@@ -109,6 +132,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
     // Check photo upload limits for free users
     if (!isPremium) {
       if (photos.length >= 5) {
+        console.log("Free user reached upload limit");
         toast("Upload Limit Reached", {
           description: "Free users can upload maximum 5 photos per month. Upgrade to Premium for unlimited uploads.",
           className: "bg-destructive text-destructive-foreground",
@@ -119,6 +143,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
     
     // Check file size for videos (max 50MB)
     if (isVideo && file.size > 50 * 1024 * 1024) {
+      console.log("Video file too large:", file.size);
       toast("File Too Large", {
         description: "Video files must be under 50MB. Please compress your video or upload a shorter clip.",
         className: "bg-destructive text-destructive-foreground",
@@ -126,12 +151,20 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       return null;
     }
     
-    return await uploadPhotoApi({
-      file: file,
-      baby_id: selectedBabyId,
-      month_number: monthNumber,
-      description
-    });
+    console.log("Starting upload via API...");
+    try {
+      const result = await uploadPhotoApi({
+        file: file,
+        baby_id: selectedBabyId,
+        month_number: monthNumber,
+        description
+      });
+      console.log("Upload completed successfully:", result);
+      return result;
+    } catch (error) {
+      console.error("Upload failed in useMonthPage:", error);
+      return null;
+    }
   };
 
   return {
