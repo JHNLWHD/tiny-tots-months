@@ -8,7 +8,6 @@ export const PlanComparison: React.FC = () => {
     { text: "1 baby profile" },
     { text: "Track milestones up to 3 months" },
     { text: "5 photos per month (15 total)" },
-    { text: "Unique shareable links" },
     { text: "No video uploads", isNegative: true },
   ];
   
@@ -18,7 +17,6 @@ export const PlanComparison: React.FC = () => {
     { text: "Unlimited photo uploads" },
     { text: "Video uploads (up to 50MB)" },
     { text: "Priority support" },
-    { text: "Advanced milestone suggestions" },
   ];
 
   return (
