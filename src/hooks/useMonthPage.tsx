@@ -24,13 +24,15 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
     photos, 
     isLoading: loadingPhotos,
     deletePhoto,
-    refetch: refetchPhotos
+    refetch: refetchPhotos,
+    uploadPhoto: uploadPhotoApi,
+    isUploading
   } = usePhotos(selectedBabyId || undefined, monthNumber);
   
   // Image upload hook
   const { 
     uploadImage, 
-    isUploading 
+    isUploading: isImageUploading 
   } = useImageUpload();
   
   // Fetch milestones for selected baby and month
@@ -124,13 +126,11 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
       return null;
     }
     
-    return await uploadImage(file, {
-      babyId: selectedBabyId,
-      monthNumber: monthNumber,
-      description,
-      onSuccess: () => {
-        refetchPhotos();
-      }
+    return await uploadPhotoApi({
+      file: file,
+      baby_id: selectedBabyId,
+      month_number: monthNumber,
+      description
     });
   };
 

@@ -114,13 +114,13 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos', babyId, monthNumber] });
       toast("Success", {
-        description: "Photo uploaded successfully",
+        description: "File uploaded successfully",
       });
     },
     onError: (error: any) => {
-      console.error("Error uploading photo:", error);
+      console.error("Error uploading file:", error);
       toast("Error", {
-        description: "Failed to upload photo",
+        description: "Failed to upload file",
         className: "bg-destructive text-destructive-foreground",
       });
     },
@@ -146,13 +146,13 @@ export const usePhotos = (babyId?: string, monthNumber?: number) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['photos', babyId, monthNumber] });
       toast("Success", {
-        description: "Photo deleted successfully",
+        description: "File deleted successfully",
       });
     },
     onError: (error: any) => {
-      console.error("Error deleting photo:", error);
+      console.error("Error deleting file:", error);
       toast("Error", {
-        description: "Failed to delete photo",
+        description: "Failed to delete file",
         className: "bg-destructive text-destructive-foreground",
       });
     },

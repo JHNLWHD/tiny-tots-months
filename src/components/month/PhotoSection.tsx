@@ -3,11 +3,11 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import ImageUploader from "@/components/ImageUploader";
 import PhotoGrid from "@/components/PhotoGrid";
 import PhotoCollage from "@/components/PhotoCollage";
 import { Photo } from "@/hooks/usePhotos";
 import { useIsMobile } from "@/hooks/use-mobile";
+import PhotoUploader from "@/components/PhotoUploader"; // Changed from ImageUploader
 
 type SortOption = "newest" | "oldest" | "description";
 type ViewMode = "grid" | "collage";
@@ -27,6 +27,8 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
   babyId,
   monthNumber,
   photos,
+  isUploading,
+  uploadPhoto,
   deletePhoto,
   refetchPhotos,
   isLoading
@@ -75,10 +77,12 @@ const PhotoSection: React.FC<PhotoSectionProps> = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <ImageUploader
+      <PhotoUploader
         babyId={babyId}
         month={monthNumber}
-        onUploadComplete={() => refetchPhotos()}
+        onUploadComplete={refetchPhotos}
+        onUpload={uploadPhoto}
+        isUploading={isUploading}
       />
       
       <div>
