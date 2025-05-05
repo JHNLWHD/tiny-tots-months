@@ -11,7 +11,6 @@ interface BabyListProps {
   babies: BabyType[];
   isLoading: boolean;
   onAddBaby: () => void;
-  onShareBaby?: (baby: BabyType) => void; // Made optional with '?'
   onSelectBaby: (baby: BabyType) => void;
   selectedBaby: BabyType | null;
 }
@@ -45,9 +44,9 @@ const BabyList: React.FC<BabyListProps> = ({
           <div className="animate-pulse text-baby-purple font-bubblegum text-lg sm:text-xl">Loading...</div>
         </Card>
       ) : (
-        babies.map((baby: any) => (
-          <Card 
-            key={baby.id} 
+        babies.map((baby) => (
+          <Card
+            key={baby.id}
             className={`p-4 sm:p-6 h-48 sm:h-64 flex flex-col cursor-pointer hover:shadow-md transition-all rounded-xl baby-card-shadow transform hover:scale-105 duration-300 bg-gradient-to-br from-white to-baby-purple/5 ${
               selectedBaby?.id === baby.id 
                 ? 'ring-4 ring-baby-purple/50 border-2 border-baby-purple shadow-lg' 
@@ -61,14 +60,14 @@ const BabyList: React.FC<BabyListProps> = ({
               </div>
               <h2 className="text-lg sm:text-xl font-bold ml-2 truncate">{baby.name}</h2>
             </div>
-            
+
             <div className="text-xs sm:text-sm text-gray-500 mb-2 bg-white/60 p-1.5 sm:p-2 rounded-lg">
               <p className="font-medium truncate">Birthdate: <span className="text-gray-600">{format(new Date(baby.date_of_birth), 'MMM d, yyyy')}</span></p>
               <p className="capitalize font-medium truncate">Gender: <span className="text-gray-600">{baby.gender || 'Not specified'}</span></p>
             </div>
-            
+
             <div className="mt-auto flex flex-col gap-2">
-              <Button 
+              <Button
                 className="w-full px-3 py-1.5 sm:px-4 sm:py-2 bg-baby-purple text-white rounded-lg flex items-center justify-center hover:bg-baby-purple/90 shadow-md text-xs sm:text-sm"
                 onClick={(e) => {
                   e.stopPropagation();

@@ -71,7 +71,6 @@ const Home = () => {
         onAddBaby={() => setIsDialogOpen(true)}
         onSelectBaby={setSelectedBaby}
         selectedBaby={selectedBaby}
-        onShareBaby={handleShareBaby} // Adding this placeholder function to satisfy type requirements
       />
       
       <MonthCardGrid 
