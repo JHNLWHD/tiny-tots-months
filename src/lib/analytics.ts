@@ -2,13 +2,13 @@
 import posthog from 'posthog-js';
 
 // PostHog public key - this is fine to expose in the frontend code
-const POSTHOG_KEY = 'phc_YourPostHogPublicKeyHere';
-const POSTHOG_HOST = 'https://app.posthog.com';
+const POSTHOG_API_KEY = import.meta.env.VITE_POSTHOG_API_KEY || 'phc_YourPostHogPublicKeyHere';
+const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://app.posthog.com';
 
 // Initialize PostHog
 export const initAnalytics = () => {
   if (typeof window !== 'undefined') {
-    posthog.init(POSTHOG_KEY, {
+    posthog.init(POSTHOG_API_KEY, {
       api_host: POSTHOG_HOST,
       capture_pageview: true, // Automatically capture pageviews
       persistence: 'localStorage',
