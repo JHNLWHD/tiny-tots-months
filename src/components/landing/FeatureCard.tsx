@@ -2,10 +2,15 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 
+interface FeatureItem {
+  text: string;
+  icon?: React.ReactNode;
+}
+
 interface FeatureCardProps {
   title: string;
   description: string;
-  features: string[];
+  features: FeatureItem[] | string[];
   imageTitle: string;
   colorClass: string;
   imagePosition: 'left' | 'right';
@@ -29,12 +34,19 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
           {description}
         </p>
         <ul className="space-y-2">
-          {features.map(item => (
-            <li key={item} className="flex items-center">
-              <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" />
-              <span>{item}</span>
-            </li>
-          ))}
+          {features.map((item, index) => {
+            // Check if the item is a string or an object with text and icon properties
+            const isString = typeof item === 'string';
+            const text = isString ? item : item.text;
+            const icon = isString ? <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" /> : item.icon;
+            
+            return (
+              <li key={text || index} className="flex items-center">
+                {icon || <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" aria-hidden="true" />}
+                <span>{text}</span>
+              </li>
+            );
+          })}
         </ul>
       </div>
       <div className={`md:w-1/2 ${colorClass.replace('text', 'bg')}/5 p-4 rounded-xl`}>
