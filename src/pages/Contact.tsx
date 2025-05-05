@@ -87,8 +87,8 @@ const Contact = () => {
                     <Mail className="h-5 w-5 text-baby-purple mr-3 mt-0.5" />
                     <div>
                       <p className="font-medium">Email Us</p>
-                      <a href="mailto:support@tinytotsmilestones.com" className="text-baby-purple hover:underline">
-                        support@tinytotsmilestones.com
+                      <a href="mailto:hello@tinytotsmilestones.com" className="text-baby-purple hover:underline">
+                        hello@tinytotsmilestones.com
                       </a>
                     </div>
                   </div>

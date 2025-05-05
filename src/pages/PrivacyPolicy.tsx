@@ -91,7 +91,7 @@ const PrivacyPolicy = () => {
             
             <h2 className="text-xl font-semibold text-gray-800 mt-6">9. Contact Us</h2>
             <p>
-              If you have questions about this Privacy Policy, please contact us at privacy@tinytotsmilestones.com.
+              If you have questions about this Privacy Policy, please contact us at hello@tinytotsmilestones.com.
             </p>
           </CardContent>
         </Card>

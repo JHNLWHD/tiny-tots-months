@@ -98,7 +98,7 @@ const TermsOfService = () => {
             
             <h2 className="text-xl font-semibold text-gray-800 mt-6">12. Contact</h2>
             <p>
-              If you have questions about these Terms, please contact us at terms@tinytotsmilestones.com.
+              If you have questions about these Terms, please contact us at hello@tinytotsmilestones.com.
             </p>
           </CardContent>
         </Card>
