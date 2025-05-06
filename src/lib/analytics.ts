@@ -10,8 +10,6 @@ export const initAnalytics = () => {
   if (typeof window !== 'undefined') {
     posthog.init(POSTHOG_API_KEY, {
       api_host: POSTHOG_HOST,
-      capture_pageview: true, // Automatically capture pageviews
-      persistence: 'localStorage',
       loaded: (posthog) => {
         if (process.env.NODE_ENV === 'development') {
           // In development, log instead of sending events
