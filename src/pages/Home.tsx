@@ -47,12 +47,12 @@ const Home = () => {
   }
 
   React.useEffect(() => {
-      if (subscription && isFree) {
+      if (subscription) {
           return;
       }
 
       createSubscription();
-  }, [isFree, subscription]);
+  }, [subscription]);
 
   // Set first baby as selected when babies load if none is selected
   React.useEffect(() => {
