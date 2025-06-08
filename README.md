@@ -1,24 +1,28 @@
-# Welcome to your Lovable project
+# Tiny Tots Milestones
 
-## Project info
+## Production URL
 
-**URL**: https://lovable.dev/projects/50d57c59-1f00-4191-9270-8af0e00e51e5
+**Live Site**: https://tinytotsmilestones.com/
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/da802ae0-d43d-40e5-ba9a-f70bf96f4f8b/deploy-status)](https://app.netlify.com/projects/tiny-tots-milestones/deploys)
+
+
+## Features
+
+- Create and manage baby profiles
+- Track monthly milestones and memories
+- Upload and organize baby photos
+- Add captions and notes to photos
+- View milestones and photos in a timeline
+- Responsive design for mobile and desktop
+- Secure authentication and protected routes
+- Easy sharing and export options
 
 ## How can I edit this code?
 
-There are several ways of editing your application.
+You can work locally using your own IDE. Clone this repo and push changes.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/50d57c59-1f00-4191-9270-8af0e00e51e5) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The only requirement is having Bun installed - [install Bun](https://bun.sh/docs/installation)
 
 Follow these steps:
 
@@ -30,44 +34,21 @@ git clone <YOUR_GIT_URL>
 cd <YOUR_PROJECT_NAME>
 
 # Step 3: Install the necessary dependencies.
-npm i
+bun install
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+bun run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Tech Stack
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/50d57c59-1f00-4191-9270-8af0e00e51e5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- [Bun](https://bun.sh/)
+- [Vite](https://vitejs.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [React](https://react.dev/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Supabase](https://supabase.com/) (backend & auth)
+- [Netlify](https://www.netlify.com/) (hosting)
