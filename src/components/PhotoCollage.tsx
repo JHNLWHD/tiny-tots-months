@@ -46,16 +46,23 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
     setIsDialogOpen(true);
   };
 
-  // For background mode, just show the first photo as full background
+  // For background mode, show a collage of up to maxDisplayCount photos
   if (isBackground && validPhotos.length > 0) {
     return (
-      <div className="h-full w-full">
-        <img
-          src={validPhotos[0].url}
-          alt="Background"
-          className="w-full h-full object-cover"
-        />
-      </div>
+        <div className="h-full w-full grid grid-cols-2 grid-rows-2 gap-0.5 absolute inset-0">
+          {displayPhotos.map((photo, idx) => (
+              <div key={photo.id} className="relative w-full h-full">
+                <img
+                    src={photo.url}
+                    alt="Background"
+                    className="w-full h-full object-cover"
+                    style={{
+                      borderRadius: idx === 0 ? '0.75rem 0 0 0' : idx === 1 ? '0 0.75rem 0 0' : idx === 2 ? '0 0 0 0.75rem' : '0 0 0.75rem 0',
+                    }}
+                />
+              </div>
+          ))}
+        </div>
     );
   }
 
