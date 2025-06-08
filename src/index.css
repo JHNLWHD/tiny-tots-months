@@ -1,202 +1,217 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
-  :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 47.4% 11.2%;
- 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
- 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
- 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
- 
-    --primary: 270 60% 60%;
-    --primary-foreground: 210 40% 98%;
- 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
- 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
- 
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --ring: 215 20.2% 65.1%;
- 
-    --radius: 0.75rem;
-    
-    /* Baby Theme Colors */
-    --baby-purple: 270 60% 60%;
-    --baby-blue: 210 80% 70%;
-    --baby-pink: 340 80% 80%;
-    --baby-mint: 160 60% 80%;
-    --baby-yellow: 40 100% 70%;
-    --baby-peach: 25 100% 85%;
-  }
- 
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
- 
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
- 
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
- 
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
- 
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
- 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
- 
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
- 
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
- 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --ring: 216 34% 17%;
- 
-    --radius: 0.75rem;
-  }
+	:root {
+		--background: 210 40% 98%;
+		--foreground: 222.2 47.4% 11.2%;
+
+		--muted: 210 40% 96.1%;
+		--muted-foreground: 215.4 16.3% 46.9%;
+
+		--popover: 0 0% 100%;
+		--popover-foreground: 222.2 47.4% 11.2%;
+
+		--card: 0 0% 100%;
+		--card-foreground: 222.2 47.4% 11.2%;
+
+		--border: 214.3 31.8% 91.4%;
+		--input: 214.3 31.8% 91.4%;
+
+		--primary: 270 60% 60%;
+		--primary-foreground: 210 40% 98%;
+
+		--secondary: 210 40% 96.1%;
+		--secondary-foreground: 222.2 47.4% 11.2%;
+
+		--accent: 210 40% 96.1%;
+		--accent-foreground: 222.2 47.4% 11.2%;
+
+		--destructive: 0 100% 50%;
+		--destructive-foreground: 210 40% 98%;
+
+		--ring: 215 20.2% 65.1%;
+
+		--radius: 0.75rem;
+
+		/* Baby Theme Colors */
+		--baby-purple: 270 60% 60%;
+		--baby-blue: 210 80% 70%;
+		--baby-pink: 340 80% 80%;
+		--baby-mint: 160 60% 80%;
+		--baby-yellow: 40 100% 70%;
+		--baby-peach: 25 100% 85%;
+	}
+
+	.dark {
+		--background: 224 71% 4%;
+		--foreground: 213 31% 91%;
+
+		--muted: 223 47% 11%;
+		--muted-foreground: 215.4 16.3% 56.9%;
+
+		--popover: 224 71% 4%;
+		--popover-foreground: 215 20.2% 65.1%;
+
+		--card: 224 71% 4%;
+		--card-foreground: 213 31% 91%;
+
+		--border: 216 34% 17%;
+		--input: 216 34% 17%;
+
+		--primary: 210 40% 98%;
+		--primary-foreground: 222.2 47.4% 1.2%;
+
+		--secondary: 222.2 47.4% 11.2%;
+		--secondary-foreground: 210 40% 98%;
+
+		--accent: 216 34% 17%;
+		--accent-foreground: 210 40% 98%;
+
+		--destructive: 0 63% 31%;
+		--destructive-foreground: 210 40% 98%;
+
+		--ring: 216 34% 17%;
+
+		--radius: 0.75rem;
+	}
 }
- 
+
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-baloo;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bubblegum;
-  }
-  button {
-    @apply font-baloo font-medium;
-  }
+	* {
+		@apply border-border;
+	}
+	body {
+		@apply bg-background text-foreground font-baloo;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-bubblegum;
+	}
+	button {
+		@apply font-baloo font-medium;
+	}
 }
 
 @layer utilities {
-  .text-baby-purple {
-    color: hsl(var(--baby-purple));
-  }
-  .text-baby-blue {
-    color: hsl(var(--baby-blue));
-  }
-  .text-baby-pink {
-    color: hsl(var(--baby-pink));
-  }
-  .text-baby-mint {
-    color: hsl(var(--baby-mint));
-  }
-  .text-baby-yellow {
-    color: hsl(var(--baby-yellow));
-  }
-  .text-baby-peach {
-    color: hsl(var(--baby-peach));
-  }
-  
-  .bg-baby-purple {
-    background-color: hsl(var(--baby-purple));
-  }
-  .bg-baby-blue {
-    background-color: hsl(var(--baby-blue));
-  }
-  .bg-baby-pink {
-    background-color: hsl(var(--baby-pink));
-  }
-  .bg-baby-mint {
-    background-color: hsl(var(--baby-mint));
-  }
-  .bg-baby-yellow {
-    background-color: hsl(var(--baby-yellow));
-  }
-  .bg-baby-peach {
-    background-color: hsl(var(--baby-peach));
-  }
+	.text-baby-purple {
+		color: hsl(var(--baby-purple));
+	}
+	.text-baby-blue {
+		color: hsl(var(--baby-blue));
+	}
+	.text-baby-pink {
+		color: hsl(var(--baby-pink));
+	}
+	.text-baby-mint {
+		color: hsl(var(--baby-mint));
+	}
+	.text-baby-yellow {
+		color: hsl(var(--baby-yellow));
+	}
+	.text-baby-peach {
+		color: hsl(var(--baby-peach));
+	}
 
-  .joyful-gradient {
-    background: linear-gradient(135deg, rgba(255,240,245,0.7) 0%, rgba(230,240,255,0.7) 50%, rgba(240,255,240,0.7) 100%);
-  }
-  
-  .joyful-gradient-2 {
-    background: linear-gradient(135deg, rgba(255,230,240,0.7) 0%, rgba(240,250,255,0.7) 50%, rgba(240,255,245,0.7) 100%);
-  }
-  
-  .month-card-gradient-1 {
-    background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
-  }
-  
-  .month-card-gradient-2 {
-    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-  }
-  
-  .month-card-gradient-3 {
-    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
-  }
-  
-  .month-card-gradient-4 {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  }
-  
-  .month-card-gradient-5 {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  }
-  
-  .month-card-gradient-6 {
-    background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
-  }
-  
-  .animate-bounce-soft {
-    animation: bounce-soft 2s infinite ease-in-out;
-  }
-  
-  .animate-fade-in {
-    animation: fade-in 0.8s ease-in-out;
-  }
-  
-  @keyframes bounce-soft {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-  
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  .card-shadow {
-    box-shadow: 0px 10px 20px rgba(167, 139, 250, 0.1);
-  }
-  
-  .baby-card-shadow {
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.05);
-  }
+	.bg-baby-purple {
+		background-color: hsl(var(--baby-purple));
+	}
+	.bg-baby-blue {
+		background-color: hsl(var(--baby-blue));
+	}
+	.bg-baby-pink {
+		background-color: hsl(var(--baby-pink));
+	}
+	.bg-baby-mint {
+		background-color: hsl(var(--baby-mint));
+	}
+	.bg-baby-yellow {
+		background-color: hsl(var(--baby-yellow));
+	}
+	.bg-baby-peach {
+		background-color: hsl(var(--baby-peach));
+	}
+
+	.joyful-gradient {
+		background: linear-gradient(
+			135deg,
+			rgba(255, 240, 245, 0.7) 0%,
+			rgba(230, 240, 255, 0.7) 50%,
+			rgba(240, 255, 240, 0.7) 100%
+		);
+	}
+
+	.joyful-gradient-2 {
+		background: linear-gradient(
+			135deg,
+			rgba(255, 230, 240, 0.7) 0%,
+			rgba(240, 250, 255, 0.7) 50%,
+			rgba(240, 255, 245, 0.7) 100%
+		);
+	}
+
+	.month-card-gradient-1 {
+		background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+	}
+
+	.month-card-gradient-2 {
+		background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+	}
+
+	.month-card-gradient-3 {
+		background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+	}
+
+	.month-card-gradient-4 {
+		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+	}
+
+	.month-card-gradient-5 {
+		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+	}
+
+	.month-card-gradient-6 {
+		background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+	}
+
+	.animate-bounce-soft {
+		animation: bounce-soft 2s infinite ease-in-out;
+	}
+
+	.animate-fade-in {
+		animation: fade-in 0.8s ease-in-out;
+	}
+
+	@keyframes bounce-soft {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-10px);
+		}
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.card-shadow {
+		box-shadow: 0px 10px 20px rgba(167, 139, 250, 0.1);
+	}
+
+	.baby-card-shadow {
+		box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.05);
+	}
 }
