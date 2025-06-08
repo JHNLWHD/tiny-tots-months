@@ -2,8 +2,11 @@
 import React from 'react';
 import { PlanCard } from './PlanCard';
 import { PaymentForm } from './PaymentForm';
+import { useSubscription } from "@/hooks/useSubscription.tsx";
 
 export const PlanComparison: React.FC = () => {
+  const { isPremium } = useSubscription();
+
   const freePlanFeatures = [
     { text: "1 baby profile" },
     { text: "Track milestones up to 3 months" },
@@ -23,14 +26,14 @@ export const PlanComparison: React.FC = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {/* Free Plan */}
       <PlanCard 
-        title="Current: Free Plan"
+        title={isPremium ? "Free Plan" : "Free Plan (Current)"}
         price="₱0"
         features={freePlanFeatures}
       />
       
       {/* Premium Plan */}
       <PlanCard 
-        title="Premium Plan"
+        title={isPremium ? "Premium Plan (Current)" : "Premium Plan"}
         price="₱500"
         features={premiumPlanFeatures}
         priceSubtext="one-time payment"
