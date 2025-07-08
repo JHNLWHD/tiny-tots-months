@@ -7,6 +7,7 @@ import {
 import type { Photo } from "@/hooks/usePhotos";
 import { Play } from "lucide-react";
 import React from "react";
+import HeicImage from "./HeicImage";
 
 interface PhotoCollageProps {
 	photos: Photo[];
@@ -53,7 +54,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 			<div className="h-full w-full grid grid-cols-2 grid-rows-2 gap-0.5 absolute inset-0">
 				{displayPhotos.map((photo, idx) => (
 					<div key={photo.id} className="relative w-full h-full">
-						<img
+						<HeicImage
 							src={photo.url}
 							alt="Background"
 							className="w-full h-full object-cover"
@@ -103,7 +104,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 									</div>
 								) : null}
 
-								<img
+								<HeicImage
 									src={photo.url || "/placeholder.svg"}
 									alt={photo.description || "Baby photo"}
 									className={`w-full h-full object-cover ${isBackground ? "opacity-100" : ""}`}
@@ -142,7 +143,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 										src={selectedPhoto.url || ""}
 									/>
 								) : (
-									<img
+									<HeicImage
 										src={selectedPhoto.url || "/placeholder.svg"}
 										alt={selectedPhoto.description || "Baby photo"}
 										className="w-full h-auto"

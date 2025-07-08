@@ -5,6 +5,7 @@ import type { Photo } from "@/hooks/usePhotos";
 import { Play, Trash2 } from "lucide-react";
 import React from "react";
 import VideoPlayer from "./VideoPlayer";
+import HeicImage from "./HeicImage";
 
 interface PhotoGridProps {
 	photos: Photo[];
@@ -49,7 +50,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 								</div>
 							) : null}
 
-							<img
+							<HeicImage
 								src={photo.url || "/placeholder.svg"}
 								alt={photo.description || "Baby photo"}
 								className="w-full h-full object-cover"
@@ -98,7 +99,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 									onError={(e) => console.error("Video failed to load:", e)}
 								/>
 							) : (
-								<img
+								<HeicImage
 									src={selectedPhoto.url || "/placeholder.svg"}
 									alt={selectedPhoto.description || "Baby photo"}
 									className="w-full h-auto"
