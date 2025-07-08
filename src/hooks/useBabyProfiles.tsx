@@ -90,7 +90,6 @@ export function useBabyProfiles() {
 	) => {
 		setCreating(true);
 
-		// Format the data to match what Supabase expects
 		const newBaby = {
 			name: data.name,
 			date_of_birth: data.dateOfBirth, // Use date_of_birth instead of dateOfBirth
@@ -114,9 +113,6 @@ export function useBabyProfiles() {
 
 					options?.onError?.(new Error(error.message));
 				} else {
-					console.log("Baby created:", newBabyData);
-
-					// Track successful baby creation
 					trackEvent("baby_created", {
 						baby_name: data.name,
 						baby_gender: data.gender,

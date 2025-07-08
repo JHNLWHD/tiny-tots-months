@@ -55,7 +55,6 @@ export const PaymentForm: React.FC = () => {
 			if (file.size > 10 * 1024 * 1024) {
 				setError("File is too large. Maximum size is 10MB.");
 
-				// Track error event
 				trackEvent("payment_proof_error", {
 					error_type: "file_too_large",
 					file_size: file.size,
@@ -65,13 +64,11 @@ export const PaymentForm: React.FC = () => {
 
 			setSelectedFile(file);
 
-			// Track file selected event
 			trackEvent("payment_proof_selected", {
 				file_type: file.type,
 				file_size: file.size,
 			});
 
-			// Create preview
 			const reader = new FileReader();
 			reader.onloadend = () => {
 				setPreview(reader.result as string);
@@ -95,7 +92,6 @@ export const PaymentForm: React.FC = () => {
 				setError("You must be logged in to upgrade");
 				toast.error("You must be logged in to upgrade");
 
-				// Track error event
 				trackEvent("upgrade_error", { error_type: "not_logged_in" });
 				return;
 			}
@@ -104,29 +100,22 @@ export const PaymentForm: React.FC = () => {
 				setError("Please upload your payment receipt");
 				toast.error("Please upload your payment receipt");
 
-				// Track error event
 				trackEvent("upgrade_error", { error_type: "no_file_selected" });
 				return;
 			}
 
-			console.log("Starting upgrade process for user:", user.id);
-
-			// Track upgrade attempt
 			trackEvent("upgrade_initiated", { user_id: user.id });
 
 			// Upload the payment proof using our dedicated function
 			await uploadPaymentProof(selectedFile, {
 				description: "Payment proof for premium upgrade",
 				onSuccess: (path) => {
-					console.log("Payment proof uploaded successfully:", path);
-					// Request premium upgrade with the storage path
 					requestPremiumUpgrade(path);
 					clearSelection();
 					toast.success(
 						"Payment proof uploaded! Your upgrade request is being processed.",
 					);
 
-					// Track successful upload
 					trackEvent("payment_proof_uploaded", {
 						success: true,
 						storage_path: path,
@@ -137,7 +126,6 @@ export const PaymentForm: React.FC = () => {
 					setError(`Failed to upload: ${error.message || "Unknown error"}`);
 					toast.error("Failed to upload payment receipt. Please try again.");
 
-					// Track upload error
 					trackEvent("payment_proof_error", {
 						error_type: "upload_failed",
 						error_message: error.message || "Unknown error",
@@ -151,7 +139,6 @@ export const PaymentForm: React.FC = () => {
 			);
 			toast.error("There was a problem processing your upgrade request");
 
-			// Track general error
 			trackEvent("upgrade_error", {
 				error_type: "general_error",
 				error_message: error?.message || "Unknown error",

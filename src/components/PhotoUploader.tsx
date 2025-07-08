@@ -34,24 +34,11 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 	const [isConverting, setIsConverting] = useState(false);
 	const { isPremium } = useSubscription();
 
-	console.log("PhotoUploader rendered with subscription status:", {
-		isPremium,
-	});
-
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files?.[0]) {
 			const file = e.target.files[0];
 
-			console.log("File selected:", {
-				name: file.name,
-				size: file.size,
-				type: file.type || "unknown",
-				lastModified: new Date(file.lastModified).toISOString(),
-			});
-
-			// Use async validation
 			const validation = await validateFile(file, isPremium);
-			console.log("File validation result:", validation);
 
 			if (!validation.isValid) {
 				return;
@@ -61,7 +48,6 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 			setIsVideo(validation.isVideo);
 			setEffectiveMimeType(validation.effectiveMimeType);
 
-			// Check if it's a HEIC/HEIF file
 			const isHeicFile = file.type === 'image/heic' || file.type === 'image/heif' ||
 							   file.name.toLowerCase().endsWith('.heic') ||
 							   file.name.toLowerCase().endsWith('.heif');
@@ -73,19 +59,15 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 				});
 
 				try {
-					// Create preview from HEIC
 					const heicPreviewUrl = await createHeicPreviewUrl(file, { quality: 0.7 });
 					if (heicPreviewUrl) {
 						setPreview(heicPreviewUrl);
-						console.log("HEIC preview created successfully");
 					} else {
 						throw new Error("Failed to create HEIC preview");
 					}
 
-					// Convert HEIC file for upload
 					const converted = await convertHeicToFile(file, { quality: 0.9 });
 					setConvertedFile(converted);
-					console.log("HEIC file converted for upload");
 
 					toast("HEIC Conversion Complete", {
 						description: "Your HEIC image has been converted and is ready to upload!",
@@ -96,7 +78,6 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 						description: "Could not convert HEIC image. Please try converting to JPEG manually.",
 						className: "bg-destructive text-destructive-foreground",
 					});
-					// Fallback to regular preview
 					const reader = new FileReader();
 					reader.onloadend = () => {
 						setPreview(reader.result as string);
@@ -106,11 +87,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 					setIsConverting(false);
 				}
 			} else {
-				// Regular file preview
 				const reader = new FileReader();
 				reader.onloadend = () => {
 					setPreview(reader.result as string);
-					console.log("Preview created successfully");
 				};
 				reader.readAsDataURL(file);
 			}
@@ -128,7 +107,6 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 		setIsVideo(false);
 		setEffectiveMimeType("");
 		setIsConverting(false);
-		console.log("File selection cleared");
 	};
 
 	const handleUpload = async () => {
@@ -140,25 +118,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 			return;
 		}
 
-		// Use converted file if available (for HEIC), otherwise use original
 		const fileToUpload = convertedFile || selectedFile;
 
-		console.log("Starting upload process for:", {
-			originalFileName: selectedFile.name,
-			uploadFileName: fileToUpload.name,
-			originalFileType: selectedFile.type || "unknown",
-			uploadFileType: fileToUpload.type || "unknown",
-			effectiveMimeType: effectiveMimeType,
-			fileSize: fileToUpload.size,
-			isVideo: isVideo,
-			babyId,
-			month,
-			caption: caption || "(no caption)",
-			isConverted: !!convertedFile,
-		});
-
 		try {
-			console.log("Calling uploadPhoto API function with isVideo:", isVideo);
 			await onUpload({
 				file: fileToUpload,
 				baby_id: babyId,
@@ -167,7 +129,6 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 				is_video: isVideo,
 			});
 
-			console.log("Upload API call complete");
 			clearSelection();
 			onUploadComplete();
 		} catch (error) {

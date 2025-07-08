@@ -30,9 +30,6 @@ export const useSubscription = () => {
 	const fetchSubscription = async (): Promise<Subscription | null> => {
 		if (!user) return null;
 
-		console.log("Fetching subscription for user:", user.id);
-
-		// First, check if user already has a subscription
 		const { data, error } = await supabase
 			.from("subscription")
 			.select("*")
@@ -41,7 +38,6 @@ export const useSubscription = () => {
 
 		if (error && error.code !== "PGRST116") {
 			// PGRST116 is "no rows returned"
-			console.error("Error fetching subscription:", error);
 			throw error;
 		}
 
@@ -51,90 +47,76 @@ export const useSubscription = () => {
 	// Query to fetch subscription
 	const {
 		data: subscription,
-		isLoading: loading,
+		isLoading,
 		refetch,
 		isError,
 	} = useQuery({
 		queryKey: ["subscription", user?.id],
-		queryFn: fetchSubscription,
+		queryFn: async () => {
+			if (!user) return null;
+
+			const { data, error } = await supabase
+				.from("subscription")
+				.select("*")
+				.eq("user_id", user.id)
+				.single();
+
+			if (error) {
+				if (error.code === "PGRST116") {
+					// No subscription found
+					return null;
+				}
+				throw error;
+			}
+
+			return data;
+		},
 		enabled: !!user,
-		staleTime: 1000 * 60 * 5, // 5 minutes
 	});
 
-	// Check if user has premium subscription
 	const isPremium = subscription?.status === SUBSCRIPTION_STATUS.PREMIUM;
 	const isPending = subscription?.status === SUBSCRIPTION_STATUS.PENDING;
 	const isFree = subscription?.status === SUBSCRIPTION_STATUS.FREE;
 
 	const createSubscription = useMutation({
 		mutationFn: async () => {
-			if (!user) throw new Error("User not found");
+			if (!user) throw new Error("No user found");
 
-			console.log("Create subscription:", user.id);
+			const { data: existingSubscription } = await supabase
+				.from("subscription")
+				.select("id")
+				.eq("user_id", user.id)
+				.single();
+
+			if (existingSubscription) {
+				return existingSubscription;
+			}
 
 			const { data, error } = await supabase
 				.from("subscription")
-				.select("*")
-				.eq("user_id", user.id)
-				.maybeSingle();
-
-			if (error && error.code !== "PGRST116") {
-				console.error("Error creating subscription:", user.id);
-				throw error;
-			}
-
-			if (data) {
-				console.log("Subscription already exists");
-				return;
-			}
-
-			console.log("No subscription found for user:", user.id);
-			console.log("Creating new subscription:", user.id);
-
-			const { data: newSubscription, error: newSubscriptionError } =
-				await supabase
-					.from("subscription")
-					.insert({
+				.insert([
+					{
 						user_id: user.id,
-						status: SUBSCRIPTION_STATUS.FREE,
-					})
-					.select()
-					.single();
+						type: "free",
+						status: "active",
+						created_at: new Date().toISOString(),
+					},
+				])
+				.select()
+				.single();
 
-			if (newSubscriptionError) {
-				console.error("Error creating new subscription:", newSubscriptionError);
-				throw newSubscriptionError;
-			}
-
-			return newSubscription;
+			if (error) throw error;
+			return data;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["subscription", user?.id] });
-			toast.success(
-				"Your subscription creation request has been submitted! Free access is now available.",
-			);
-		},
-		onError: (error) => {
-			console.error("Error creating subscription:", error);
-			toast.error(
-				`Subscription creation request failed: ${error.message || "Please try again later"}`,
-			);
 		},
 	});
 
-	// Mutation to request premium upgrade
 	const requestPremiumUpgrade = useMutation({
 		mutationFn: async (paymentProofPath: string): Promise<Subscription> => {
 			if (!user) throw new Error("User not authenticated");
 
-			console.log(
-				"Requesting premium upgrade for user:",
-				user.id,
-				"with payment proof:",
-				paymentProofPath,
-			);
-
-			// Use upsert to handle both creation and update
 			const { data, error } = await supabase
 				.from("subscription")
 				.upsert({
@@ -146,7 +128,6 @@ export const useSubscription = () => {
 				.single();
 
 			if (error) {
-				console.error("Upgrade request error:", error);
 				throw error;
 			}
 
@@ -168,7 +149,7 @@ export const useSubscription = () => {
 
 	return {
 		subscription,
-		loading,
+		loading: isLoading,
 		isPremium,
 		isPending,
 		isFree,

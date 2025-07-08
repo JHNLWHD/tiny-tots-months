@@ -25,7 +25,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 	const videoRef = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
-		console.log("VideoPlayer mounted with source:", src);
 	}, [src]);
 
 	const handlePlayPause = () => {
@@ -50,7 +49,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 	};
 
 	const handleLoadedData = () => {
-		console.log("Video loaded successfully");
 		setIsLoading(false);
 		setHasError(false);
 		if (autoPlay && videoRef.current) {

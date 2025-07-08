@@ -58,60 +58,31 @@ export const validateFile = async (
 	isPremium: boolean,
 ): Promise<FileValidationResult> => {
 	if (!file) {
-		console.log("File validation failed: No file provided");
 		return { isValid: false, isVideo: false, effectiveMimeType: "" };
 	}
 
-	console.log(
-		`Starting validation for file: ${file.name}, size: ${file.size} bytes`,
-	);
-
-	// Get the MIME type reported by the browser
 	const reportedMimeType = file.type || "";
-	console.log("Browser-reported MIME type:", reportedMimeType);
 
-	// Try to detect file type from binary data for more accurate type detection
 	let detectedMimeType = "";
 	try {
-		console.log("Detecting file type from binary data...");
 		const fileTypeResult = await fileTypeFromBlob(file);
 		if (fileTypeResult) {
 			detectedMimeType = fileTypeResult.mime;
-			console.log(
-				"Successfully detected MIME type from binary:",
-				detectedMimeType,
-			);
-		} else {
-			console.log("fileTypeFromBlob returned null or undefined");
 		}
 	} catch (error) {
 		console.error("Error detecting file type:", error);
 	}
 
-	// Get MIME type from file extension as fallback
 	const extensionMimeType = getMimeTypeFromExtension(file.name);
-	console.log("MIME type from extension:", extensionMimeType);
 
-	// Use the most reliable MIME type available
 	// Priority: detected > reported > extension
 	const effectiveMimeType = detectedMimeType || reportedMimeType || extensionMimeType;
-
-	console.log("File type determination:", {
-		reportedMimeType,
-		detectedMimeType,
-		extensionMimeType,
-		effectiveMimeType,
-	});
 
 	// Enhanced fallback for mobile: if no MIME type can be determined but file seems like an image
 	if (!effectiveMimeType) {
 		if (isLikelyImage(file)) {
-			console.log("No MIME type detected, but file appears to be an image based on extension");
-			// Default to JPEG for unknown image files - most common on mobile
 			const fallbackMimeType = "image/jpeg";
-			console.log(`Using fallback MIME type: ${fallbackMimeType}`);
 			
-			// Proceed with validation using the fallback
 			return validateWithMimeType(file, fallbackMimeType, isPremium, true);
 		}
 		
@@ -133,15 +104,9 @@ const validateWithMimeType = (
 	isPremium: boolean,
 	isFallback: boolean
 ): FileValidationResult => {
-	// Check if file is a video based on effective MIME type
 	const isVideo = mimeType.startsWith("video/");
-	console.log(`File is determined to be a ${isVideo ? "video" : "image"}${isFallback ? " (fallback detection)" : ""}`);
 
-	// Check premium subscription for video uploads
 	if (isVideo && !isPremium) {
-		console.log(
-			"Validation failed: Video upload attempted without premium subscription",
-		);
 		toast("Premium Required", {
 			description: "Video uploads are only available for premium users",
 			className: "bg-destructive text-destructive-foreground",
@@ -149,12 +114,8 @@ const validateWithMimeType = (
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };
 	}
 
-	// Validate file size (max 50MB for videos, 10MB for images)
 	const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
 	if (file.size > maxSize) {
-		console.log(
-			`Validation failed: File too large (${file.size} bytes, max: ${maxSize} bytes)`,
-		);
 		toast(isVideo ? "Video too large" : "Image too large", {
 			description: isVideo
 				? "Maximum video size is 50MB"
@@ -164,7 +125,6 @@ const validateWithMimeType = (
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };
 	}
 
-	// Enhanced accepted file types including mobile-specific formats
 	const acceptedImageTypes = [
 		"image/jpeg",
 		"image/jpg", // Sometimes reported as jpg instead of jpeg
@@ -186,11 +146,9 @@ const validateWithMimeType = (
 	const acceptedTypes = [...acceptedImageTypes, ...acceptedVideoTypes];
 
 	if (!acceptedTypes.includes(mimeType)) {
-		// For fallback scenarios, be more lenient with unknown image types
 		if (isFallback && mimeType.startsWith("image/")) {
-			console.log(`Accepting unknown image type in fallback mode: ${mimeType}`);
+			// Accept unknown image types in fallback mode
 		} else {
-			console.log(`Validation failed: Invalid file type (${mimeType})`);
 			toast("Invalid file type", {
 				description:
 					"Please upload a JPG, PNG, GIF, WebP, HEIC, MP4, WebM or QuickTime file",
@@ -200,6 +158,5 @@ const validateWithMimeType = (
 		}
 	}
 
-	console.log("File validation passed successfully");
 	return { isValid: true, isVideo, effectiveMimeType: mimeType };
 };

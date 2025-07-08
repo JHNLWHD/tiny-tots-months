@@ -79,7 +79,6 @@ export const usePaymentProofUpload = () => {
 			const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'tiff', 'tif'];
 			
 			if (imageExtensions.includes(extension)) {
-				console.log(`Accepting payment proof based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
 				isValidFileType = true;
 				isHeicFormat = extension === 'heic' || extension === 'heif';
 			}
@@ -93,7 +92,6 @@ export const usePaymentProofUpload = () => {
 			return null;
 		}
 
-		// Show info toast for HEIC/HEIF files
 		if (isHeicFormat) {
 			toast.info("HEIC/HEIF Format Detected", {
 				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
@@ -105,31 +103,21 @@ export const usePaymentProofUpload = () => {
 			setProgress(0);
 			setError(null);
 
-			console.log(
-				"Starting payment proof upload for user:",
-				user.id,
-				"file type:",
-				file.type,
-			);
-
 			// Generate file path specifically for payment proofs (no baby_id association)
 			const fileExt = file.name.split(".").pop();
 			const fileName = `payment_proofs/${user.id}/${uuidv4()}.${fileExt}`;
 
 			// Custom upload function that tracks progress
 			const uploadWithProgress = async () => {
-				// For HEIC/HEIF files, set the correct content type explicitly
 				const uploadOptions: any = {};
 				if (isHeicFormat) {
 					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
 				}
 
-				// Upload file to baby_images bucket but in payment_proofs folder
 				const { error: uploadError, data: uploadData } = await supabase.storage
 					.from("baby_images")
 					.upload(fileName, file, uploadOptions);
 
-				// Simulate progress manually since we don't have a proper progress API
 				setProgress(100);
 				options.onProgress?.(100);
 
@@ -146,8 +134,6 @@ export const usePaymentProofUpload = () => {
 				}
 				throw uploadError;
 			}
-
-			console.log("Payment proof upload successful:", fileName);
 
 			// Successfully uploaded the file
 			options.onSuccess?.(fileName);

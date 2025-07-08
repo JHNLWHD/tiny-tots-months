@@ -17,7 +17,6 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 
 	// Get subscription status
 	const { isPremium } = useSubscription();
-	console.log("useMonthPage - Subscription status:", { isPremium });
 
 	// Fetch all babies
 	const { babies, loading: loadingBabies } = useBabyProfiles();
@@ -45,13 +44,11 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		refetch: refetchMilestones,
 	} = useMilestones(selectedBabyId || undefined, monthNumber);
 
-	// Set the first baby as selected when babies load if no initial baby ID is provided
 	useEffect(() => {
 		if (babies.length > 0) {
 			if (!selectedBabyId) {
 				setSelectedBabyId(babies[0].id);
 			} else if (!babies.some((baby) => baby.id === selectedBabyId)) {
-				// If the selected baby ID is not in the list of babies, select the first one
 				setSelectedBabyId(babies[0].id);
 			}
 		}
@@ -79,7 +76,6 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 
 	const handleBabySelect = (babyId: string) => {
 		setSelectedBabyId(babyId);
-		// Update URL when baby is selected
 		navigate(`/app/month/${babyId}/${monthNumber}`);
 	};
 
@@ -93,23 +89,13 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	const selectedBaby = babies.find((baby) => baby.id === selectedBabyId);
 
 	const uploadPhoto = async (data) => {
-		console.log("uploadPhoto called in useMonthPage", {
-			selectedBabyId,
-			fileName: data.file.name,
-			fileSize: data.file.size,
-			fileType: data.file.type || "unknown",
-			isVideo: data.is_video,
-		});
-
 		if (!selectedBabyId) {
 			console.error("Cannot upload: No baby selected");
 			return null;
 		}
 
-		// Check photo upload limits for free users
 		if (!isPremium) {
 			if (!data.is_video && photos.length >= 5) {
-				console.log("Free user reached upload limit");
 				toast("Upload Limit Reached", {
 					description:
 						"Free users can upload maximum 5 photos per month. Upgrade to Premium for unlimited uploads.",
@@ -119,7 +105,6 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 			}
 		}
 
-		console.log("Starting upload via API with isVideo flag:", data.is_video);
 		try {
 			const result = await uploadPhotoApi({
 				file: data.file,
@@ -128,7 +113,6 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 				description: data.description,
 				is_video: data.is_video,
 			});
-			console.log("Upload completed successfully:", result);
 			return result;
 		} catch (error) {
 			console.error("Upload failed in useMonthPage:", error);

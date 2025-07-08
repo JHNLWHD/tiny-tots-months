@@ -15,9 +15,6 @@ export const initAnalytics = () => {
 				if (process.env.NODE_ENV === "development") {
 					// In development, log instead of sending events
 					posthog.opt_out_capturing();
-					console.log(
-						"PostHog initialized in development mode (events not sent)",
-					);
 				}
 			},
 		});
@@ -28,10 +25,6 @@ export const initAnalytics = () => {
 export const trackEvent = (eventName: string, properties?: Properties) => {
 	if (typeof window !== "undefined") {
 		posthog.capture(eventName, properties);
-
-		if (process.env.NODE_ENV === "development") {
-			console.log(`[Analytics] Event tracked: ${eventName}`, properties || {});
-		}
 	}
 };
 
@@ -39,13 +32,6 @@ export const trackEvent = (eventName: string, properties?: Properties) => {
 export const identifyUser = (userId: string, userProperties?: Properties) => {
 	if (typeof window !== "undefined") {
 		posthog.identify(userId, userProperties);
-
-		if (process.env.NODE_ENV === "development") {
-			console.log(
-				`[Analytics] User identified: ${userId}`,
-				userProperties || {},
-			);
-		}
 	}
 };
 
@@ -53,10 +39,6 @@ export const identifyUser = (userId: string, userProperties?: Properties) => {
 export const resetUser = () => {
 	if (typeof window !== "undefined") {
 		posthog.reset();
-
-		if (process.env.NODE_ENV === "development") {
-			console.log("[Analytics] User reset (logout)");
-		}
 	}
 };
 
@@ -66,9 +48,5 @@ export const trackPageView = (url?: string) => {
 		posthog.capture("$pageview", {
 			$current_url: url || window.location.href,
 		});
-
-		if (process.env.NODE_ENV === "development") {
-			console.log(`[Analytics] Page view: ${url || window.location.href}`);
-		}
 	}
 };

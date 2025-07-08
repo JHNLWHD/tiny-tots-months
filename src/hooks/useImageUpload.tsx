@@ -106,7 +106,6 @@ export const useImageUpload = () => {
 			const videoExtensions = ['mp4', 'mov', 'qt', 'webm', 'avi', 'm4v'];
 			
 			if (imageExtensions.includes(extension) || videoExtensions.includes(extension)) {
-				console.log(`Accepting file based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
 				isValidFileType = true;
 				isHeicFormat = extension === 'heic' || extension === 'heif';
 			}
@@ -124,7 +123,6 @@ export const useImageUpload = () => {
 			return null;
 		}
 
-		// Show info toast for HEIC/HEIF files
 		if (isHeicFormat) {
 			toast("HEIC/HEIF Format Detected", {
 				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
@@ -142,20 +140,16 @@ export const useImageUpload = () => {
 			const isVideo = file.type.startsWith("video/") || 
 							 !!fileName.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
 
-			// Create a custom upload function that tracks progress
 			const uploadWithProgress = async () => {
-				// For HEIC/HEIF files, set the correct content type explicitly
 				const uploadOptions: any = {};
 				if (isHeicFormat) {
 					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
 				}
 
-				// Upload file with proper content type
 				const { error: uploadError, data: uploadData } = await supabase.storage
 					.from("baby_images")
 					.upload(fileName, file, uploadOptions);
 
-				// Simulate progress manually
 				setProgress(100);
 				options.onProgress?.(100);
 
@@ -165,14 +159,12 @@ export const useImageUpload = () => {
 			const { uploadError, uploadData } = await uploadWithProgress();
 
 			if (uploadError) {
-				// Special handling for HEIC/HEIF upload errors
 				if (isHeicFormat && uploadError.message?.includes('mime')) {
 					throw new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
 				}
 				throw uploadError;
 			}
 
-			// Create record in the photo table
 			const { error: insertError, data: photo } = await supabase
 				.from("photo")
 				.insert({
@@ -187,12 +179,10 @@ export const useImageUpload = () => {
 				.single();
 
 			if (insertError) {
-				// If record creation fails, clean up the uploaded file
 				await supabase.storage.from("baby_images").remove([fileName]);
 				throw insertError;
 			}
 
-			// Create a signed URL for immediate use
 			const { data: signedUrlData } = await supabase.storage
 				.from("baby_images")
 				.createSignedUrl(fileName, 3600);
