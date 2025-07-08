@@ -73,23 +73,49 @@ export const useImageUpload = () => {
 			return null;
 		}
 
-		// Validate file type
+		// Validate file type - enhanced for mobile compatibility
 		const acceptedTypes = [
 			"image/jpeg",
+			"image/jpg", // Sometimes reported as jpg instead of jpeg
 			"image/png",
 			"image/gif",
 			"image/webp",
+			"image/heic", // iOS HEIF format
+			"image/heif", // High Efficiency Image Format
+			"image/bmp",
+			"image/tiff",
 			"video/mp4",
 			"video/quicktime",
+			"video/webm",
+			"video/avi",
+			"video/x-msvideo" // Alternative AVI MIME type
 		];
 
-		if (!acceptedTypes.includes(file.type)) {
+		// Enhanced validation for mobile devices
+		let isValidFileType = false;
+		
+		if (acceptedTypes.includes(file.type)) {
+			isValidFileType = true;
+		} else if (!file.type || file.type === "") {
+			// Mobile devices sometimes don't set MIME type properly
+			// Check file extension as fallback
+			const extension = file.name.split('.').pop()?.toLowerCase() || '';
+			const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'tiff', 'tif'];
+			const videoExtensions = ['mp4', 'mov', 'qt', 'webm', 'avi', 'm4v'];
+			
+			if (imageExtensions.includes(extension) || videoExtensions.includes(extension)) {
+				console.log(`Accepting file based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
+				isValidFileType = true;
+			}
+		}
+
+		if (!isValidFileType) {
 			const typeError = new Error("Invalid file type");
 			setError(typeError);
 			options.onError?.(typeError);
 			toast("Invalid file type", {
 				description:
-					"Please upload a JPG, PNG, GIF, WebP, MP4 or QuickTime file",
+					"Please upload a JPG, PNG, GIF, WebP, HEIC, MP4, WebM or QuickTime file",
 				className: "bg-destructive text-destructive-foreground",
 			});
 			return null;

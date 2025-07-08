@@ -52,19 +52,41 @@ export const usePaymentProofUpload = () => {
 			return null;
 		}
 
-		// Validate file type
+		// Validate file type - enhanced for mobile compatibility
 		const acceptedTypes = [
 			"image/jpeg",
+			"image/jpg", // Sometimes reported as jpg instead of jpeg
 			"image/png",
 			"image/gif",
 			"image/webp",
+			"image/heic", // iOS HEIF format
+			"image/heif", // High Efficiency Image Format
+			"image/bmp",
+			"image/tiff"
 		];
 
-		if (!acceptedTypes.includes(file.type)) {
+		// Enhanced validation for mobile devices
+		let isValidFileType = false;
+		
+		if (acceptedTypes.includes(file.type)) {
+			isValidFileType = true;
+		} else if (!file.type || file.type === "") {
+			// Mobile devices sometimes don't set MIME type properly
+			// Check file extension as fallback
+			const extension = file.name.split('.').pop()?.toLowerCase() || '';
+			const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif', 'bmp', 'tiff', 'tif'];
+			
+			if (imageExtensions.includes(extension)) {
+				console.log(`Accepting payment proof based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
+				isValidFileType = true;
+			}
+		}
+
+		if (!isValidFileType) {
 			const typeError = new Error("Invalid file type");
 			setError(typeError);
 			options.onError?.(typeError);
-			toast.error("Please upload a JPG, PNG, GIF or WebP file");
+			toast.error("Please upload a JPG, PNG, GIF, WebP, HEIC, BMP or TIFF file");
 			return null;
 		}
 

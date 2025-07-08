@@ -1,8 +1,8 @@
-
 project_id = "htxczdhdospkxjesvztw"
 
 [storage]
-[storage.baby_images]
+
+[storage.buckets.baby_images]
 public = false
-allowed_mime_types = ["image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4", "video/quicktime"]
-file_size_limit = "104857600"
+allowed_mime_types = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "image/heic", "image/heif", "image/bmp", "image/tiff", "video/mp4", "video/quicktime", "video/webm", "video/avi", "video/x-msvideo"]
+file_size_limit = "100MB"
