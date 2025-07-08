@@ -43,16 +43,16 @@ export const usePaymentProofUpload = () => {
 			return null;
 		}
 
-		// Validate file size (max 50MB)
-		if (file.size > 50 * 1024 * 1024) {
+		// Validate file size (max 100MB to match Supabase config)
+		if (file.size > 100 * 1024 * 1024) {
 			const sizeError = new Error("File too large");
 			setError(sizeError);
 			options.onError?.(sizeError);
-			toast.error("Maximum file size is 50MB");
+			toast.error("Maximum file size is 100MB");
 			return null;
 		}
 
-		// Validate file type - enhanced for mobile compatibility
+		// Validate file type - enhanced for mobile compatibility including HEIC/HEIF
 		const acceptedTypes = [
 			"image/jpeg",
 			"image/jpg", // Sometimes reported as jpg instead of jpeg
@@ -67,9 +67,11 @@ export const usePaymentProofUpload = () => {
 
 		// Enhanced validation for mobile devices
 		let isValidFileType = false;
+		let isHeicFormat = false;
 		
 		if (acceptedTypes.includes(file.type)) {
 			isValidFileType = true;
+			isHeicFormat = file.type === "image/heic" || file.type === "image/heif";
 		} else if (!file.type || file.type === "") {
 			// Mobile devices sometimes don't set MIME type properly
 			// Check file extension as fallback
@@ -79,6 +81,7 @@ export const usePaymentProofUpload = () => {
 			if (imageExtensions.includes(extension)) {
 				console.log(`Accepting payment proof based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
 				isValidFileType = true;
+				isHeicFormat = extension === 'heic' || extension === 'heif';
 			}
 		}
 
@@ -86,8 +89,15 @@ export const usePaymentProofUpload = () => {
 			const typeError = new Error("Invalid file type");
 			setError(typeError);
 			options.onError?.(typeError);
-			toast.error("Please upload a JPG, PNG, GIF, WebP, HEIC, BMP or TIFF file");
+			toast.error("Please upload a JPG, PNG, GIF, WebP, HEIC, HEIF, BMP or TIFF file");
 			return null;
+		}
+
+		// Show info toast for HEIC/HEIF files
+		if (isHeicFormat) {
+			toast.info("HEIC/HEIF Format Detected", {
+				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
+			});
 		}
 
 		try {
@@ -96,7 +106,7 @@ export const usePaymentProofUpload = () => {
 			setError(null);
 
 			console.log(
-				"Starting upload for user:",
+				"Starting payment proof upload for user:",
 				user.id,
 				"file type:",
 				file.type,
@@ -108,14 +118,16 @@ export const usePaymentProofUpload = () => {
 
 			// Custom upload function that tracks progress
 			const uploadWithProgress = async () => {
-				// Read file as array buffer
-				const arrayBuffer = await file.arrayBuffer();
-				const fileData = new Uint8Array(arrayBuffer);
+				// For HEIC/HEIF files, set the correct content type explicitly
+				const uploadOptions: any = {};
+				if (isHeicFormat) {
+					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
+				}
 
 				// Upload file to baby_images bucket but in payment_proofs folder
 				const { error: uploadError, data: uploadData } = await supabase.storage
 					.from("baby_images")
-					.upload(fileName, file);
+					.upload(fileName, file, uploadOptions);
 
 				// Simulate progress manually since we don't have a proper progress API
 				setProgress(100);
@@ -128,25 +140,38 @@ export const usePaymentProofUpload = () => {
 
 			if (uploadError) {
 				console.error("Storage upload error:", uploadError);
+				// Special handling for HEIC/HEIF upload errors
+				if (isHeicFormat && uploadError.message?.includes('mime')) {
+					throw new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+				}
 				throw uploadError;
 			}
 
-			console.log("Upload successful:", fileName);
+			console.log("Payment proof upload successful:", fileName);
 
 			// Successfully uploaded the file
 			options.onSuccess?.(fileName);
 
-			toast.success("Your payment proof was uploaded successfully");
+			toast.success(
+				isHeicFormat 
+					? "Your HEIC/HEIF payment proof was uploaded successfully" 
+					: "Your payment proof was uploaded successfully"
+			);
 
 			return fileName;
 		} catch (err) {
-			console.error("Upload error:", err);
+			console.error("Payment proof upload error:", err);
 			const uploadError =
 				err instanceof Error ? err : new Error("Upload failed");
 			setError(uploadError);
 			options.onError?.(uploadError);
 
-			toast.error(uploadError.message || "Failed to upload payment proof");
+			// Special error message for HEIC/HEIF issues
+			const errorMessage = isHeicFormat && uploadError.message?.includes('not supported')
+				? "HEIC/HEIF upload failed. Please convert to JPEG or PNG for better compatibility."
+				: uploadError.message || "Failed to upload payment proof";
+
+			toast.error(errorMessage);
 			return null;
 		} finally {
 			setIsUploading(false);

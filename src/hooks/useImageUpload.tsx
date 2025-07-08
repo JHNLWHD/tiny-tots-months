@@ -61,19 +61,19 @@ export const useImageUpload = () => {
 		// Ensure month number is at least 1 to satisfy database constraint
 		const monthNumber = Math.max(1, options.monthNumber);
 
-		// Validate file size (max 50MB)
-		if (file.size > 50 * 1024 * 1024) {
+		// Validate file size (max 100MB to match Supabase config)
+		if (file.size > 100 * 1024 * 1024) {
 			const sizeError = new Error("File too large");
 			setError(sizeError);
 			options.onError?.(sizeError);
 			toast("File too large", {
-				description: "Maximum file size is 50MB",
+				description: "Maximum file size is 100MB",
 				className: "bg-destructive text-destructive-foreground",
 			});
 			return null;
 		}
 
-		// Validate file type - enhanced for mobile compatibility
+		// Validate file type - enhanced for mobile compatibility including HEIC/HEIF
 		const acceptedTypes = [
 			"image/jpeg",
 			"image/jpg", // Sometimes reported as jpg instead of jpeg
@@ -93,9 +93,11 @@ export const useImageUpload = () => {
 
 		// Enhanced validation for mobile devices
 		let isValidFileType = false;
+		let isHeicFormat = false;
 		
 		if (acceptedTypes.includes(file.type)) {
 			isValidFileType = true;
+			isHeicFormat = file.type === "image/heic" || file.type === "image/heif";
 		} else if (!file.type || file.type === "") {
 			// Mobile devices sometimes don't set MIME type properly
 			// Check file extension as fallback
@@ -106,6 +108,7 @@ export const useImageUpload = () => {
 			if (imageExtensions.includes(extension) || videoExtensions.includes(extension)) {
 				console.log(`Accepting file based on extension: ${extension} (MIME type: ${file.type || 'empty'})`);
 				isValidFileType = true;
+				isHeicFormat = extension === 'heic' || extension === 'heif';
 			}
 		}
 
@@ -115,10 +118,17 @@ export const useImageUpload = () => {
 			options.onError?.(typeError);
 			toast("Invalid file type", {
 				description:
-					"Please upload a JPG, PNG, GIF, WebP, HEIC, MP4, WebM or QuickTime file",
+					"Please upload a JPG, PNG, GIF, WebP, HEIC, HEIF, BMP, TIFF, MP4, WebM or QuickTime file",
 				className: "bg-destructive text-destructive-foreground",
 			});
 			return null;
+		}
+
+		// Show info toast for HEIC/HEIF files
+		if (isHeicFormat) {
+			toast("HEIC/HEIF Format Detected", {
+				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
+			});
 		}
 
 		try {
@@ -129,18 +139,21 @@ export const useImageUpload = () => {
 			// Generate file path
 			const fileExt = file.name.split(".").pop();
 			const fileName = `${user.id}/${options.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
-			const isVideo = file.type.startsWith("video/");
+			const isVideo = file.type.startsWith("video/") || 
+							 !!fileName.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
 
 			// Create a custom upload function that tracks progress
 			const uploadWithProgress = async () => {
-				// Read file as array buffer
-				const arrayBuffer = await file.arrayBuffer();
-				const fileData = new Uint8Array(arrayBuffer);
+				// For HEIC/HEIF files, set the correct content type explicitly
+				const uploadOptions: any = {};
+				if (isHeicFormat) {
+					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
+				}
 
-				// Upload file without progress tracking
+				// Upload file with proper content type
 				const { error: uploadError, data: uploadData } = await supabase.storage
 					.from("baby_images")
-					.upload(fileName, file);
+					.upload(fileName, file, uploadOptions);
 
 				// Simulate progress manually
 				setProgress(100);
@@ -152,6 +165,10 @@ export const useImageUpload = () => {
 			const { uploadError, uploadData } = await uploadWithProgress();
 
 			if (uploadError) {
+				// Special handling for HEIC/HEIF upload errors
+				if (isHeicFormat && uploadError.message?.includes('mime')) {
+					throw new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+				}
 				throw uploadError;
 			}
 
@@ -188,7 +205,9 @@ export const useImageUpload = () => {
 			options.onSuccess?.(result);
 
 			toast("Upload Complete", {
-				description: "Your file was uploaded successfully",
+				description: isHeicFormat 
+					? "Your HEIC/HEIF file was uploaded successfully" 
+					: "Your file was uploaded successfully",
 			});
 
 			return result;
@@ -199,8 +218,13 @@ export const useImageUpload = () => {
 			setError(uploadError);
 			options.onError?.(uploadError);
 
+			// Special error message for HEIC/HEIF issues
+			const errorMessage = isHeicFormat && uploadError.message?.includes('not supported')
+				? "HEIC/HEIF upload failed. Please convert to JPEG or PNG for better compatibility."
+				: uploadError.message || "Failed to upload file";
+
 			toast("Upload Error", {
-				description: uploadError.message || "Failed to upload file",
+				description: errorMessage,
 				className: "bg-destructive text-destructive-foreground",
 			});
 			return null;
