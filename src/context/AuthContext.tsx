@@ -1,5 +1,6 @@
 import { useToast } from "@/hooks/useToast.ts";
 import { supabase } from "@/integrations/supabase/client";
+import { trackAuthError } from "@/lib/analytics";
 import type { Session, User } from "@supabase/supabase-js";
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -74,9 +75,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 			navigate("/app");
 		} catch (error) {
+			const authError = error instanceof Error ? error : new Error("Unknown signup error");
+			trackAuthError(authError, "signup");
+			
 			toast({
 				title: "Sign up failed",
-				description: error.message || "An error occurred during sign up",
+				description: authError.message || "An error occurred during sign up",
 				variant: "destructive",
 			});
 		}
@@ -92,9 +96,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			if (error) throw error;
 			navigate("/app");
 		} catch (error) {
+			const authError = error instanceof Error ? error : new Error("Unknown signin error");
+			trackAuthError(authError, "login");
+			
 			toast({
 				title: "Sign in failed",
-				description: error.message || "Invalid email or password",
+				description: authError.message || "Invalid email or password",
 				variant: "destructive",
 			});
 		}
@@ -106,9 +113,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			if (error) throw error;
 			navigate("/");
 		} catch (error) {
+			const authError = error instanceof Error ? error : new Error("Unknown signout error");
+			trackAuthError(authError, "logout");
+			
 			toast({
 				title: "Sign out failed",
-				description: error.message || "An error occurred during sign out",
+				description: authError.message || "An error occurred during sign out",
 				variant: "destructive",
 			});
 		}

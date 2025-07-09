@@ -1,6 +1,7 @@
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFileUploadError, trackDatabaseError, ErrorCategory, ErrorSeverity } from "@/lib/analytics";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -40,6 +41,7 @@ export const useImageUpload = () => {
 			const authError = new Error("User not authenticated");
 			setError(authError);
 			options.onError?.(authError);
+			trackFileUploadError(authError, file?.type || "unknown", file?.size || 0, "validation");
 			toast("Authentication Error", {
 				description: "You must be logged in to upload files",
 				className: "bg-destructive text-destructive-foreground",
@@ -51,6 +53,7 @@ export const useImageUpload = () => {
 			const fileError = new Error("No file selected");
 			setError(fileError);
 			options.onError?.(fileError);
+			trackFileUploadError(fileError, "unknown", 0, "validation");
 			toast("Upload Error", {
 				description: "No file selected for upload",
 				className: "bg-destructive text-destructive-foreground",
@@ -66,6 +69,7 @@ export const useImageUpload = () => {
 			const sizeError = new Error("File too large");
 			setError(sizeError);
 			options.onError?.(sizeError);
+			trackFileUploadError(sizeError, file.type, file.size, "validation");
 			toast("File too large", {
 				description: "Maximum file size is 100MB",
 				className: "bg-destructive text-destructive-foreground",
@@ -115,6 +119,7 @@ export const useImageUpload = () => {
 			const typeError = new Error("Invalid file type");
 			setError(typeError);
 			options.onError?.(typeError);
+			trackFileUploadError(typeError, file.type, file.size, "validation");
 			toast("Invalid file type", {
 				description:
 					"Please upload a JPG, PNG, GIF, WebP, HEIC, HEIF, BMP, TIFF, MP4, WebM or QuickTime file",
@@ -160,8 +165,11 @@ export const useImageUpload = () => {
 
 			if (uploadError) {
 				if (isHeicFormat && uploadError.message?.includes('mime')) {
-					throw new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+					const heicError = new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+					trackFileUploadError(heicError, file.type, file.size, "upload");
+					throw heicError;
 				}
+				trackFileUploadError(uploadError, file.type, file.size, "upload");
 				throw uploadError;
 			}
 
@@ -180,6 +188,7 @@ export const useImageUpload = () => {
 
 			if (insertError) {
 				await supabase.storage.from("baby_images").remove([fileName]);
+				trackDatabaseError(insertError, "insert", "photo", user.id);
 				throw insertError;
 			}
 
@@ -207,6 +216,11 @@ export const useImageUpload = () => {
 				err instanceof Error ? err : new Error("Upload failed");
 			setError(uploadError);
 			options.onError?.(uploadError);
+
+			// Track the error if it hasn't been tracked yet
+			if (uploadError.message === "Upload failed") {
+				trackFileUploadError(uploadError, file.type, file.size, "processing");
+			}
 
 			// Special error message for HEIC/HEIF issues
 			const errorMessage = isHeicFormat && uploadError.message?.includes('not supported')

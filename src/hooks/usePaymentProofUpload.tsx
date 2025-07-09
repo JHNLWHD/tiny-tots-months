@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { trackFileUploadError, ErrorCategory, ErrorSeverity } from "@/lib/analytics";
 import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -31,6 +32,7 @@ export const usePaymentProofUpload = () => {
 			const authError = new Error("User not authenticated");
 			setError(authError);
 			options.onError?.(authError);
+			trackFileUploadError(authError, file?.type || "unknown", file?.size || 0, "validation");
 			toast.error("You must be logged in to upload files");
 			return null;
 		}
@@ -39,6 +41,7 @@ export const usePaymentProofUpload = () => {
 			const fileError = new Error("No file selected");
 			setError(fileError);
 			options.onError?.(fileError);
+			trackFileUploadError(fileError, "unknown", 0, "validation");
 			toast.error("No file selected for upload");
 			return null;
 		}
@@ -48,6 +51,7 @@ export const usePaymentProofUpload = () => {
 			const sizeError = new Error("File too large");
 			setError(sizeError);
 			options.onError?.(sizeError);
+			trackFileUploadError(sizeError, file.type, file.size, "validation");
 			toast.error("Maximum file size is 100MB");
 			return null;
 		}
@@ -88,6 +92,7 @@ export const usePaymentProofUpload = () => {
 			const typeError = new Error("Invalid file type");
 			setError(typeError);
 			options.onError?.(typeError);
+			trackFileUploadError(typeError, file.type, file.size, "validation");
 			toast.error("Please upload a JPG, PNG, GIF, WebP, HEIC, HEIF, BMP or TIFF file");
 			return null;
 		}
@@ -130,8 +135,11 @@ export const usePaymentProofUpload = () => {
 				console.error("Storage upload error:", uploadError);
 				// Special handling for HEIC/HEIF upload errors
 				if (isHeicFormat && uploadError.message?.includes('mime')) {
-					throw new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+					const heicError = new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+					trackFileUploadError(heicError, file.type, file.size, "upload");
+					throw heicError;
 				}
+				trackFileUploadError(uploadError, file.type, file.size, "upload");
 				throw uploadError;
 			}
 
@@ -151,6 +159,11 @@ export const usePaymentProofUpload = () => {
 				err instanceof Error ? err : new Error("Upload failed");
 			setError(uploadError);
 			options.onError?.(uploadError);
+
+			// Track the error if it hasn't been tracked yet
+			if (uploadError.message === "Upload failed") {
+				trackFileUploadError(uploadError, file.type, file.size, "processing");
+			}
 
 			// Special error message for HEIC/HEIF issues
 			const errorMessage = isHeicFormat && uploadError.message?.includes('not supported')

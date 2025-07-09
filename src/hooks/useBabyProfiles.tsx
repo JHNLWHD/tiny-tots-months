@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 // Import the analytics tracking function
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackDatabaseError } from "@/lib/analytics";
 import { useEffect, useState } from "react";
 
 export type Baby = {
@@ -39,6 +39,7 @@ export function useBabyProfiles() {
 
 					if (error) {
 						console.error("Error fetching babies:", error);
+						trackDatabaseError(error, "select", "baby", user.id);
 						setError(error.message);
 					} else {
 						// Map the database data to match our Baby type
@@ -51,7 +52,9 @@ export function useBabyProfiles() {
 				}
 			} catch (err) {
 				console.error("Unexpected error fetching babies:", err);
-				setError(err.message);
+				const dbError = err instanceof Error ? err : new Error("Unknown fetch error");
+				trackDatabaseError(dbError, "select", "baby", user?.id);
+				setError(dbError.message);
 			} finally {
 				setLoading(false);
 			}
@@ -70,6 +73,7 @@ export function useBabyProfiles() {
 				.then(({ data, error }) => {
 					if (error) {
 						console.error("Error refetching babies:", error);
+						trackDatabaseError(error, "select", "baby", user.id);
 						setError(error.message);
 					} else {
 						// Map the database data to match our Baby type
@@ -106,10 +110,10 @@ export function useBabyProfiles() {
 					console.error("Error creating baby:", error);
 					setError(error.message);
 
-					// Track error event
 					trackEvent("baby_creation_failed", {
 						error_message: error.message,
 					});
+					trackDatabaseError(error, "insert", "baby", user?.id);
 
 					options?.onError?.(new Error(error.message));
 				} else {

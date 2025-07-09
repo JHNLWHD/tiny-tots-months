@@ -10,9 +10,12 @@ import {
 	BrowserRouter as Router,
 	Routes,
 } from "react-router-dom";
+import { useState } from "react";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { ErrorMonitoringPanel } from "./components/ErrorMonitoringPanel";
+import { TrackingConsentBanner } from "./components/TrackingConsentBanner";
 import Auth from "./pages/Auth";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
@@ -21,6 +24,7 @@ import Landing from "./pages/Landing";
 import Month from "./pages/Month";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Settings from "./pages/Settings";
 import TermsOfService from "./pages/TermsOfService";
 import Upgrade from "./pages/Upgrade";
 
@@ -30,6 +34,13 @@ import "./App.css";
 const queryClient = new QueryClient();
 
 function App() {
+	const [errorMonitoringVisible, setErrorMonitoringVisible] = useState(false);
+	const isDevelopment = import.meta.env.DEV;
+
+	const toggleErrorMonitoring = () => {
+		setErrorMonitoringVisible(!errorMonitoringVisible);
+	};
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<HelmetProvider>
@@ -60,11 +71,23 @@ function App() {
 									<Route index element={<Home />} />
 									<Route path="month/:babyId/:monthId" element={<Month />} />
 									<Route path="upgrade" element={<Upgrade />} />
+									<Route path="settings" element={<Settings />} />
 								</Route>
 
 								<Route path="*" element={<NotFound />} />
 							</Routes>
 							<Toaster />
+							
+							{/* Tracking Consent Banner - Production Only */}
+							<TrackingConsentBanner />
+							
+							{/* Error Monitoring Panel - Development Only */}
+							{isDevelopment && (
+								<ErrorMonitoringPanel
+									isVisible={errorMonitoringVisible}
+									onToggle={toggleErrorMonitoring}
+								/>
+							)}
 						</AuthWrapper>
 					</AuthProvider>
 				</Router>

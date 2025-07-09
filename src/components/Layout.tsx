@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useIsMobile } from "@/hooks/useIsMobile.tsx";
 import { cn } from "@/lib/utils";
-import { Baby, Home, LogOut, Menu, X } from "lucide-react";
+import { Baby, Home, LogOut, Menu, X, Settings as SettingsIcon } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -66,6 +66,13 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 												{user.email}
 											</div>
 										)}
+										<Link
+											to="/app/settings"
+											className="px-4 py-2 bg-white border border-baby-purple/30 hover:border-baby-purple hover:bg-white/80 hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
+										>
+											<SettingsIcon className="mr-2 h-4 w-4" />
+											<span>Settings</span>
+										</Link>
 										<Button
 											variant="ghost"
 											onClick={signOut}
@@ -125,6 +132,14 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 									>
 										<Home className="mr-2 h-4 w-4" />
 										<span>Dashboard</span>
+									</Link>
+									<Link
+										to="/app/settings"
+										className="flex items-center px-4 py-2 text-baby-purple hover:bg-baby-purple/10 rounded-md mx-2"
+										onClick={() => setMobileMenuOpen(false)}
+									>
+										<SettingsIcon className="mr-2 h-4 w-4" />
+										<span>Settings</span>
 									</Link>
 									<Button
 										variant="ghost"
