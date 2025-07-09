@@ -13,7 +13,7 @@ const Settings = () => {
 	const { user } = useAuth();
 
 	return (
-		<Layout hideHeader={false}>
+		<Layout hideHeader>
 			<Helmet>
 				<title>Settings - Tiny Tots Milestones</title>
 				<meta
@@ -28,14 +28,6 @@ const Settings = () => {
 						<SettingsIcon className="h-8 w-8 text-baby-purple" aria-hidden="true" />
 						<h1 className="text-3xl font-bold text-gray-800">Settings</h1>
 					</div>
-					<Button
-						variant="ghost"
-						className="flex items-center gap-2"
-						onClick={() => navigate("/app")}
-					>
-						<ArrowLeft size={16} />
-						Back to Dashboard
-					</Button>
 				</div>
 
 				<div className="space-y-8">
