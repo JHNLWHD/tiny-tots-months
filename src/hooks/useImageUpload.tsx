@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackFileUploadError, trackDatabaseError, ErrorCategory, ErrorSeverity } from "@/lib/analytics";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { CreatePhotoData } from "@/types/photo";
 
 interface UploadOptions {
 	babyId: string;
@@ -21,60 +23,36 @@ export interface UploadResult {
 	is_video: boolean;
 }
 
-export const useImageUpload = () => {
+export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 	const { user } = useAuth();
-	const [isUploading, setIsUploading] = useState(false);
+	const queryClient = useQueryClient();
 	const [progress, setProgress] = useState(0);
-	const [error, setError] = useState<Error | null>(null);
 
-	const resetState = () => {
-		setIsUploading(false);
-		setProgress(0);
-		setError(null);
-	};
-
-	const uploadImage = async (
+	// Validation and upload logic extracted into a reusable function
+	const uploadImageLogic = async (
 		file: File,
-		options: UploadOptions,
-	): Promise<UploadResult | null> => {
+		uploadOptions: UploadOptions,
+	): Promise<UploadResult> => {
 		if (!user) {
 			const authError = new Error("User not authenticated");
-			setError(authError);
-			options.onError?.(authError);
 			trackFileUploadError(authError, file?.type || "unknown", file?.size || 0, "validation");
-			toast("Authentication Error", {
-				description: "You must be logged in to upload files",
-				className: "bg-destructive text-destructive-foreground",
-			});
-			return null;
+			throw authError;
 		}
 
 		if (!file) {
 			const fileError = new Error("No file selected");
-			setError(fileError);
-			options.onError?.(fileError);
 			trackFileUploadError(fileError, "unknown", 0, "validation");
-			toast("Upload Error", {
-				description: "No file selected for upload",
-				className: "bg-destructive text-destructive-foreground",
-			});
-			return null;
+			throw fileError;
 		}
 
 		// Ensure month number is at least 1 to satisfy database constraint
-		const monthNumber = Math.max(1, options.monthNumber);
+		const monthNumber = Math.max(1, uploadOptions.monthNumber);
 
 		// Validate file size (max 100MB to match Supabase config)
 		if (file.size > 100 * 1024 * 1024) {
 			const sizeError = new Error("File too large");
-			setError(sizeError);
-			options.onError?.(sizeError);
 			trackFileUploadError(sizeError, file.type, file.size, "validation");
-			toast("File too large", {
-				description: "Maximum file size is 100MB",
-				className: "bg-destructive text-destructive-foreground",
-			});
-			return null;
+			throw sizeError;
 		}
 
 		// Validate file type - enhanced for mobile compatibility including HEIC/HEIF
@@ -117,15 +95,8 @@ export const useImageUpload = () => {
 
 		if (!isValidFileType) {
 			const typeError = new Error("Invalid file type");
-			setError(typeError);
-			options.onError?.(typeError);
 			trackFileUploadError(typeError, file.type, file.size, "validation");
-			toast("Invalid file type", {
-				description:
-					"Please upload a JPG, PNG, GIF, WebP, HEIC, HEIF, BMP, TIFF, MP4, WebM or QuickTime file",
-				className: "bg-destructive text-destructive-foreground",
-			});
-			return null;
+			throw typeError;
 		}
 
 		if (isHeicFormat) {
@@ -134,77 +105,113 @@ export const useImageUpload = () => {
 			});
 		}
 
-		try {
-			setIsUploading(true);
-			setProgress(0);
-			setError(null);
+		setProgress(0);
+		uploadOptions.onProgress?.(0);
 
-			// Generate file path
-			const fileExt = file.name.split(".").pop();
-			const fileName = `${user.id}/${options.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
-			const isVideo = file.type.startsWith("video/") || 
-							 !!fileName.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
+		// Generate file path
+		const fileExt = file.name.split(".").pop();
+		const fileName = `${user.id}/${uploadOptions.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
+		const isVideo = file.type.startsWith("video/") || 
+						 !!fileName.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
 
-			const uploadWithProgress = async () => {
-				const uploadOptions: any = {};
-				if (isHeicFormat) {
-					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
-				}
-
-				const { error: uploadError, data: uploadData } = await supabase.storage
-					.from("baby_images")
-					.upload(fileName, file, uploadOptions);
-
-				setProgress(100);
-				options.onProgress?.(100);
-
-				return { uploadError, uploadData };
-			};
-
-			const { uploadError, uploadData } = await uploadWithProgress();
-
-			if (uploadError) {
-				if (isHeicFormat && uploadError.message?.includes('mime')) {
-					const heicError = new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
-					trackFileUploadError(heicError, file.type, file.size, "upload");
-					throw heicError;
-				}
-				trackFileUploadError(uploadError, file.type, file.size, "upload");
-				throw uploadError;
+		const uploadWithProgress = async () => {
+			const uploadOptionsConfig: any = {};
+			if (isHeicFormat) {
+				uploadOptionsConfig.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
 			}
 
-			const { error: insertError, data: photo } = await supabase
-				.from("photo")
-				.insert({
-					baby_id: options.babyId,
-					user_id: user.id,
-					month_number: monthNumber,
-					storage_path: fileName,
-					description: options.description || null,
-					is_video: isVideo,
-				})
-				.select()
-				.single();
-
-			if (insertError) {
-				await supabase.storage.from("baby_images").remove([fileName]);
-				trackDatabaseError(insertError, "insert", "photo", user.id);
-				throw insertError;
-			}
-
-			const { data: signedUrlData } = await supabase.storage
+			const { error: uploadError, data: uploadData } = await supabase.storage
 				.from("baby_images")
-				.createSignedUrl(fileName, 3600);
+				.upload(fileName, file, uploadOptionsConfig);
 
-			const result = {
-				...photo,
-				url: signedUrlData?.signedUrl,
-			};
+			setProgress(100);
+			uploadOptions.onProgress?.(100);
 
+			return { uploadError, uploadData };
+		};
+
+		const { uploadError, uploadData } = await uploadWithProgress();
+
+		if (uploadError) {
+			if (isHeicFormat && uploadError.message?.includes('mime')) {
+				const heicError = new Error("HEIC/HEIF format not supported by storage. Please convert to JPEG or PNG.");
+				trackFileUploadError(heicError, file.type, file.size, "upload");
+				throw heicError;
+			}
+			trackFileUploadError(uploadError, file.type, file.size, "upload");
+			throw uploadError;
+		}
+
+		const { error: insertError, data: photo } = await supabase
+			.from("photo")
+			.insert({
+				baby_id: uploadOptions.babyId,
+				user_id: user.id,
+				month_number: monthNumber,
+				storage_path: fileName,
+				description: uploadOptions.description || null,
+				is_video: isVideo,
+			})
+			.select()
+			.single();
+
+		if (insertError) {
+			await supabase.storage.from("baby_images").remove([fileName]);
+			trackDatabaseError(insertError, "insert", "photo", user.id);
+			throw insertError;
+		}
+
+		const { data: signedUrlData } = await supabase.storage
+			.from("baby_images")
+			.createSignedUrl(fileName, 3600);
+
+		const result = {
+			...photo,
+			url: signedUrlData?.signedUrl,
+		};
+
+		return result;
+	};
+
+	// React Query mutation for the new interface
+	const uploadPhotoMutation = useMutation({
+		mutationFn: async (data: CreatePhotoData) => {
+			const result = await uploadImageLogic(data.file, {
+				babyId: data.baby_id,
+				monthNumber: data.month_number,
+				description: data.description,
+			});
+			return result;
+		},
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({
+				queryKey: ["photos", babyId, monthNumber],
+			});
+			toast("Upload Complete", {
+				description: "Your file was uploaded successfully",
+			});
+		},
+		onError: (error: Error) => {
+			console.error("Upload error:", error);
+			toast("Upload Error", {
+				description: error.message || "Failed to upload file",
+				className: "bg-destructive text-destructive-foreground",
+			});
+		},
+	});
+
+	// Legacy interface for backward compatibility
+	const uploadImage = async (
+		file: File,
+		options: UploadOptions,
+	): Promise<UploadResult | null> => {
+		try {
+			const result = await uploadImageLogic(file, options);
+			
 			options.onSuccess?.(result);
 
 			toast("Upload Complete", {
-				description: isHeicFormat 
+				description: options.description?.includes('HEIC') || options.description?.includes('HEIF')
 					? "Your HEIC/HEIF file was uploaded successfully" 
 					: "Your file was uploaded successfully",
 			});
@@ -212,9 +219,8 @@ export const useImageUpload = () => {
 			return result;
 		} catch (err) {
 			console.error("Upload error:", err);
-			const uploadError =
-				err instanceof Error ? err : new Error("Upload failed");
-			setError(uploadError);
+			const uploadError = err instanceof Error ? err : new Error("Upload failed");
+			
 			options.onError?.(uploadError);
 
 			// Track the error if it hasn't been tracked yet
@@ -223,6 +229,8 @@ export const useImageUpload = () => {
 			}
 
 			// Special error message for HEIC/HEIF issues
+			const extension = file.name.split('.').pop()?.toLowerCase() || '';
+			const isHeicFormat = extension === 'heic' || extension === 'heif' || file.type === "image/heic" || file.type === "image/heif";
 			const errorMessage = isHeicFormat && uploadError.message?.includes('not supported')
 				? "HEIC/HEIF upload failed. Please convert to JPEG or PNG for better compatibility."
 				: uploadError.message || "Failed to upload file";
@@ -233,15 +241,23 @@ export const useImageUpload = () => {
 			});
 			return null;
 		} finally {
-			setIsUploading(false);
+			setProgress(0);
 		}
 	};
 
+	const resetState = () => {
+		setProgress(0);
+	};
+
 	return {
+		// Legacy interface (backward compatibility)
 		uploadImage,
-		isUploading,
+		isUploading: uploadPhotoMutation.isPending,
 		progress,
-		error,
+		error: uploadPhotoMutation.error,
 		resetUploadState: resetState,
+		
+		// New React Query interface
+		uploadPhoto: uploadPhotoMutation.mutate,
 	};
 };

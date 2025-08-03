@@ -1,7 +1,6 @@
 import { validateFile } from "@/components/photoUploader/validateFile";
 import { toast } from "@/components/ui/sonner";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
-import { useImageUpload } from "@/hooks/useImageUpload";
 import { useMilestones } from "@/hooks/useMilestones";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -30,9 +29,6 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		uploadPhoto: uploadPhotoApi,
 		isUploading,
 	} = usePhotos(selectedBabyId || undefined, monthNumber);
-
-	// Image upload hook
-	const { uploadImage, isUploading: isImageUploading } = useImageUpload();
 
 	// Fetch milestones for selected baby and month
 	const {
