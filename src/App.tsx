@@ -10,11 +10,9 @@ import {
 	BrowserRouter as Router,
 	Routes,
 } from "react-router-dom";
-import { useState } from "react";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { ErrorMonitoringPanel } from "./components/ErrorMonitoringPanel";
 import { TrackingConsentBanner } from "./components/TrackingConsentBanner";
 import Auth from "./pages/Auth";
 import Contact from "./pages/Contact";
@@ -34,13 +32,6 @@ import "./App.css";
 const queryClient = new QueryClient();
 
 function App() {
-	const [errorMonitoringVisible, setErrorMonitoringVisible] = useState(false);
-	const isDevelopment = import.meta.env.DEV;
-
-	const toggleErrorMonitoring = () => {
-		setErrorMonitoringVisible(!errorMonitoringVisible);
-	};
-
 	return (
 		<QueryClientProvider client={queryClient}>
 			<HelmetProvider>
@@ -80,14 +71,6 @@ function App() {
 							
 							{/* Tracking Consent Banner - Production Only */}
 							<TrackingConsentBanner />
-							
-							{/* Error Monitoring Panel - Development Only */}
-							{isDevelopment && (
-								<ErrorMonitoringPanel
-									isVisible={errorMonitoringVisible}
-									onToggle={toggleErrorMonitoring}
-								/>
-							)}
 						</AuthWrapper>
 					</AuthProvider>
 				</Router>
