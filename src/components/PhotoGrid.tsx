@@ -1,6 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Photo } from "@/hooks/usePhotos";
 import { Play, Trash2 } from "lucide-react";
 import React from "react";
@@ -20,6 +30,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 }) => {
 	const [selectedPhoto, setSelectedPhoto] = React.useState<Photo | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+	const [photoToDelete, setPhotoToDelete] = React.useState<Photo | null>(null);
 
 	if (!photos || photos.length === 0) {
 		return (
@@ -32,6 +43,21 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 	const handlePhotoClick = (photo: Photo) => {
 		setSelectedPhoto(photo);
 		setIsDialogOpen(true);
+	};
+
+	const handleDeleteClick = (photo: Photo) => {
+		setPhotoToDelete(photo);
+	};
+
+	const handleConfirmDelete = () => {
+		if (photoToDelete && onDelete) {
+			onDelete(photoToDelete.id);
+		}
+		setPhotoToDelete(null);
+	};
+
+	const handleCancelDelete = () => {
+		setPhotoToDelete(null);
 	};
 
 	return (
@@ -76,7 +102,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 									className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
 									onClick={(e) => {
 										e.stopPropagation();
-										onDelete(photo.id);
+										handleDeleteClick(photo);
 									}}
 								>
 									<Trash2 size={16} />
@@ -115,6 +141,23 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 					)}
 				</DialogContent>
 			</Dialog>
+
+			<AlertDialog open={!!photoToDelete} onOpenChange={() => setPhotoToDelete(null)}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete Photo</AlertDialogTitle>
+						<AlertDialogDescription>
+							Are you sure you want to delete this photo? This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel onClick={handleCancelDelete}>Cancel</AlertDialogCancel>
+						<AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+							Delete
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
 	);
 };
