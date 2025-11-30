@@ -32,7 +32,7 @@ const BabyList: React.FC<BabyListProps> = ({
 				<div className="w-12 sm:w-16 h-12 sm:h-16 rounded-full bg-baby-purple/10 flex items-center justify-center mb-3 md:mb-4">
 					<Plus className="h-6 sm:h-8 w-6 sm:w-8 text-baby-purple" />
 				</div>
-				<p className="text-base sm:text-lg font-medium text-gray-600 font-bubblegum text-center">
+				<p className="text-base sm:text-lg font-medium text-gray-600 font-sans text-center">
 					Add a Baby
 				</p>
 				<p className="text-xs sm:text-sm text-gray-500 text-center mt-2">
@@ -44,7 +44,7 @@ const BabyList: React.FC<BabyListProps> = ({
 
 			{isLoading ? (
 				<Card className="p-6 h-48 sm:h-64 flex items-center justify-center rounded-xl baby-card-shadow">
-					<div className="animate-pulse text-baby-purple font-bubblegum text-lg sm:text-xl">
+					<div className="animate-pulse text-baby-purple font-heading text-lg sm:text-xl">
 						Loading...
 					</div>
 				</Card>

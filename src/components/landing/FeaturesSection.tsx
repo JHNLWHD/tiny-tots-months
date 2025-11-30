@@ -85,29 +85,36 @@ const FeaturesSection = () => {
 
 	return (
 		<section
-			className="bg-gray-50 py-16"
+			className="bg-white py-24"
 			id="features"
 			aria-labelledby="features-heading"
 		>
-			<div className="container mx-auto px-4">
-				<h2
-					id="features-heading"
-					className="text-3xl font-bold text-center mb-12"
-				>
-					Key Features
-				</h2>
-				<div className="space-y-12 max-w-4xl mx-auto">
-					{features.map((feature) => (
-						<FeatureCard
-							key={feature.title}
-							title={feature.title}
-							description={feature.description}
-							features={feature.features}
-							imageTitle={feature.imageTitle}
-							colorClass={feature.colorClass}
-							imagePosition={feature.imagePosition}
-							icon={feature.icon}
-						/>
+			<div className="w-full px-4 sm:px-6 lg:px-8">
+				<div className="text-center mb-20">
+					<h2
+						id="features-heading"
+						className="text-4xl md:text-5xl font-bold text-gray-800 mb-6"
+					>
+						Powerful <span className="text-baby-purple">Features</span> for Every Family
+					</h2>
+					<p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+						Everything you need to capture, organize, and share your baby's precious moments
+						in one beautifully designed app.
+					</p>
+				</div>
+				<div className="space-y-20 max-w-7xl mx-auto">
+					{features.map((feature, index) => (
+						<div key={feature.title} className={index % 2 === 1 ? "bg-gray-50 -mx-4 px-4 py-16 rounded-3xl" : ""}>
+							<FeatureCard
+								title={feature.title}
+								description={feature.description}
+								features={feature.features}
+								imageTitle={feature.imageTitle}
+								colorClass={feature.colorClass}
+								imagePosition={feature.imagePosition}
+								icon={feature.icon}
+							/>
+						</div>
 					))}
 				</div>
 			</div>

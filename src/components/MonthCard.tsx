@@ -85,7 +85,7 @@ const MonthCard: React.FC<MonthCardProps> = ({
 						<div className="text-2xl sm:text-3xl md:text-4xl mb-0.5 md:mb-1">
 							{getMonthEmoji(month)}
 						</div>
-						<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-md font-bubblegum">
+						<h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-md font-heading">
 							Month {month}
 						</h2>
 						{hasMilestones && (

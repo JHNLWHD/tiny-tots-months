@@ -9,14 +9,20 @@ const HeroSection = () => {
 
 	return (
 		<section
-			className="joyful-gradient py-16 sm:py-24"
+			className="royal-blue-hero-gradient py-20 sm:py-28 relative overflow-hidden"
 			aria-labelledby="hero-heading"
 		>
-			<div className="container mx-auto px-4 text-center">
-				<div className="flex justify-center mb-6">
-					<div className="bg-white p-4 rounded-full shadow-lg">
+			{/* Background decorative elements */}
+			<div className="absolute inset-0 overflow-hidden">
+				<div className="absolute -top-40 -right-40 w-80 h-80 bg-baby-purple/5 rounded-full blur-3xl"></div>
+				<div className="absolute -bottom-40 -left-40 w-80 h-80 bg-baby-blue/5 rounded-full blur-3xl"></div>
+			</div>
+			
+			<div className="w-full px-4 sm:px-6 lg:px-8 text-center relative z-10">
+				<div className="flex justify-center mb-8">
+					<div className="bg-white p-6 rounded-full shadow-xl border border-baby-purple/10 transform hover:scale-105 transition-transform duration-300">
 						<Baby
-							size={48}
+							size={56}
 							className="text-baby-purple animate-bounce-soft"
 							aria-hidden="true"
 						/>
@@ -24,30 +30,33 @@ const HeroSection = () => {
 				</div>
 				<h1
 					id="hero-heading"
-					className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-6"
+					className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-800 mb-8 leading-tight"
 				>
 					Capture Every Precious{" "}
-					<span className="text-baby-purple">Milestone</span> of Your Little One
+					<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
+						Milestone
+					</span>{" "}
+					of Your Little One
 				</h1>
-				<p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+				<p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
 					Document and share your baby's developmental journey month by month
-					with photos, videos, and milestone tracking.
+					with photos, videos, and milestone tracking in one beautiful app.
 				</p>
-				<div className="flex flex-wrap justify-center gap-4">
+				<div className="flex flex-wrap justify-center gap-6">
 					<Button
 						asChild
 						size="lg"
-						className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-8"
+						className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-10 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
 					>
 						{isAuthenticated ? (
 							<Link to="/app">
 								Go to Dashboard{" "}
-								<ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+								<ArrowRight className="ml-3 h-6 w-6" aria-hidden="true" />
 							</Link>
 						) : (
 							<Link to="/auth">
-								Get Started{" "}
-								<ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+								Get Started Free{" "}
+								<ArrowRight className="ml-3 h-6 w-6" aria-hidden="true" />
 							</Link>
 						)}
 					</Button>
@@ -55,10 +64,26 @@ const HeroSection = () => {
 						asChild
 						variant="outline"
 						size="lg"
-						className="border-baby-purple text-baby-purple hover:bg-baby-purple/10 rounded-full px-8"
+						className="border-2 border-baby-purple text-baby-purple hover:bg-baby-purple/10 rounded-full px-10 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
 					>
 						<a href="#features">Learn More</a>
 					</Button>
+				</div>
+				
+				{/* Trust indicators */}
+				<div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-gray-500 text-sm">
+					<div className="flex items-center">
+						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
+						<span>Trusted by 1000+ families</span>
+					</div>
+					<div className="flex items-center">
+						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
+						<span>100% secure & private</span>
+					</div>
+					<div className="flex items-center">
+						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
+						<span>Free to start</span>
+					</div>
 				</div>
 			</div>
 		</section>

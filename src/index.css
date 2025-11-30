@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,14 +21,14 @@
 		--border: 214.3 31.8% 91.4%;
 		--input: 214.3 31.8% 91.4%;
 
-		--primary: 270 60% 60%;
-		--primary-foreground: 210 40% 98%;
+		--primary: 255 59% 67%;
+		--primary-foreground: 0 0% 100%;
 
-		--secondary: 210 40% 96.1%;
-		--secondary-foreground: 222.2 47.4% 11.2%;
+		--secondary: 255 59% 90%;
+		--secondary-foreground: 255 59% 20%;
 
-		--accent: 210 40% 96.1%;
-		--accent-foreground: 222.2 47.4% 11.2%;
+		--accent: 255 59% 85%;
+		--accent-foreground: 255 59% 15%;
 
 		--destructive: 0 100% 50%;
 		--destructive-foreground: 210 40% 98%;
@@ -35,13 +37,13 @@
 
 		--radius: 0.75rem;
 
-		/* Baby Theme Colors */
-		--baby-purple: 270 60% 60%;
-		--baby-blue: 210 80% 70%;
-		--baby-pink: 340 80% 80%;
-		--baby-mint: 160 60% 80%;
-		--baby-yellow: 40 100% 70%;
-		--baby-peach: 25 100% 85%;
+		/* Baby Theme Colors - Royal Blue Harmonized */
+		--baby-purple: 255 59% 67%;
+		--baby-blue: 220 80% 75%;
+		--baby-pink: 320 70% 80%;
+		--baby-mint: 160 50% 75%;
+		--baby-yellow: 45 90% 75%;
+		--baby-peach: 25 80% 80%;
 	}
 
 	.dark {
@@ -83,7 +85,7 @@
 		@apply border-border;
 	}
 	body {
-		@apply bg-background text-foreground font-baloo;
+		@apply bg-background text-foreground font-sans;
 		font-feature-settings: "rlig" 1, "calt" 1;
 	}
 	h1,
@@ -92,10 +94,10 @@
 	h4,
 	h5,
 	h6 {
-		@apply font-bubblegum;
+		@apply font-heading;
 	}
 	button {
-		@apply font-baloo font-medium;
+		@apply font-sans font-medium;
 	}
 }
 
@@ -141,43 +143,71 @@
 	.joyful-gradient {
 		background: linear-gradient(
 			135deg,
-			rgba(255, 240, 245, 0.7) 0%,
-			rgba(230, 240, 255, 0.7) 50%,
-			rgba(240, 255, 240, 0.7) 100%
+			rgba(106, 59, 228, 0.1) 0%,
+			rgba(147, 107, 243, 0.1) 50%,
+			rgba(196, 181, 253, 0.1) 100%
 		);
 	}
 
 	.joyful-gradient-2 {
 		background: linear-gradient(
 			135deg,
-			rgba(255, 230, 240, 0.7) 0%,
-			rgba(240, 250, 255, 0.7) 50%,
-			rgba(240, 255, 245, 0.7) 100%
+			rgba(106, 59, 228, 0.15) 0%,
+			rgba(139, 92, 246, 0.1) 50%,
+			rgba(167, 139, 250, 0.1) 100%
+		);
+	}
+
+	.royal-blue-hero-gradient {
+		background: linear-gradient(
+			135deg,
+			rgba(106, 59, 228, 0.08) 0%,
+			rgba(139, 92, 246, 0.06) 30%,
+			rgba(167, 139, 250, 0.04) 60%,
+			rgba(196, 181, 253, 0.02) 100%
+		);
+	}
+
+	.royal-blue-cta-gradient {
+		background: linear-gradient(
+			135deg,
+			rgba(106, 59, 228, 0.12) 0%,
+			rgba(139, 92, 246, 0.08) 50%,
+			rgba(167, 139, 250, 0.06) 100%
+		);
+	}
+
+	.royal-blue-card-gradient {
+		background: linear-gradient(
+			135deg,
+			rgba(106, 59, 228, 0.05) 0%,
+			rgba(255, 255, 255, 0.9) 50%,
+			rgba(167, 139, 250, 0.03) 100%
 		);
 	}
 
 	.month-card-gradient-1 {
-		background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
+		background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
 	}
 
 	.month-card-gradient-2 {
-		background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+		background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
 	}
 
 	.month-card-gradient-3 {
-		background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+		background: linear-gradient(135deg, #fce7f3 0%, #f9a8d4 100%);
 	}
 
 	.month-card-gradient-4 {
-		background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+		background: linear-gradient(135deg, #d1fae5 0%, #86efac 100%);
 	}
 
 	.month-card-gradient-5 {
-		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+		background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
 	}
 
 	.month-card-gradient-6 {
-		background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);
+		background: linear-gradient(135deg, #fed7d7 0%, #fca5a5 100%);
 	}
 
 	.animate-bounce-soft {
@@ -208,7 +238,7 @@
 	}
 
 	.card-shadow {
-		box-shadow: 0px 10px 20px rgba(167, 139, 250, 0.1);
+		box-shadow: 0px 10px 20px rgba(106, 59, 228, 0.1);
 	}
 
 	.baby-card-shadow {

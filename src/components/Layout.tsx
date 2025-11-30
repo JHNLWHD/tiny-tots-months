@@ -34,7 +34,7 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 										className="text-white animate-bounce-soft"
 									/>
 								</div>
-								<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-bubblegum">
+								<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-heading">
 									Tiny Tots Milestones
 								</h1>
 							</Link>

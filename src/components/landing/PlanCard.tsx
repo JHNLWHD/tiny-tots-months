@@ -26,47 +26,60 @@ const PlanCard: React.FC<PlanCardProps> = ({
 }) => {
 	return (
 		<article
-			className={`${
+			className={`relative ${
 				isPremium
-					? "border-2 border-baby-purple rounded-xl p-8 bg-white shadow-md relative overflow-hidden"
-					: "border border-gray-200 rounded-xl p-8 bg-white shadow-sm hover:shadow-md transition-shadow"
+					? "border-2 border-baby-purple rounded-2xl p-10 bg-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+					: "border border-gray-200 rounded-2xl p-10 bg-white shadow-lg hover:shadow-xl hover:border-baby-purple/30 transform hover:scale-105 transition-all duration-300"
 			}`}
 		>
 			{isPremium && (
-				<div className="absolute top-0 right-0 bg-baby-purple text-white px-4 py-1 text-sm font-medium rounded-bl-lg">
-					RECOMMENDED
-				</div>
+				<>
+					<div className="absolute top-0 right-0 bg-gradient-to-r from-baby-purple to-baby-blue text-white px-6 py-2 text-sm font-bold rounded-bl-2xl shadow-lg">
+						MOST POPULAR
+					</div>
+					<div className="absolute -top-2 -right-2 w-4 h-4 bg-baby-purple/20 rounded-full"></div>
+					<div className="absolute -bottom-2 -left-2 w-6 h-6 bg-baby-blue/20 rounded-full"></div>
+				</>
 			)}
-			<h3 className="text-2xl font-bold mb-2">{title}</h3>
-			<p className="text-gray-500 mb-6">{description}</p>
-			<p className="text-3xl font-bold mb-6">
-				{price}{" "}
-				<span className="text-base font-normal text-gray-500">
-					{pricePeriod}
-				</span>
-			</p>
+			<div className="relative z-10">
+				<h3 className={`text-3xl font-bold mb-3 ${isPremium ? "text-baby-purple" : "text-gray-800"}`}>
+					{title}
+				</h3>
+				<p className="text-gray-600 mb-8 text-lg">{description}</p>
+				<div className="mb-8">
+					<p className={`text-5xl font-bold ${isPremium ? "text-baby-purple" : "text-gray-800"}`}>
+						{price}
+					</p>
+					<span className="text-lg text-gray-500 font-medium">
+						{pricePeriod}
+					</span>
+				</div>
 
-			<ul className="space-y-3 mb-8">
-				{features.map((item) => (
-					<li key={item} className="flex items-start">
-						<CheckCircle2
-							className={`h-5 w-5 ${isPremium ? "text-baby-purple" : "text-green-500"} mr-2 mt-0.5 flex-shrink-0`}
-							aria-hidden="true"
-						/>
-						<span>{item}</span>
-					</li>
-				))}
-			</ul>
+				<ul className="space-y-4 mb-10">
+					{features.map((item) => (
+						<li key={item} className="flex items-start">
+							<CheckCircle2
+								className={`h-6 w-6 ${isPremium ? "text-baby-purple" : "text-green-500"} mr-3 mt-0.5 flex-shrink-0`}
+								aria-hidden="true"
+							/>
+							<span className="text-gray-700 text-lg">{item}</span>
+						</li>
+					))}
+				</ul>
 
-			<Button
-				asChild
-				className={`w-full rounded-full ${
-					isPremium ? "bg-baby-purple hover:bg-baby-purple/90" : ""
-				}`}
-				variant={isPremium ? "default" : "outline"}
-			>
-				<Link to={ctaLink}>{ctaText}</Link>
-			</Button>
+				<Button
+					asChild
+					size="lg"
+					className={`w-full rounded-full py-4 text-lg font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ${
+						isPremium 
+							? "bg-baby-purple hover:bg-baby-purple/90 text-white" 
+							: "border-2 border-baby-purple text-baby-purple hover:bg-baby-purple/10"
+					}`}
+					variant={isPremium ? "default" : "outline"}
+				>
+					<Link to={ctaLink}>{ctaText}</Link>
+				</Button>
+			</div>
 		</article>
 	);
 };
