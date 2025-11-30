@@ -33,7 +33,7 @@ const Upgrade = () => {
 					onClick={() => navigate("/app")}
 				>
 					<ArrowLeft size={16} />
-					Back to Dashboard
+					Back to App
 				</Button>
 
 				<h1 className="text-3xl font-bold text-center mb-8">

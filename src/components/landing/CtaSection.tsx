@@ -37,7 +37,7 @@ const CtaSection = () => {
 					>
 						{isAuthenticated ? (
 							<Link to="/app">
-								Go to Dashboard{" "}
+								Go to App{" "}
 								<ArrowRight className="ml-3 h-6 w-6" aria-hidden="true" />
 							</Link>
 						) : (
