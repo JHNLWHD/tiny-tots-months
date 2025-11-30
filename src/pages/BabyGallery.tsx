@@ -9,15 +9,15 @@ import {
 } from "@/components/ui/select";
 import { useBabyPhotos } from "@/hooks/useBabyPhotos";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
+import PhotoCard from "@/components/PhotoCard";
+import PhotoLightbox from "@/components/PhotoLightbox";
 import { 
 	ArrowLeft, 
 	Calendar, 
 	Camera, 
 	Filter, 
 	Grid3X3, 
-	List, 
-	Play, 
-	Image as ImageIcon
+	List
 } from "lucide-react";
 import React, { useState, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -30,32 +30,28 @@ const BabyGallery = () => {
 	const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
 	const [filterMonth, setFilterMonth] = useState<string>('all');
 	const [filterType, setFilterType] = useState<string>('all');
+	const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+	const [lightboxIndex, setLightboxIndex] = useState<number>(0);
 
-	// Find the current baby
 	const baby = babies.find(b => b.id === babyId);
 
-	// Filter and sort photos
 	const filteredPhotos = useMemo(() => {
 		let filtered = photos;
 
-		// Filter by month
 		if (filterMonth !== 'all') {
 			const monthNum = parseInt(filterMonth);
 			filtered = filtered.filter(photo => photo.month_number === monthNum);
 		}
 
-		// Filter by type
 		if (filterType === 'photos') {
 			filtered = filtered.filter(photo => !photo.is_video);
 		} else if (filterType === 'videos') {
 			filtered = filtered.filter(photo => photo.is_video);
 		}
 
-		// Sort by creation date (newest first)
 		return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 	}, [photos, filterMonth, filterType]);
 
-	// Group photos by month for timeline view
 	const photosByMonth = useMemo(() => {
 		const grouped: { [key: number]: typeof photos } = {};
 		filteredPhotos.forEach(photo => {
@@ -67,6 +63,12 @@ const BabyGallery = () => {
 		});
 		return grouped;
 	}, [filteredPhotos]);
+
+
+	const openLightbox = (index: number) => {
+		setLightboxIndex(index);
+		setLightboxOpen(true);
+	};
 
 	const getMonthName = (monthNum: number) => {
 		if (monthNum === 0) return "Unassigned";
@@ -105,8 +107,7 @@ const BabyGallery = () => {
 
 	return (
 		<div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-			{/* Header */}
-			<div className="flex items-center gap-4">
+		<div className="flex items-center gap-4">
 				<Link
 					to="/app"
 					className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -123,8 +124,7 @@ const BabyGallery = () => {
 				</div>
 			</div>
 
-			{/* Filters and View Controls */}
-			<Card className="p-4 border-baby-purple/20">
+		<Card className="p-4 border-baby-purple/20">
 				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-2">
@@ -181,8 +181,7 @@ const BabyGallery = () => {
 				</div>
 			</Card>
 
-			{/* Content */}
-			{filteredPhotos.length === 0 ? (
+		{filteredPhotos.length === 0 ? (
 				<Card className="p-12 text-center border-baby-purple/20">
 					<div className="w-16 h-16 bg-baby-purple/10 rounded-full flex items-center justify-center mx-auto mb-4">
 						<Camera className="h-8 w-8 text-baby-purple" />
@@ -202,79 +201,18 @@ const BabyGallery = () => {
 					</Link>
 				</Card>
 			) : viewMode === 'grid' ? (
-				// Grid View
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-					{filteredPhotos.map((photo) => (
-						<Card
+					{filteredPhotos.map((photo, index) => (
+						<PhotoCard
 							key={photo.id}
-							className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-baby-purple/30"
-						>
-							<div className="relative aspect-square bg-gray-100">
-								{photo.is_video ? (
-									<div className="relative w-full h-full">
-										<video
-											src={photo.url}
-											className="w-full h-full object-cover"
-											preload="metadata"
-										/>
-										<div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-											<Play className="h-8 w-8 text-white" />
-										</div>
-										<div className="absolute top-2 right-2 bg-black/50 rounded-full p-1">
-											<Play className="h-3 w-3 text-white" />
-										</div>
-									</div>
-								) : (
-									<div className="relative w-full h-full">
-										<img
-											src={photo.url}
-											alt={photo.description || `Photo from month ${photo.month_number}`}
-											className="w-full h-full object-cover"
-										/>
-										<div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-											<ImageIcon className="h-8 w-8 text-white" />
-										</div>
-									</div>
-								)}
-								
-								{/* Month badge */}
-								{photo.month_number && (
-									<div className="absolute top-2 left-2 bg-baby-purple/90 text-white text-xs px-2 py-1 rounded-full">
-										Month {photo.month_number}
-									</div>
-								)}
-							</div>
-							
-							{/* Caption and metadata - always show for consistent layout */}
-							<div className="p-3 bg-white">
-								<div className="min-h-[2.5rem] mb-2 flex items-start">
-									{photo.description ? (
-										<p className="text-sm text-gray-800 font-medium line-clamp-2">
-											{photo.description}
-										</p>
-									) : (
-										<p className="text-sm text-gray-400 italic">
-											No description
-										</p>
-									)}
-								</div>
-								<div className="flex items-center justify-between text-xs text-gray-500">
-									<span>
-										{new Date(photo.created_at).toLocaleDateString()}
-									</span>
-									{photo.is_video && (
-										<span className="flex items-center gap-1">
-											<Play className="h-3 w-3" />
-											Video
-										</span>
-									)}
-								</div>
-							</div>
-						</Card>
+							photo={photo}
+							onClick={() => openLightbox(index)}
+							showDeleteButton={false}
+							showMonthBadge={true}
+						/>
 					))}
 				</div>
 			) : (
-				// Timeline View
 				<div className="space-y-8">
 					{Object.entries(photosByMonth)
 						.sort(([a], [b]) => parseInt(b) - parseInt(a))
@@ -295,67 +233,34 @@ const BabyGallery = () => {
 								</div>
 								
 								<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-									{monthPhotos.map((photo) => (
-										<Card
-											key={photo.id}
-											className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-baby-purple/30"
-										>
-											<div className="relative aspect-square bg-gray-100">
-												{photo.is_video ? (
-													<div className="relative w-full h-full">
-														<video
-															src={photo.url}
-															className="w-full h-full object-cover"
-															preload="metadata"
-														/>
-														<div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-															<Play className="h-6 w-6 text-white" />
-														</div>
-														<div className="absolute top-2 right-2 bg-black/50 rounded-full p-1">
-															<Play className="h-3 w-3 text-white" />
-														</div>
-													</div>
-												) : (
-													<img
-														src={photo.url}
-														alt={photo.description || `Photo from month ${photo.month_number}`}
-														className="w-full h-full object-cover"
-													/>
-												)}
-											</div>
-											
-											{/* Caption and metadata - always show for consistent layout */}
-											<div className="p-3 bg-white">
-												<div className="min-h-[2.5rem] mb-2 flex items-start">
-													{photo.description ? (
-														<p className="text-sm text-gray-800 font-medium line-clamp-2">
-															{photo.description}
-														</p>
-													) : (
-														<p className="text-sm text-gray-400 italic">
-															No description
-														</p>
-													)}
-												</div>
-												<div className="flex items-center justify-between text-xs text-gray-500">
-													<span>
-														{new Date(photo.created_at).toLocaleDateString()}
-													</span>
-													{photo.is_video && (
-														<span className="flex items-center gap-1">
-															<Play className="h-3 w-3" />
-															Video
-														</span>
-													)}
-												</div>
-											</div>
-										</Card>
-									))}
+									{monthPhotos.map((photo) => {
+										const photoIndex = filteredPhotos.findIndex(p => p.id === photo.id);
+										return (
+											<PhotoCard
+												key={photo.id}
+												photo={photo}
+												onClick={() => openLightbox(photoIndex)}
+												showDeleteButton={false}
+												showMonthBadge={false}
+											/>
+										);
+									})}
 								</div>
 							</Card>
 						))}
 				</div>
 			)}
+
+		<PhotoLightbox
+				photos={filteredPhotos}
+				open={lightboxOpen}
+				index={lightboxIndex}
+				onClose={() => setLightboxOpen(false)}
+				babyName={baby?.name || "baby"}
+				showCaptions={true}
+				showDownload={true}
+				showThumbnails={true}
+			/>
 		</div>
 	);
 };
