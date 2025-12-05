@@ -7,9 +7,9 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { Baby as BabyType } from "@/hooks/useBabyProfiles";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useBabyStats } from "@/hooks/useBabyStats";
 import { format } from "date-fns";
-import { Baby, Calendar, Plus, Share, Star, TrendingUp, MoreVertical, Trash2 } from "lucide-react";
+import { Baby, Calendar, Plus, Star, TrendingUp, MoreVertical, Trash2 } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router-dom";
 
@@ -22,6 +22,158 @@ interface BabyListProps {
 	selectedBaby: BabyType | null;
 }
 
+interface BabyCardProps {
+	baby: BabyType;
+	selectedBaby: BabyType | null;
+	onSelectBaby: (baby: BabyType) => void;
+	onDeleteBaby?: (baby: BabyType) => void;
+}
+
+const BabyCard: React.FC<BabyCardProps> = ({
+	baby,
+	selectedBaby,
+	onSelectBaby,
+	onDeleteBaby,
+}) => {
+	const { stats, isLoading: isLoadingStats } = useBabyStats(baby.id);
+
+	return (
+		<Card
+			className={`p-5 cursor-pointer transition-all duration-300 hover:shadow-lg transform hover:scale-105 ${
+				selectedBaby?.id === baby.id
+					? "ring-3 ring-baby-purple/50 border-2 border-baby-purple bg-gradient-to-br from-baby-purple/5 to-baby-blue/5 shadow-lg"
+					: "border border-gray-200 hover:border-baby-purple/30 bg-white"
+			}`}
+			onClick={() => onSelectBaby(baby)}
+		>
+			{/* Baby Header */}
+			<div className="flex items-center gap-3 mb-4">
+				<div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+					selectedBaby?.id === baby.id
+						? "bg-baby-purple/20"
+						: "bg-gray-100"
+				}`}>
+					<Baby className={`h-6 w-6 ${
+						selectedBaby?.id === baby.id
+							? "text-baby-purple"
+							: "text-gray-600"
+					}`} />
+				</div>
+				<div className="flex-1 min-w-0">
+					<h3 className="font-heading text-lg text-gray-800 truncate">
+						{baby.name}
+					</h3>
+					<p className="text-sm text-gray-500">
+						{format(new Date(baby.date_of_birth), "MMM d, yyyy")}
+					</p>
+				</div>
+				{onDeleteBaby && (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="sm"
+								className="h-8 w-8 p-0 hover:bg-gray-100"
+								onClick={(e) => e.stopPropagation()}
+							>
+								<MoreVertical className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem
+								onClick={(e) => {
+									e.stopPropagation();
+									onDeleteBaby(baby);
+								}}
+								className="text-red-600 hover:text-red-700 hover:bg-red-50"
+							>
+								<Trash2 className="h-4 w-4 mr-2" />
+								Delete Baby
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
+			</div>
+
+			{/* Progress Indicators */}
+			<div className="mb-4 space-y-2">
+				<div className="flex justify-between items-center text-sm">
+					<span className="text-gray-600">Progress</span>
+					{isLoadingStats ? (
+						<span className="text-gray-400 text-xs">Loading...</span>
+					) : (
+						<span className="text-baby-purple font-medium">
+							{stats.monthsTracked}/12 months
+						</span>
+					)}
+				</div>
+				<div className="w-full bg-gray-200 rounded-full h-2">
+					<div
+						className="bg-baby-purple h-2 rounded-full transition-all duration-500"
+						style={{ 
+							width: isLoadingStats 
+								? "0%" 
+								: `${Math.min(stats.progressPercentage, 100)}%` 
+						}}
+					/>
+				</div>
+			</div>
+
+			{/* Quick Stats */}
+			<div className="flex justify-between items-center text-xs text-gray-500 mb-4">
+				<div className="flex items-center gap-1">
+					<Star className="h-3 w-3" />
+					{isLoadingStats ? (
+						<span className="text-gray-400">...</span>
+					) : (
+						<span>{stats.milestoneCount} milestone{stats.milestoneCount !== 1 ? 's' : ''}</span>
+					)}
+				</div>
+				<div className="flex items-center gap-1">
+					<Calendar className="h-3 w-3" />
+					{isLoadingStats ? (
+						<span className="text-gray-400">...</span>
+					) : (
+						<span>{stats.photoCount} photo{stats.photoCount !== 1 ? 's' : ''}</span>
+					)}
+				</div>
+			</div>
+
+			{/* Action Buttons */}
+			<div className="flex gap-2">
+				<Button
+					size="sm"
+					asChild
+					className={`flex-1 text-xs ${
+						selectedBaby?.id === baby.id
+							? "bg-baby-purple hover:bg-baby-purple/90 text-white"
+							: "bg-gray-100 hover:bg-baby-purple/10 text-gray-700 hover:text-baby-purple"
+					}`}
+				>
+					<Link 
+						to={`/app/baby/${baby.id}/gallery`}
+						onClick={(e) => e.stopPropagation()}
+					>
+						<Calendar className="h-3 w-3 mr-1" />
+						View Gallery
+					</Link>
+				</Button>
+				<Button
+					size="sm"
+					variant="outline"
+					className="border-baby-purple/30 text-baby-purple hover:bg-baby-purple/10 text-xs"
+					onClick={(e) => {
+						e.stopPropagation();
+						onSelectBaby(baby);
+					}}
+				>
+					<TrendingUp className="h-3 w-3" />
+				</Button>
+			</div>
+		</Card>
+	);
+};
+
 const BabyList: React.FC<BabyListProps> = ({
 	babies,
 	isLoading,
@@ -30,7 +182,6 @@ const BabyList: React.FC<BabyListProps> = ({
 	onDeleteBaby,
 	selectedBaby,
 }) => {
-	const { isPremium } = useSubscription();
 
 	return (
 		<div className="space-y-6">
@@ -61,122 +212,13 @@ const BabyList: React.FC<BabyListProps> = ({
 				) : babies.length > 0 ? (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{babies.map((baby) => (
-							<Card
+							<BabyCard
 								key={baby.id}
-								className={`p-5 cursor-pointer transition-all duration-300 hover:shadow-lg transform hover:scale-105 ${
-									selectedBaby?.id === baby.id
-										? "ring-3 ring-baby-purple/50 border-2 border-baby-purple bg-gradient-to-br from-baby-purple/5 to-baby-blue/5 shadow-lg"
-										: "border border-gray-200 hover:border-baby-purple/30 bg-white"
-								}`}
-								onClick={() => onSelectBaby(baby)}
-							>
-								{/* Baby Header */}
-								<div className="flex items-center gap-3 mb-4">
-									<div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-										selectedBaby?.id === baby.id
-											? "bg-baby-purple/20"
-											: "bg-gray-100"
-									}`}>
-										<Baby className={`h-6 w-6 ${
-											selectedBaby?.id === baby.id
-												? "text-baby-purple"
-												: "text-gray-600"
-										}`} />
-									</div>
-									<div className="flex-1 min-w-0">
-										<h3 className="font-heading text-lg text-gray-800 truncate">
-											{baby.name}
-										</h3>
-										<p className="text-sm text-gray-500">
-											{format(new Date(baby.date_of_birth), "MMM d, yyyy")}
-										</p>
-									</div>
-									{onDeleteBaby && (
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="h-8 w-8 p-0 hover:bg-gray-100"
-													onClick={(e) => e.stopPropagation()}
-												>
-													<MoreVertical className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												<DropdownMenuItem
-													onClick={(e) => {
-														e.stopPropagation();
-														onDeleteBaby(baby);
-													}}
-													className="text-red-600 hover:text-red-700 hover:bg-red-50"
-												>
-													<Trash2 className="h-4 w-4 mr-2" />
-													Delete Baby
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									)}
-								</div>
-
-								{/* Progress Indicators */}
-								<div className="mb-4 space-y-2">
-									<div className="flex justify-between items-center text-sm">
-										<span className="text-gray-600">Progress</span>
-										<span className="text-baby-purple font-medium">3/12 months</span>
-									</div>
-									<div className="w-full bg-gray-200 rounded-full h-2">
-										<div
-											className="bg-baby-purple h-2 rounded-full transition-all duration-500"
-											style={{ width: "25%" }}
-										/>
-									</div>
-								</div>
-
-								{/* Quick Stats */}
-								<div className="flex justify-between items-center text-xs text-gray-500 mb-4">
-									<div className="flex items-center gap-1">
-										<Star className="h-3 w-3" />
-										<span>8 milestones</span>
-									</div>
-									<div className="flex items-center gap-1">
-										<Calendar className="h-3 w-3" />
-										<span>45 photos</span>
-									</div>
-								</div>
-
-								{/* Action Buttons */}
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										asChild
-										className={`flex-1 text-xs ${
-											selectedBaby?.id === baby.id
-												? "bg-baby-purple hover:bg-baby-purple/90 text-white"
-												: "bg-gray-100 hover:bg-baby-purple/10 text-gray-700 hover:text-baby-purple"
-										}`}
-									>
-										<Link 
-											to={`/app/baby/${baby.id}/gallery`}
-											onClick={(e) => e.stopPropagation()}
-										>
-											<Calendar className="h-3 w-3 mr-1" />
-											View Gallery
-										</Link>
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										className="border-baby-purple/30 text-baby-purple hover:bg-baby-purple/10 text-xs"
-										onClick={(e) => {
-											e.stopPropagation();
-											onSelectBaby(baby);
-										}}
-									>
-										<TrendingUp className="h-3 w-3" />
-									</Button>
-								</div>
-							</Card>
+								baby={baby}
+								selectedBaby={selectedBaby}
+								onSelectBaby={onSelectBaby}
+								onDeleteBaby={onDeleteBaby}
+							/>
 						))}
 					</div>
 				) : (
