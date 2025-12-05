@@ -135,7 +135,36 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 						</div>
 						<div className="text-center">
 							<div className="text-2xl font-bold text-blue-600">
-								{formatCentsAmount(paymentSummary.totalSpent, "PHP")}
+								{(() => {
+									// Use totalSpentByCurrency if available, otherwise fall back to legacy totalSpent
+									const totalsByCurrency = paymentSummary.totalSpentByCurrency || {};
+									const currencies = Object.keys(totalsByCurrency) as ("PHP" | "USD")[];
+									
+									if (currencies.length === 0) {
+										// Fallback to legacy totalSpent with primaryCurrency
+										return formatCentsAmount(
+											paymentSummary.totalSpent, 
+											paymentSummary.primaryCurrency || "PHP"
+										);
+									} else if (currencies.length === 1) {
+										// Single currency - display normally
+										return formatCentsAmount(
+											totalsByCurrency[currencies[0]], 
+											currencies[0]
+										);
+									} else {
+										// Multiple currencies - display both
+										return (
+											<div className="space-y-0.5">
+												{currencies.map((currency) => (
+													<div key={currency} className="text-lg">
+														{formatCentsAmount(totalsByCurrency[currency], currency)}
+													</div>
+												))}
+											</div>
+										);
+									}
+								})()}
 							</div>
 							<div className="text-sm text-gray-600">Total Spent</div>
 						</div>

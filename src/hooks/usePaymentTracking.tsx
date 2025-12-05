@@ -180,8 +180,28 @@ export const usePaymentTracking = () => {
 		const completedTransactions = paymentTransactions.filter(t => t.status === "completed");
 		const pendingTransactions = paymentTransactions.filter(t => t.status === "pending");
 		
-		const totalSpent = completedTransactions.reduce((sum, t) => sum + t.amount_in_cents, 0); // In cents
-		const totalPending = pendingTransactions.reduce((sum, t) => sum + t.amount_in_cents, 0); // In cents
+		// Calculate totals per currency
+		const totalSpentByCurrency = completedTransactions.reduce((acc, t) => {
+			const currency = (t.currency as "PHP" | "USD") || "PHP";
+			acc[currency] = (acc[currency] || 0) + t.amount_in_cents;
+			return acc;
+		}, {} as Record<"PHP" | "USD", number>);
+
+		const totalPendingByCurrency = pendingTransactions.reduce((acc, t) => {
+			const currency = (t.currency as "PHP" | "USD") || "PHP";
+			acc[currency] = (acc[currency] || 0) + t.amount_in_cents;
+			return acc;
+		}, {} as Record<"PHP" | "USD", number>);
+
+		// Get primary currency (the one with the highest total, or PHP as default)
+		const currencies = Object.keys(totalSpentByCurrency) as ("PHP" | "USD")[];
+		const primaryCurrency = currencies.length > 0 
+			? currencies.reduce((a, b) => (totalSpentByCurrency[a] || 0) > (totalSpentByCurrency[b] || 0) ? a : b)
+			: "PHP" as "PHP" | "USD";
+		
+		// Legacy totalSpent for backward compatibility (uses primary currency)
+		const totalSpent = totalSpentByCurrency[primaryCurrency] || 0;
+		const totalPending = totalPendingByCurrency[primaryCurrency] || 0;
 		
 		const byType = completedTransactions.reduce((acc, t) => {
 			acc[t.transaction_type] = (acc[t.transaction_type] || 0) + t.amount_in_cents;
@@ -199,6 +219,9 @@ export const usePaymentTracking = () => {
 			pendingTransactions: pendingTransactions.length,
 			totalSpent,
 			totalPending,
+			totalSpentByCurrency,
+			totalPendingByCurrency,
+			primaryCurrency,
 			byType,
 			byMethod,
 			lastPayment: completedTransactions[0]?.created_at,
