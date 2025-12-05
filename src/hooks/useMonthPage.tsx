@@ -96,30 +96,34 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 
 		// Check photo upload permissions using CASL abilities
 		const photoAbilityCheck = abilities.check('upload', 'Photo');
+		
+		// If credits are required (even if allowed is true), use executeWithAbility to spend credits
+		if (photoAbilityCheck.creditsRequired) {
+			// Execute with credits using abilities system
+			const success = await abilities.executeWithAbility(
+				'upload',
+				'Photo',
+				async () => {
+					return await uploadPhotoApi({
+						file: data.file,
+						baby_id: selectedBabyId,
+						month_number: monthNumber,
+						description: data.description,
+						is_video: data.is_video,
+					});
+				},
+				`Photo upload for month ${monthNumber}`
+			);
+			return success ? "success" : null;
+		}
+		
+		// If not allowed and no credits can help, show upgrade prompt
 		if (!photoAbilityCheck.allowed) {
-			if (photoAbilityCheck.creditsRequired) {
-				// Try to execute with credits using abilities system
-				const success = await abilities.executeWithAbility(
-					'upload',
-					'Photo',
-					async () => {
-						return await uploadPhotoApi({
-							file: data.file,
-							baby_id: selectedBabyId,
-							month_number: monthNumber,
-							description: data.description,
-							is_video: data.is_video,
-						});
-					},
-					`Photo upload for month ${monthNumber}`
-				);
-				return success ? "success" : null;
-			} else {
-				abilities.showUpgradePrompt('upload', 'Photo');
-				return null;
-			}
+			abilities.showUpgradePrompt('upload', 'Photo');
+			return null;
 		}
 
+		// Action is allowed without credits - proceed directly
 		try {
 			const result = await uploadPhotoApi({
 				file: data.file,
