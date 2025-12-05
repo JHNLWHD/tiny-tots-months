@@ -65,18 +65,10 @@ export const useAbilities = (context?: Partial<UserContext>) => {
     if (abilityCheck.creditsRequired) {
       // Action requires credits
       try {
-        // Spend credits first
-        await new Promise<void>((resolve, reject) => {
-          spendCredits(
-            { 
-              amount: abilityCheck.creditsRequired!, 
-              description: description || `${action} ${subject}` 
-            },
-            {
-              onSuccess: () => resolve(),
-              onError: (error) => reject(error),
-            }
-          );
+        // Spend credits first (mutateAsync returns a promise)
+        await spendCredits({
+          amount: abilityCheck.creditsRequired!,
+          description: description || `${action} ${subject}`
         });
 
         // Then execute the action
@@ -84,7 +76,8 @@ export const useAbilities = (context?: Partial<UserContext>) => {
         return true;
       } catch (error) {
         console.error('Error executing action with credits:', error);
-        toast.error('Action failed. Please try again.');
+        const errorMessage = error instanceof Error ? error.message : 'Action failed. Please try again.';
+        toast.error(errorMessage);
         return false;
       }
     } else {

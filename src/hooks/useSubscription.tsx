@@ -371,7 +371,7 @@ export const useSubscription = () => {
 		creditsBalance,
 		createSubscription: createSubscription.mutate,
 		purchaseCredits: purchaseCredits.mutate,
-		spendCredits: spendCredits.mutate,
+		spendCredits: spendCredits.mutateAsync,
 		requestSubscriptionUpgrade: requestSubscriptionUpgrade.mutate,
 		canPerformAction,
 		getUserCurrency,
