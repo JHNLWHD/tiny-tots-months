@@ -1,4 +1,4 @@
-export interface Photo {
+export type Photo = {
 	id: string;
 	baby_id: string;
 	user_id: string;
@@ -9,12 +9,12 @@ export interface Photo {
 	created_at: string;
 	updated_at: string;
 	url?: string; // URL for the actual image from storage
-}
+};
 
-export interface CreatePhotoData {
+export type CreatePhotoData = {
 	baby_id: string;
 	month_number: number;
 	description?: string;
 	file: File;
 	is_video?: boolean;
-}
+};

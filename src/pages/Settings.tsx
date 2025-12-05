@@ -1,8 +1,11 @@
 import Layout from "@/components/Layout";
 import { TrackingSettings } from "@/components/TrackingSettings";
+import { AnalyticsDashboard } from "@/components/analytics/AnalyticsDashboard";
+import { PaymentHistory } from "@/components/payments/PaymentHistory";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings as SettingsIcon, ArrowLeft, User, Bell, Shield } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Settings as SettingsIcon, ArrowLeft, User, Bell, Shield, BarChart3, CreditCard } from "lucide-react";
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
@@ -30,116 +33,147 @@ const Settings = () => {
 					</div>
 				</div>
 
-				<div className="space-y-8">
-					{/* Account Information */}
-					<Card>
-						<CardHeader>
-							<div className="flex items-center gap-2">
-								<User className="h-5 w-5 text-gray-600" />
-								<CardTitle>Account Information</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div>
-								<label className="text-sm text-gray-500">Email Address</label>
-								<p className="font-medium text-gray-900">{user?.email}</p>
-							</div>
-							<div>
-								<label className="text-sm text-gray-500">Account Created</label>
-								<p className="font-medium text-gray-900">
-									{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-								</p>
-							</div>
-							<div>
-								<label className="text-sm text-gray-500">User ID</label>
-								<p className="font-mono text-xs text-gray-600">{user?.id}</p>
-							</div>
-						</CardContent>
-					</Card>
+				<Tabs defaultValue="account" className="space-y-6">
+					<TabsList className="grid w-full grid-cols-4">
+						<TabsTrigger value="account" className="flex items-center gap-2">
+							<User className="w-4 h-4" />
+							Account
+						</TabsTrigger>
+						<TabsTrigger value="payments" className="flex items-center gap-2">
+							<CreditCard className="w-4 h-4" />
+							Payments
+						</TabsTrigger>
+						<TabsTrigger value="analytics" className="flex items-center gap-2">
+							<BarChart3 className="w-4 h-4" />
+							Analytics
+						</TabsTrigger>
+						<TabsTrigger value="privacy" className="flex items-center gap-2">
+							<Shield className="w-4 h-4" />
+							Privacy
+						</TabsTrigger>
+					</TabsList>
 
-					{/* Privacy & Tracking Settings */}
-					<TrackingSettings />
+					<TabsContent value="account" className="space-y-6">
+						{/* Account Information */}
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-2">
+									<User className="h-5 w-5 text-gray-600" />
+									<CardTitle>Account Information</CardTitle>
+								</div>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div>
+									<label className="text-sm text-gray-500">Email Address</label>
+									<p className="font-medium text-gray-900">{user?.email}</p>
+								</div>
+								<div>
+									<label className="text-sm text-gray-500">Account Created</label>
+									<p className="font-medium text-gray-900">
+										{user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+									</p>
+								</div>
+								<div>
+									<label className="text-sm text-gray-500">User ID</label>
+									<p className="font-mono text-xs text-gray-600">{user?.id}</p>
+								</div>
+							</CardContent>
+						</Card>
 
-					{/* Notifications (Placeholder for future) */}
-					<Card>
-						<CardHeader>
-							<div className="flex items-center gap-2">
-								<Bell className="h-5 w-5 text-gray-600" />
-								<CardTitle>Notifications</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent>
-							<div className="text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
-								<p>📧 Email notifications and preferences will be available in a future update.</p>
-								<p className="mt-2">For now, important account updates will be sent to your registered email address.</p>
-							</div>
-						</CardContent>
-					</Card>
+						{/* Notifications */}
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-2">
+									<Bell className="h-5 w-5 text-gray-600" />
+									<CardTitle>Notifications</CardTitle>
+								</div>
+							</CardHeader>
+							<CardContent>
+								<div className="text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
+									<p>📧 Email notifications and preferences will be available in a future update.</p>
+									<p className="mt-2">For now, important account updates will be sent to your registered email address.</p>
+								</div>
+							</CardContent>
+						</Card>
 
-					{/* Data & Privacy */}
-					<Card>
-						<CardHeader>
-							<div className="flex items-center gap-2">
-								<Shield className="h-5 w-5 text-gray-600" />
-								<CardTitle>Data & Privacy</CardTitle>
-							</div>
-						</CardHeader>
-						<CardContent className="space-y-4">
-							<div className="text-sm text-gray-600 space-y-3">
-								<p>
-									<strong>Data Retention:</strong> Your baby milestone data is stored securely and 
-									is only accessible by you through your account.
+						{/* Support */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Need Help?</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<p className="text-sm text-gray-600 mb-4">
+									Have questions about your account or need assistance? Our support team is here to help.
 								</p>
-								<p>
-									<strong>Data Export:</strong> Contact our support team if you need to export 
-									your data or delete your account.
-								</p>
-								<p>
-									<strong>Sharing:</strong> Content is only shared when you explicitly generate 
-									and distribute shareable links.
-								</p>
-							</div>
-							<div className="pt-4 border-t border-gray-200">
 								<div className="flex gap-3">
-									<Button variant="outline" size="sm">
-										Request Data Export
+									<Button 
+										variant="outline" 
+										size="sm" 
+										onClick={() => navigate("/help")}
+									>
+										Help Center
 									</Button>
-									<Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50">
-										Delete Account
+									<Button 
+										variant="outline" 
+										size="sm"
+										onClick={() => navigate("/contact")}
+									>
+										Contact Support
 									</Button>
 								</div>
-							</div>
-						</CardContent>
-					</Card>
+							</CardContent>
+						</Card>
+					</TabsContent>
 
-					{/* Support */}
-					<Card>
-						<CardHeader>
-							<CardTitle>Need Help?</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="text-sm text-gray-600 mb-4">
-								Have questions about your account or need assistance? Our support team is here to help.
-							</p>
-							<div className="flex gap-3">
-								<Button 
-									variant="outline" 
-									size="sm" 
-									onClick={() => navigate("/help")}
-								>
-									Help Center
-								</Button>
-								<Button 
-									variant="outline" 
-									size="sm"
-									onClick={() => navigate("/contact")}
-								>
-									Contact Support
-								</Button>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
+					<TabsContent value="payments" className="space-y-6">
+						<PaymentHistory showSummary={true} />
+					</TabsContent>
+
+					<TabsContent value="analytics" className="space-y-6">
+						<AnalyticsDashboard />
+					</TabsContent>
+
+					<TabsContent value="privacy" className="space-y-6">
+						{/* Privacy & Tracking Settings */}
+						<TrackingSettings />
+
+						{/* Data & Privacy */}
+						<Card>
+							<CardHeader>
+								<div className="flex items-center gap-2">
+									<Shield className="h-5 w-5 text-gray-600" />
+									<CardTitle>Data & Privacy</CardTitle>
+								</div>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div className="text-sm text-gray-600 space-y-3">
+									<p>
+										<strong>Data Retention:</strong> Your baby milestone data is stored securely and 
+										is only accessible by you through your account.
+									</p>
+									<p>
+										<strong>Data Export:</strong> Contact our support team if you need to export 
+										your data or delete your account.
+									</p>
+									<p>
+										<strong>Sharing:</strong> Content is only shared when you explicitly generate 
+										and distribute shareable links.
+									</p>
+								</div>
+								<div className="pt-4 border-t border-gray-200">
+									<div className="flex gap-3">
+										<Button variant="outline" size="sm">
+											Request Data Export
+										</Button>
+										<Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50">
+											Delete Account
+										</Button>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					</TabsContent>
+				</Tabs>
 			</div>
 		</Layout>
 	);

@@ -16,12 +16,12 @@ interface UploadOptions {
 	onError?: (error: Error) => void;
 }
 
-export interface UploadResult {
+export type UploadResult = {
 	id: string;
 	url?: string;
 	storage_path: string;
 	is_video: boolean;
-}
+};
 
 export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 	const { user } = useAuth();

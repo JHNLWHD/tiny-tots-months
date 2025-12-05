@@ -109,7 +109,6 @@ const FeaturesSection = () => {
 								title={feature.title}
 								description={feature.description}
 								features={feature.features}
-								imageTitle={feature.imageTitle}
 								colorClass={feature.colorClass}
 								imagePosition={feature.imagePosition}
 								icon={feature.icon}

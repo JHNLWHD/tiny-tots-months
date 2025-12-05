@@ -32,10 +32,6 @@ const MonthCardGrid: React.FC<MonthCardGridProps> = ({
 		return null;
 	}
 
-	if (!showGrid) {
-		return null;
-	}
-
 	return (
 		<div className="space-y-6">
 			{/* Month Timeline Card */}

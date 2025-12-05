@@ -85,7 +85,7 @@ const Home = () => {
 			return;
 		}
 
-		createSubscription();
+		createSubscription("PHP");
 	}, [subscription, createSubscription]);
 
 	// Set first baby as selected when babies load if none is selected

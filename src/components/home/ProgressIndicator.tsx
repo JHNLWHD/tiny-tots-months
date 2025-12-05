@@ -1,22 +1,23 @@
 import { Card } from "@/components/ui/card";
 import { useBabyPhotos } from "@/hooks/useBabyPhotos";
 import { useMilestones } from "@/hooks/useMilestones";
+import { Baby } from "@/hooks/useBabyProfiles";
 import { CheckCircle2, Circle, TrendingUp } from "lucide-react";
 import React, { useMemo } from "react";
 
-interface ProgressData {
+type ProgressData = {
 	totalMonths: number;
 	completedMonths: number;
 	totalMilestones: number;
 	completedMilestones: number;
 	totalPhotos: number;
 	monthsWithContent: number[];
-}
+};
 
-interface ProgressIndicatorProps {
-	selectedBaby?: any;
+type ProgressIndicatorProps = {
+	selectedBaby?: Baby;
 	showDetailed?: boolean;
-}
+};
 
 const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 	selectedBaby,
@@ -25,12 +26,39 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 	// Fetch real data for the selected baby
 	const { photos = [], isLoading: loadingPhotos } = useBabyPhotos(selectedBaby?.id);
 	
-	// Fetch milestones for all months (we'll aggregate them)
-	const allMilestones = [];
-	for (let month = 1; month <= 12; month++) {
-		const { milestones = [] } = useMilestones(selectedBaby?.id, month);
-		allMilestones.push(...milestones);
-	}
+	// Fetch milestones for all months (hooks must be called at top level)
+	const monthlyMilestones = [
+		useMilestones(selectedBaby?.id, 1),
+		useMilestones(selectedBaby?.id, 2),
+		useMilestones(selectedBaby?.id, 3),
+		useMilestones(selectedBaby?.id, 4),
+		useMilestones(selectedBaby?.id, 5),
+		useMilestones(selectedBaby?.id, 6),
+		useMilestones(selectedBaby?.id, 7),
+		useMilestones(selectedBaby?.id, 8),
+		useMilestones(selectedBaby?.id, 9),
+		useMilestones(selectedBaby?.id, 10),
+		useMilestones(selectedBaby?.id, 11),
+		useMilestones(selectedBaby?.id, 12),
+	];
+	
+	// Aggregate all milestones
+	const allMilestones = useMemo(() => {
+		return monthlyMilestones.flatMap(monthData => monthData.milestones || []);
+	}, [
+		monthlyMilestones[0].milestones,
+		monthlyMilestones[1].milestones,
+		monthlyMilestones[2].milestones,
+		monthlyMilestones[3].milestones,
+		monthlyMilestones[4].milestones,
+		monthlyMilestones[5].milestones,
+		monthlyMilestones[6].milestones,
+		monthlyMilestones[7].milestones,
+		monthlyMilestones[8].milestones,
+		monthlyMilestones[9].milestones,
+		monthlyMilestones[10].milestones,
+		monthlyMilestones[11].milestones,
+	]);
 
 	// Calculate real progress data
 	const data: ProgressData = useMemo(() => {
@@ -57,8 +85,8 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 
 		// Add months that have milestones
 		allMilestones.forEach(milestone => {
-			if (milestone.month && milestone.month >= 1 && milestone.month <= 12) {
-				monthsWithContent.add(milestone.month);
+			if (milestone.month_number && milestone.month_number >= 1 && milestone.month_number <= 12) {
+				monthsWithContent.add(milestone.month_number);
 			}
 		});
 

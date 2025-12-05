@@ -39,18 +39,24 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 	showThumbnails = true,
 }) => {
 	const lightboxSlides = useMemo(() => {
-		return photos.map(photo => ({
-			src: photo.url || '',
-			alt: photo.description || `Photo from month ${photo.month_number}`,
-			title: photo.description || `Month ${photo.month_number}`,
-			description: photo.description 
-				? `${photo.description}\n\nMonth ${photo.month_number} • ${new Date(photo.created_at).toLocaleDateString()}`
-				: `Month ${photo.month_number} • ${new Date(photo.created_at).toLocaleDateString()}`,
-			download: {
-				url: photo.url || '',
-				filename: `${babyName}-month-${photo.month_number}-${photo.id}.${photo.is_video ? 'mp4' : 'jpg'}`,
-			},
-		}));
+		return photos.map(photo => {
+			const monthDisplay = photo.month_number ? `Month ${photo.month_number}` : 'Photo';
+			const monthForFilename = photo.month_number || 'unknown';
+			const dateDisplay = new Date(photo.created_at).toLocaleDateString();
+			
+			return {
+				src: photo.url || '',
+				alt: photo.description || `Photo from ${monthDisplay.toLowerCase()}`,
+				title: photo.description || monthDisplay,
+				description: photo.description 
+					? `${photo.description}\n\n${monthDisplay} • ${dateDisplay}`
+					: `${monthDisplay} • ${dateDisplay}`,
+				download: {
+					url: photo.url || '',
+					filename: `${babyName}-month-${monthForFilename}-${photo.id}.${photo.is_video ? 'mp4' : 'jpg'}`,
+				},
+			};
+		});
 	}, [photos, babyName]);
 
 	const plugins = [];

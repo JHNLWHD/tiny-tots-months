@@ -1,11 +1,11 @@
 import { toast } from "@/components/ui/sonner";
 import { fileTypeFromBlob } from "file-type";
 
-export interface FileValidationResult {
+export type FileValidationResult = {
 	isValid: boolean;
 	isVideo: boolean;
 	effectiveMimeType: string;
-}
+};
 
 // Helper function to detect file type from extension as a fallback
 const getMimeTypeFromExtension = (fileName: string): string => {
@@ -108,7 +108,7 @@ const validateWithMimeType = (
 
 	if (isVideo && !isPremium) {
 		toast("Premium Required", {
-			description: "Video uploads are only available for premium users",
+			description: "Video uploads require premium subscription or credits",
 			className: "bg-destructive text-destructive-foreground",
 		});
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };

@@ -4,10 +4,10 @@ import { CheckCircle2, Clock } from "lucide-react";
 import type React from "react";
 import { useNavigate } from "react-router-dom";
 
-interface SubscriptionStatusProps {
+type SubscriptionStatusProps = {
 	isPremium: boolean;
 	isPending: boolean;
-}
+};
 
 export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 	isPremium,
