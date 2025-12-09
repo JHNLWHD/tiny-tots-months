@@ -16,7 +16,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	const [activeTab, setActiveTab] = useState("photos");
 
 	// Get subscription status
-	const { isPremium } = useSubscription();
+	const { isPremium, tier, creditsBalance } = useSubscription();
 
 	// Fetch all babies
 	const { babies, loading: loadingBabies } = useBabyProfiles();
@@ -66,13 +66,16 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		}
 
 		// Check access using CASL abilities
+		// Use stable dependencies: monthNumber, tier, creditsBalance
+		// The abilities object is recreated each render, so we call the method inside the effect
 		const accessCheck = abilities.canAccessMonth(monthNumber);
 		if (!accessCheck.allowed) {
 			abilities.showUpgradePrompt('access', 'Month');
 			navigate("/app");
 			return;
 		}
-	}, [monthNumber, abilities, navigate]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [monthNumber, tier, creditsBalance, navigate]);
 
 	const handleBabySelect = (babyId: string) => {
 		setSelectedBabyId(babyId);
