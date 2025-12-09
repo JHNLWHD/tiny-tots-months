@@ -65,7 +65,7 @@ export const usePaymentIntegration = () => {
 	const processPayment = async (
 		request: PaymentRequest,
 		method: PaymentMethod,
-		proofFile?: File
+		proofPath?: string
 	): Promise<PaymentResult> => {
 		setIsProcessing(true);
 		
@@ -79,6 +79,7 @@ export const usePaymentIntegration = () => {
 					paymentMethod: method.type as PaymentMethodType,
 					transactionType: request.type as TransactionType,
 					description: request.description,
+					paymentProofUrl: proofPath, // Store the uploaded proof storage path
 					metadata: {
 						...request.metadata,
 						paymentMethod: method.name,
@@ -104,7 +105,7 @@ export const usePaymentIntegration = () => {
 				return await processStripePayment(request, paymentTransaction.id);
 			} else {
 				// For manual payment methods (GCash, PayMaya, Bank Transfer, PayPal)
-				return await processManualPayment(request, method, proofFile, paymentTransaction.id);
+				return await processManualPayment(request, method, proofPath, paymentTransaction.id);
 			}
 		} catch (error) {
 			console.error("Payment processing error:", error);
@@ -163,11 +164,11 @@ export const usePaymentIntegration = () => {
 	const processManualPayment = async (
 		request: PaymentRequest,
 		method: PaymentMethod,
-		proofFile: File | undefined,
+		proofPath: string | undefined,
 		transactionId: string
 	): Promise<PaymentResult> => {
 		// For manual payments, we need proof of payment
-		if (!proofFile) {
+		if (!proofPath) {
 			return {
 				success: false,
 				error: "Payment proof is required for this payment method",
@@ -176,20 +177,21 @@ export const usePaymentIntegration = () => {
 			};
 		}
 
-		// Simulate uploading proof and creating pending payment
-		await new Promise(resolve => setTimeout(resolve, 1500));
+		// Simulate processing pending payment
+		await new Promise(resolve => setTimeout(resolve, 500));
 		
 		trackEvent("manual_payment_submitted", {
 			amount: request.amount,
 			currency: request.currency,
 			type: request.type,
 			method: method.type,
-			proofUploaded: true
+			proofUploaded: true,
+			proofPath: proofPath
 		});
 
 		// In a real implementation, you would:
-		// 1. Upload the proof file to storage
-		// 2. Create a pending payment record
+		// 1. The proof file has already been uploaded (proofPath contains the storage path)
+		// 2. The payment transaction record has been created with paymentProofUrl
 		// 3. Notify admin for manual verification
 		// 4. Send confirmation email to user
 		

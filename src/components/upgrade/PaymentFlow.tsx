@@ -93,8 +93,8 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 				});
 			}
 
-			// Process the payment
-			const result = await processPayment(request, selectedMethod, proofFile);
+			// Process the payment - pass the uploaded storage path instead of the raw file
+			const result = await processPayment(request, selectedMethod, uploadedProofPath);
 			
 			setPaymentResult(result);
 
