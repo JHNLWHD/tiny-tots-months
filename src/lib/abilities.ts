@@ -81,17 +81,24 @@ export function createAbilityFor(user: UserContext): AppAbility {
         cannot('create', 'Baby').because('Additional baby profiles require premium subscription or 15 credits');
       }
 
-      // Photo uploads: 10 photos per month for free, then credits required
+      // Photo uploads: 10 photos per month for free, then credits required per batch of 10
       if (user.monthlyPhotoCount < 10) {
         can('upload', 'Photo');
       } else {
-        const extraPhotosNeeded = Math.ceil((user.monthlyPhotoCount - 9) / 10);
-        const creditsNeeded = extraPhotosNeeded * CREDIT_COSTS.EXTRA_PHOTOS;
+        // Check if entering a new batch (photos 11, 21, 31, etc.)
+        const nextPhotoNumber = user.monthlyPhotoCount + 1;
+        const enteringNewBatch = nextPhotoNumber % 10 === 1;
         
-        if (user.creditsBalance >= creditsNeeded) {
-          can('upload', 'Photo');
+        if (enteringNewBatch) {
+          // Need 1 credit to enter the new batch
+          if (user.creditsBalance >= CREDIT_COSTS.EXTRA_PHOTOS) {
+            can('upload', 'Photo');
+          } else {
+            cannot('upload', 'Photo').because(`Photo upload limit reached. Need ${CREDIT_COSTS.EXTRA_PHOTOS} credit to upload more photos (1 credit per 10 photos) or premium subscription`);
+          }
         } else {
-          cannot('upload', 'Photo').because(`Photo upload limit reached. Need ${creditsNeeded} credits or premium subscription`);
+          // Already in a batch, can upload without additional credits
+          can('upload', 'Photo');
         }
       }
 
@@ -155,8 +162,18 @@ export function getRequiredCredits(user: UserContext, action: Actions, subject: 
         return CREDIT_COSTS.VIDEO_UPLOAD;
       }
       if (subject === 'Photo' && user.monthlyPhotoCount >= 10) {
-        const extraPhotosNeeded = Math.ceil((user.monthlyPhotoCount - 9) / 10);
-        return extraPhotosNeeded * CREDIT_COSTS.EXTRA_PHOTOS;
+        // Charge 1 credit only when entering a new batch of 10 photos
+        // Photos 1-10: free
+        // Photos 11-20: 1 credit (charged once when uploading photo 11)
+        // Photos 21-30: 1 credit (charged once when uploading photo 21)
+        // etc.
+        // We charge when (monthlyPhotoCount + 1) % 10 === 1 (i.e., uploading photo 11, 21, 31, etc.)
+        const nextPhotoNumber = user.monthlyPhotoCount + 1;
+        if (nextPhotoNumber % 10 === 1) {
+          return CREDIT_COSTS.EXTRA_PHOTOS;
+        }
+        // If we're already in a batch (photos 12-20, 22-30, etc.), no additional charge
+        return 0;
       }
       break;
     
