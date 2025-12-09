@@ -7,16 +7,7 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { getFileExtension } from "@/components/photoUploader/validateFile";
-
-export type Photo = {
-	id: string;
-	url?: string;
-	description?: string | null;
-	is_video: boolean;
-	month_number?: number;
-	created_at: string;
-	storage_path?: string;
-};
+import type { Photo } from "@/types/photo";
 
 type PhotoLightboxProps = {
 	photos: Photo[];
@@ -64,7 +55,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 
 		const lightboxSlides = useMemo(() => {
 		return photos.map(photo => {
-			const monthDisplay = photo.month_number ? `Month ${photo.month_number}` : 'Photo';
+			const monthDisplay = `Month ${photo.month_number}`;
 			const monthForFilename = photo.month_number || 'unknown';
 			const dateDisplay = new Date(photo.created_at).toLocaleDateString();
 			const fileExtension = getPhotoFileExtension(photo);

@@ -23,23 +23,27 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
 	selectedBaby,
 	showDetailed = false,
 }) => {
-	// Fetch real data for the selected baby
-	const { photos = [], isLoading: loadingPhotos } = useBabyPhotos(selectedBaby?.id);
+	// Ensure hooks are always called with stable, non-undefined values
+	// This prevents React Hooks violations when selectedBaby changes
+	const babyId = selectedBaby?.id ?? '';
 	
-	// Fetch milestones for all months (hooks must be called at top level)
+	// Fetch real data for the selected baby
+	const { photos = [], isLoading: loadingPhotos } = useBabyPhotos(babyId);
+	
+	// Fetch milestones for all months (hooks must be called at top level with stable parameters)
 	const monthlyMilestones = [
-		useMilestones(selectedBaby?.id, 1),
-		useMilestones(selectedBaby?.id, 2),
-		useMilestones(selectedBaby?.id, 3),
-		useMilestones(selectedBaby?.id, 4),
-		useMilestones(selectedBaby?.id, 5),
-		useMilestones(selectedBaby?.id, 6),
-		useMilestones(selectedBaby?.id, 7),
-		useMilestones(selectedBaby?.id, 8),
-		useMilestones(selectedBaby?.id, 9),
-		useMilestones(selectedBaby?.id, 10),
-		useMilestones(selectedBaby?.id, 11),
-		useMilestones(selectedBaby?.id, 12),
+		useMilestones(babyId, 1),
+		useMilestones(babyId, 2),
+		useMilestones(babyId, 3),
+		useMilestones(babyId, 4),
+		useMilestones(babyId, 5),
+		useMilestones(babyId, 6),
+		useMilestones(babyId, 7),
+		useMilestones(babyId, 8),
+		useMilestones(babyId, 9),
+		useMilestones(babyId, 10),
+		useMilestones(babyId, 11),
+		useMilestones(babyId, 12),
 	];
 	
 	// Aggregate all milestones

@@ -2,17 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Trash2 } from "lucide-react";
 import React from "react";
+import type { Photo } from "@/types/photo";
 import HeicImage from "./HeicImage";
-
-export type Photo = {
-	id: string;
-	url?: string;
-	description?: string | null;
-	is_video: boolean;
-	month_number?: number;
-	created_at: string;
-	storage_path?: string;
-};
 
 type PhotoCardProps = {
 	photo: Photo;
@@ -80,7 +71,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 					</div>
 				)}
 				
-				{showMonthBadge && photo.month_number && (
+				{showMonthBadge && (
 					<div className="absolute top-2 left-2 bg-baby-purple/90 text-white text-xs px-2 py-1 rounded-full">
 						Month {photo.month_number}
 					</div>
