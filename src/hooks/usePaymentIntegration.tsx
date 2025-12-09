@@ -5,6 +5,7 @@ import { PAYMENT_CONFIG, getSupportedCurrencies } from "@/config/payment";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
 import { toCents, formatCentsAmount } from "@/utils/currency";
 import type { PaymentMethodType, TransactionType } from "@/hooks/usePaymentTracking";
+import { loadStripe, Stripe, StripeCardElement, StripeElements } from "@stripe/stripe-js";
 
 export type PaymentMethod = {
 	type: "gcash" | "stripe";
@@ -20,6 +21,12 @@ export type PaymentRequest = {
 	type: "credits" | "subscription" | "lifetime";
 	description: string;
 	metadata?: Record<string, any>;
+};
+
+export type StripePaymentData = {
+	paymentMethodId?: string; // For Payment Intents API
+	clientSecret?: string; // Payment Intent client secret from backend
+	cardElement?: StripeCardElement; // For direct card element confirmation
 };
 
 export type PaymentResult = {
@@ -65,7 +72,8 @@ export const usePaymentIntegration = () => {
 	const processPayment = async (
 		request: PaymentRequest,
 		method: PaymentMethod,
-		proofPath?: string
+		proofPath?: string,
+		stripeData?: StripePaymentData
 	): Promise<PaymentResult> => {
 		setIsProcessing(true);
 		
@@ -96,8 +104,7 @@ export const usePaymentIntegration = () => {
 
 			// Process payment based on method
 			if (method.type === "stripe") {
-				// In a real implementation, this would integrate with Stripe
-				return await processStripePayment(request, paymentTransaction.id);
+				return await processStripePayment(request, paymentTransaction.id, stripeData);
 			} else {
 				// For manual payment methods (GCash, PayMaya, Bank Transfer, PayPal)
 				return await processManualPayment(request, method, proofPath, paymentTransaction.id);
@@ -121,37 +128,172 @@ export const usePaymentIntegration = () => {
 		}
 	};
 
-	const processStripePayment = async (request: PaymentRequest, transactionId: string): Promise<PaymentResult> => {
-		// Simulate Stripe integration
-		// In a real implementation, you would:
-		// 1. Create a Stripe payment intent
-		// 2. Handle 3D Secure if needed
-		// 3. Confirm the payment
-		// 4. Handle webhooks for completion
-		
-		await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
-		
-		// Simulate success/failure
-		const success = Math.random() > 0.1; // 90% success rate for demo
-		
-		if (success) {
-			trackEvent("payment_completed", {
+	const processStripePayment = async (
+		request: PaymentRequest,
+		transactionId: string,
+		stripeData?: StripePaymentData
+	): Promise<PaymentResult> => {
+		// Validate Stripe configuration
+		if (!PAYMENT_CONFIG.stripePublishableKey) {
+			const errorMsg = "Stripe is not configured. Please contact support.";
+			trackEvent("payment_error", {
 				amount: request.amount,
 				currency: request.currency,
 				type: request.type,
 				method: "stripe",
-				paymentId: `stripe_${Date.now()}`
+				error: errorMsg
 			});
-			
-			return {
-				success: true,
-				paymentId: `stripe_${Date.now()}`,
-				transactionId: transactionId,
-			};
-		} else {
 			return {
 				success: false,
-				error: "Payment was declined by your bank. Please try a different card."
+				error: errorMsg
+			};
+		}
+
+		// Load Stripe instance
+		const stripe = await loadStripe(PAYMENT_CONFIG.stripePublishableKey);
+		if (!stripe) {
+			const errorMsg = "Failed to initialize Stripe. Please refresh the page and try again.";
+			trackEvent("payment_error", {
+				amount: request.amount,
+				currency: request.currency,
+				type: request.type,
+				method: "stripe",
+				error: errorMsg
+			});
+			return {
+				success: false,
+				error: errorMsg
+			};
+		}
+
+		try {
+			// Convert amount to cents for Stripe
+			const amountInCents = toCents(request.amount);
+
+			// Method 1: Payment Intent with client secret (recommended, requires backend)
+			if (stripeData?.clientSecret) {
+				const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+					stripeData.clientSecret,
+					{
+						payment_method: stripeData.paymentMethodId || undefined,
+					}
+				);
+
+				if (confirmError) {
+					trackEvent("payment_error", {
+						amount: request.amount,
+						currency: request.currency,
+						type: request.type,
+						method: "stripe",
+						error: confirmError.message || "Payment confirmation failed"
+					});
+
+					return {
+						success: false,
+						error: confirmError.message || "Payment confirmation failed. Please try again."
+					};
+				}
+
+				if (paymentIntent && paymentIntent.status === "succeeded") {
+					trackEvent("payment_completed", {
+						amount: request.amount,
+						currency: request.currency,
+						type: request.type,
+						method: "stripe",
+						paymentId: paymentIntent.id
+					});
+
+					return {
+						success: true,
+						paymentId: paymentIntent.id,
+						transactionId: transactionId,
+					};
+				}
+
+				// Handle other payment intent statuses
+				if (paymentIntent?.status === "requires_action") {
+					return {
+						success: false,
+						error: "Additional authentication required. Please complete the verification."
+					};
+				}
+
+				return {
+					success: false,
+					error: `Payment status: ${paymentIntent?.status}. Please try again.`
+				};
+			}
+
+			// Method 2: Direct card element confirmation (requires card element)
+			if (stripeData?.cardElement) {
+				// Create payment method from card element
+				const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({
+					type: "card",
+					card: stripeData.cardElement,
+				});
+
+				if (pmError || !paymentMethod) {
+					trackEvent("payment_error", {
+						amount: request.amount,
+						currency: request.currency,
+						type: request.type,
+						method: "stripe",
+						error: pmError?.message || "Failed to create payment method"
+					});
+
+					return {
+						success: false,
+						error: pmError?.message || "Failed to process card. Please check your card details and try again."
+					};
+				}
+
+				// NOTE: This requires a backend endpoint to create a Payment Intent
+				// For now, return an error indicating backend is required
+				const errorMsg = "Backend payment endpoint required. Please implement a Payment Intent creation endpoint.";
+				console.error(errorMsg);
+				trackEvent("payment_error", {
+					amount: request.amount,
+					currency: request.currency,
+					type: request.type,
+					method: "stripe",
+					error: errorMsg
+				});
+
+				return {
+					success: false,
+					error: "Payment processing is not fully configured. Please contact support."
+				};
+			}
+
+			// No valid payment data provided
+			const errorMsg = "Payment method data is required for Stripe payments.";
+			trackEvent("payment_error", {
+				amount: request.amount,
+				currency: request.currency,
+				type: request.type,
+				method: "stripe",
+				error: errorMsg
+			});
+
+			return {
+				success: false,
+				error: errorMsg
+			};
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during payment processing.";
+			console.error("Stripe payment error:", error);
+			
+			trackEvent("payment_error", {
+				amount: request.amount,
+				currency: request.currency,
+				type: request.type,
+				method: "stripe",
+				error: errorMessage
+			});
+
+			return {
+				success: false,
+				error: errorMessage
 			};
 		}
 	};
