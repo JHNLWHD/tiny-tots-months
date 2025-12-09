@@ -62,12 +62,14 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 		return '';
 	};
 
-	const lightboxSlides = useMemo(() => {
+		const lightboxSlides = useMemo(() => {
 		return photos.map(photo => {
 			const monthDisplay = photo.month_number ? `Month ${photo.month_number}` : 'Photo';
 			const monthForFilename = photo.month_number || 'unknown';
 			const dateDisplay = new Date(photo.created_at).toLocaleDateString();
 			const fileExtension = getPhotoFileExtension(photo);
+			const filenameBase = `${babyName}-month-${monthForFilename}-${photo.id}`;
+			const filename = fileExtension ? `${filenameBase}.${fileExtension}` : filenameBase;
 			
 			return {
 				src: photo.url || '',
@@ -78,7 +80,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 					: `${monthDisplay} • ${dateDisplay}`,
 				download: {
 					url: photo.url || '',
-					filename: `${babyName}-month-${monthForFilename}-${photo.id}.${fileExtension}`,
+					filename: filename,
 				},
 			};
 		});
