@@ -64,20 +64,34 @@ export const useAbilities = (context?: Partial<UserContext>) => {
 
     if (abilityCheck.creditsRequired) {
       // Action requires credits
-      try {
-        // Spend credits first (mutateAsync returns a promise)
-        await spendCredits({
-          amount: abilityCheck.creditsRequired!,
-          description: description || `${action} ${subject}`
-        });
+      // First verify user has enough credits (without spending yet)
+      if ((creditsBalance || 0) < abilityCheck.creditsRequired) {
+        toast.error(`Insufficient credits. You need ${abilityCheck.creditsRequired} credits for this action.`);
+        return false;
+      }
 
-        // Then execute the action
+      try {
+        // Execute the action first - if this fails, credits are never deducted
         await executeFunction();
-        return true;
+
+        // Action succeeded - now spend credits
+        try {
+          await spendCredits({
+            amount: abilityCheck.creditsRequired!,
+            description: description || `${action} ${subject}`
+          });
+          return true;
+        } catch (creditError) {
+          // Action succeeded but credit deduction failed - critical error
+          console.error('Action succeeded but failed to deduct credits:', creditError);
+          toast.error('Action completed but credit deduction failed. Please contact support.');
+          return true;
+        }
       } catch (error) {
-        console.error('Error executing action with credits:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Action failed. Please try again.';
-        toast.error(errorMessage);
+        // Action failed - credits were never deducted, so no refund needed
+        const actionError = error instanceof Error ? error : new Error(String(error));
+        console.error('Error executing action with credits:', actionError);
+        toast.error(actionError.message || 'Action failed. Please try again.');
         return false;
       }
     } else {
