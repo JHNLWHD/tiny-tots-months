@@ -7,9 +7,24 @@ export type FileValidationResult = {
 	effectiveMimeType: string;
 };
 
+// Helper function to extract file extension from a filename or path
+export const getFileExtension = (fileName: string): string => {
+	if (!fileName) return '';
+	
+	const pathWithoutQuery = fileName.split('?')[0];
+	const extension = pathWithoutQuery.split('.').pop()?.toLowerCase() || '';
+	const isValidExtension = extension && extension.length > 0 && extension.length <= 5;
+	
+	if (isValidExtension) {
+		return extension;
+	}
+	
+	return '';
+};
+
 // Helper function to detect file type from extension as a fallback
 const getMimeTypeFromExtension = (fileName: string): string => {
-	const extension = fileName.split('.').pop()?.toLowerCase() || '';
+	const extension = getFileExtension(fileName);
 	
 	const extensionMap: Record<string, string> = {
 		// Image formats

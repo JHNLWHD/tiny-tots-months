@@ -6,6 +6,7 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
+import { getFileExtension } from "@/components/photoUploader/validateFile";
 
 export type Photo = {
 	id: string;
@@ -38,11 +39,35 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 	showDownload = true,
 	showThumbnails = true,
 }) => {
+	// Helper function to extract file extension from storage_path or URL
+	const getPhotoFileExtension = (photo: Photo): string => {
+		const hasStoragePath = photo.storage_path !== undefined && photo.storage_path !== null && photo.storage_path !== '';
+		if (hasStoragePath) {
+			const ext = getFileExtension(photo.storage_path);
+			const hasValidExtension = ext !== '';
+			if (hasValidExtension) {
+				return ext;
+			}
+		}
+
+		const hasUrl = photo.url !== undefined && photo.url !== null && photo.url !== '';
+		if (hasUrl) {
+			const ext = getFileExtension(photo.url);
+			const hasValidExtension = ext !== '';
+			if (hasValidExtension) {
+				return ext;
+			}
+		}
+
+		return '';
+	};
+
 	const lightboxSlides = useMemo(() => {
 		return photos.map(photo => {
 			const monthDisplay = photo.month_number ? `Month ${photo.month_number}` : 'Photo';
 			const monthForFilename = photo.month_number || 'unknown';
 			const dateDisplay = new Date(photo.created_at).toLocaleDateString();
+			const fileExtension = getPhotoFileExtension(photo);
 			
 			return {
 				src: photo.url || '',
@@ -53,7 +78,7 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 					: `${monthDisplay} • ${dateDisplay}`,
 				download: {
 					url: photo.url || '',
-					filename: `${babyName}-month-${monthForFilename}-${photo.id}.${photo.is_video ? 'mp4' : 'jpg'}`,
+					filename: `${babyName}-month-${monthForFilename}-${photo.id}.${fileExtension}`,
 				},
 			};
 		});
