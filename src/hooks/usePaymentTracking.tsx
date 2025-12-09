@@ -258,7 +258,7 @@ export const usePaymentTracking = () => {
 		isProcessing,
 		
 		// Actions
-		createPaymentTransaction: createPaymentTransaction.mutate,
+		createPaymentTransaction: createPaymentTransaction.mutateAsync,
 		updatePaymentTransaction: updatePaymentTransaction.mutate,
 		getPaymentTransaction,
 		linkPaymentToResource,

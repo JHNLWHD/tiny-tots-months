@@ -72,23 +72,18 @@ export const usePaymentIntegration = () => {
 		try {
 			// First, create a payment transaction record (convert amount to cents)
 			const amountInCents = toCents(request.amount);
-			const paymentTransaction = await new Promise<any>((resolve, reject) => {
-				createPaymentTransaction({
-					amount: amountInCents,
-					currency: request.currency,
-					paymentMethod: method.type as PaymentMethodType,
-					transactionType: request.type as TransactionType,
-					description: request.description,
-					paymentProofUrl: proofPath, // Store the uploaded proof storage path
-					metadata: {
-						...request.metadata,
-						paymentMethod: method.name,
-						originalAmount: request.amount, // Store original amount for reference
-					}
-				});
-				// Note: In a real implementation, you'd wait for the mutation to complete
-				// For now, we'll simulate with a timeout
-				setTimeout(() => resolve({ id: `txn_${Date.now()}` }), 100);
+			const paymentTransaction = await createPaymentTransaction({
+				amount: amountInCents,
+				currency: request.currency,
+				paymentMethod: method.type as PaymentMethodType,
+				transactionType: request.type as TransactionType,
+				description: request.description,
+				paymentProofUrl: proofPath, // Store the uploaded proof storage path
+				metadata: {
+					...request.metadata,
+					paymentMethod: method.name,
+					originalAmount: request.amount, // Store original amount for reference
+				}
 			});
 
 			trackEvent("payment_initiated", {
