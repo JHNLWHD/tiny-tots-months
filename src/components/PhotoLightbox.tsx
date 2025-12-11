@@ -95,14 +95,21 @@ const PhotoLightbox: React.FC<PhotoLightboxProps> = ({
 			} : undefined}
 			download={showDownload ? {
 				download: async ({ slide }) => {
-					if (slide.download && typeof slide.download === 'object' && 'url' in slide.download) {
+					const download = slide.download;
+					if (!download || typeof download !== 'object' || !('url' in download)) return;
+					
+					try {
+						const blob = await fetch(download.url).then(r => r.blob());
+						const url = URL.createObjectURL(blob);
 						const link = document.createElement('a');
-						link.href = slide.download.url;
-						link.download = slide.download.filename || 'photo';
-						link.target = '_blank';
+						link.href = url;
+						link.download = download.filename || 'photo';
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
+						setTimeout(() => URL.revokeObjectURL(url), 100);
+					} catch (error) {
+						console.error('Download failed:', error);
 					}
 				},
 			} : undefined}
