@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useSubscription } from './useSubscription';
 import { 
   createAbilityFor, 
-  checkAbility, 
+  checkAbility,
+  hasCreditsRequired,
   type Actions, 
   type Subjects, 
   type AppAbility,
@@ -56,13 +57,14 @@ export const useAbilities = (context?: Partial<UserContext>) => {
   ): Promise<boolean> => {
     const abilityCheck = check(action, subject);
 
-    if (!abilityCheck.allowed && !abilityCheck.creditsRequired) {
-      // Action not allowed and no credits can help
+    if (!abilityCheck.allowed && abilityCheck.creditsRequired === null) {
+      // Action not allowed and no credits can help (premium-only feature)
       toast.error(abilityCheck.reason || 'Action not permitted');
       return false;
     }
 
-    if (abilityCheck.creditsRequired) {
+    const needsCredits = hasCreditsRequired(abilityCheck.creditsRequired);
+    if (needsCredits) {
       // Action requires credits
       // First verify user has enough credits (without spending yet)
       if ((creditsBalance || 0) < abilityCheck.creditsRequired) {
@@ -113,7 +115,7 @@ export const useAbilities = (context?: Partial<UserContext>) => {
     
     let message = abilityCheck.reason || 'This action requires an upgrade';
     
-    if (abilityCheck.creditsRequired) {
+    if (hasCreditsRequired(abilityCheck.creditsRequired)) {
       message += ` You need ${abilityCheck.creditsRequired} credits or can upgrade to premium.`;
     }
 

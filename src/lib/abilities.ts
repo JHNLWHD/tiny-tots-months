@@ -193,6 +193,13 @@ export function getForbiddenReason(ability: AppAbility, action: Actions, subject
 }
 
 /**
+ * Helper function to check if credits are required (non-null and greater than 0)
+ */
+export function hasCreditsRequired(creditsRequired: number | null): boolean {
+  return creditsRequired !== null && creditsRequired > 0;
+}
+
+/**
  * Helper function to check abilities with detailed results
  */
 export function checkAbility(ability: AppAbility, action: Actions, subject: Subjects, user?: UserContext) {
@@ -204,6 +211,6 @@ export function checkAbility(ability: AppAbility, action: Actions, subject: Subj
     allowed,
     creditsRequired,
     reason,
-    requiresUpgrade: !allowed && !creditsRequired,
+    requiresUpgrade: !allowed && creditsRequired === null,
   };
 }

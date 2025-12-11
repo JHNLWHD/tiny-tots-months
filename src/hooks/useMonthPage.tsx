@@ -5,6 +5,7 @@ import { useMilestones } from "@/hooks/useMilestones";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAbilities } from "@/hooks/useAbilities";
+import { hasCreditsRequired } from "@/lib/abilities";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -101,7 +102,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		const photoAbilityCheck = abilities.check('upload', 'Photo');
 		
 		// If credits are required (even if allowed is true), use executeWithAbility to spend credits
-		if (photoAbilityCheck.creditsRequired) {
+		if (hasCreditsRequired(photoAbilityCheck.creditsRequired)) {
 			// Execute with credits using abilities system
 			const success = await abilities.executeWithAbility(
 				'upload',
