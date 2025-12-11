@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { trackEvent } from "@/lib/analytics";
+import { getDefaultCurrency } from "@/config/payment";
 
 export type AnalyticsData = {
 	totalCreditsEarned: number;
@@ -10,6 +11,7 @@ export type AnalyticsData = {
 	creditBalance: number;
 	subscriptionValue: number;
 	lifetimeValue: number;
+	currency: "PHP" | "USD"; // User's currency for displaying lifetime value
 	featureUsage: {
 		photosUploaded: number;
 		videosUploaded: number;
@@ -168,6 +170,11 @@ export const useAnalytics = () => {
 				churnRisk = "high";
 			}
 
+			// Determine user's currency from payment transactions (use most recent completed payment, or default)
+			const userCurrency: "PHP" | "USD" = completedPayments.length > 0 
+				? (completedPayments[0].currency as "PHP" | "USD") || getDefaultCurrency()
+				: getDefaultCurrency();
+
 			return {
 				totalCreditsEarned,
 				totalCreditsSpent,
@@ -176,6 +183,7 @@ export const useAnalytics = () => {
 				// Lifetime value: subscription value + actual credit purchases + estimated credit value (all in cents)
 				// Note: totalPaid already includes subscription and credit payments, so we use the breakdown here
 				lifetimeValue: subscriptionValue + creditPurchaseValue + estimatedCreditValue,
+				currency: userCurrency,
 				featureUsage: {
 					photosUploaded,
 					videosUploaded,

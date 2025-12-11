@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useSubscription } from "@/hooks/useSubscription";
+import { formatCentsAmount } from "@/utils/currency";
 import { 
 	TrendingUp, 
 	Zap, 
@@ -91,8 +92,8 @@ export const AnalyticsDashboard: React.FC = () => {
 							<p className="text-sm text-gray-600">Lifetime Value</p>
 							<p className="text-lg font-semibold">
 								{analyticsData.lifetimeValue > 0 
-									? `$${analyticsData.lifetimeValue.toFixed(2)}`
-									: "$0"
+									? formatCentsAmount(analyticsData.lifetimeValue, analyticsData.currency)
+									: formatCentsAmount(0, analyticsData.currency)
 								}
 							</p>
 						</div>
