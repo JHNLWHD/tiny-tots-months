@@ -139,6 +139,22 @@ export const useAnalytics = () => {
 				return acc;
 			}, {} as Record<string, number>);
 
+			// Calculate credit purchase value from actual payment transactions
+			// Credit transactions have payment_transaction_id linking to payment_transactions
+			const creditPurchaseValue = creditTransactions
+				?.filter(t => t.transaction_type === "purchase" && t.payment_transaction_id)
+				.reduce((sum, ct) => {
+					const payment = paymentTransactions?.find(pt => pt.id === ct.payment_transaction_id && pt.status === "completed");
+					return sum + (payment?.amount_in_cents || 0);
+				}, 0) || 0;
+
+			// For credits without linked payment transactions, estimate value
+			// Using $0.05 per credit = 5 cents per credit (converted from dollars to cents)
+			const creditsWithoutPayment = totalCreditsEarned - (creditTransactions
+				?.filter(t => t.transaction_type === "purchase" && t.payment_transaction_id)
+				.reduce((sum, t) => sum + t.amount, 0) || 0);
+			const estimatedCreditValue = creditsWithoutPayment * 5; // 5 cents per credit
+
 			// Calculate churn risk
 			const daysSinceCreation = subscription?.created_at 
 				? Math.floor((Date.now() - new Date(subscription.created_at).getTime()) / (1000 * 60 * 60 * 24))
@@ -157,7 +173,9 @@ export const useAnalytics = () => {
 				totalCreditsSpent,
 				creditBalance: userCredits?.credits_balance || 0,
 				subscriptionValue,
-				lifetimeValue: subscriptionValue + totalPaid + (totalCreditsEarned * 0.05), // Include actual payments in LTV
+				// Lifetime value: subscription value + actual credit purchases + estimated credit value (all in cents)
+				// Note: totalPaid already includes subscription and credit payments, so we use the breakdown here
+				lifetimeValue: subscriptionValue + creditPurchaseValue + estimatedCreditValue,
 				featureUsage: {
 					photosUploaded,
 					videosUploaded,
