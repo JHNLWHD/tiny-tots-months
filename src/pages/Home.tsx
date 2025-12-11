@@ -68,7 +68,7 @@ const Home = () => {
 	};
 
 	function handleOnAddBaby() {
-		if (isFree && !isPremium) {
+		if (isFree && !isPremium && babies.length >= 1) {
 			toast("Premium Required", {
 				description:
 					"Free users can only add 1 baby profile. Upgrade to Premium to create unlimited baby profiles.",
