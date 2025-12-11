@@ -83,7 +83,7 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 			let uploadedProofPath: string | undefined;
 
 			// Upload proof if required and provided
-			if (proofFile && selectedMethod.type !== "stripe") {
+			if (proofFile) {
 				uploadedProofPath = await new Promise<string>((resolve, reject) => {
 					uploadPaymentProof(proofFile, {
 						description: `Payment proof for ${request.description}`,
@@ -172,34 +172,32 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 				</div>
 			</div>
 
-			{selectedMethod?.type !== "stripe" && (
-				<div className="space-y-4">
-					<div>
-						<Label htmlFor="proof">Upload Payment Receipt/Proof *</Label>
-						<Input
-							id="proof"
-							type="file"
-							accept="image/*,.pdf"
-							onChange={handleProofUpload}
-							className="mt-1"
-						/>
-						<p className="text-xs text-gray-500 mt-1">
-							Accepted formats: JPG, PNG, PDF (max 10MB)
-						</p>
-					</div>
-
-					<div>
-						<Label htmlFor="notes">Additional Notes (Optional)</Label>
-						<Textarea
-							id="notes"
-							value={notes}
-							onChange={(e) => setNotes(e.target.value)}
-							placeholder="Any additional information about your payment..."
-							className="mt-1"
-						/>
-					</div>
+			<div className="space-y-4">
+				<div>
+					<Label htmlFor="proof">Upload Payment Receipt/Proof *</Label>
+					<Input
+						id="proof"
+						type="file"
+						accept="image/*,.pdf"
+						onChange={handleProofUpload}
+						className="mt-1"
+					/>
+					<p className="text-xs text-gray-500 mt-1">
+						Accepted formats: JPG, PNG, PDF (max 10MB)
+					</p>
 				</div>
-			)}
+
+				<div>
+					<Label htmlFor="notes">Additional Notes (Optional)</Label>
+					<Textarea
+						id="notes"
+						value={notes}
+						onChange={(e) => setNotes(e.target.value)}
+						placeholder="Any additional information about your payment..."
+						className="mt-1"
+					/>
+				</div>
+			</div>
 
 			<div className="flex gap-3 mt-6">
 				<Button variant="outline" onClick={() => setStep("method")} className="flex-1">
@@ -207,10 +205,10 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 				</Button>
 				<Button 
 					onClick={handlePayment}
-					disabled={selectedMethod?.type !== "stripe" && !proofFile}
+					disabled={!proofFile}
 					className="flex-1"
 				>
-					{selectedMethod?.type === "stripe" ? "Pay Now" : "Submit Payment"}
+					Submit Payment
 				</Button>
 			</div>
 		</Card>
@@ -221,10 +219,7 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 			<Loader2 className="w-12 h-12 text-baby-purple mx-auto mb-4 animate-spin" />
 			<h3 className="text-lg font-semibold mb-2">Processing Payment</h3>
 			<p className="text-gray-600">
-				{selectedMethod?.type === "stripe" 
-					? "Securely processing your payment..."
-					: "Uploading payment proof and submitting for verification..."
-				}
+				Uploading payment proof and submitting for verification...
 			</p>
 		</Card>
 	);
@@ -236,15 +231,13 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 			<p className="text-gray-600 mb-4">
 				{paymentResult?.instructions || "Your payment has been processed successfully."}
 			</p>
-			{selectedMethod?.type !== "stripe" && (
-				<div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm">
-					<p className="font-medium text-blue-800 mb-1">What happens next?</p>
-					<p className="text-blue-700">
-						We'll verify your payment within 24 hours and activate your purchase. 
-						You'll receive an email confirmation once it's complete.
-					</p>
-				</div>
-			)}
+			<div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm">
+				<p className="font-medium text-blue-800 mb-1">What happens next?</p>
+				<p className="text-blue-700">
+					We'll verify your payment within 24 hours and activate your purchase. 
+					You'll receive an email confirmation once it's complete.
+				</p>
+			</div>
 		</Card>
 	);
 

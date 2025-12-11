@@ -65,8 +65,6 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 		switch (method) {
 			case "gcash":
 				return "💳";
-			case "stripe":
-				return "💳";
 			case "legacy_migration":
 				return "📋";
 			default:

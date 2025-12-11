@@ -11,7 +11,7 @@ type PaymentTransactionInsert = Database["public"]["Tables"]["payment_transactio
 type PaymentTransactionUpdate = Database["public"]["Tables"]["payment_transactions"]["Update"];
 
 export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
-export type PaymentMethodType = "gcash" | "stripe";
+export type PaymentMethodType = "gcash";
 export type TransactionType = "credits" | "subscription" | "lifetime";
 
 export type CreatePaymentTransactionData = {

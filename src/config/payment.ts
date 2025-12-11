@@ -11,9 +11,6 @@ export const PAYMENT_CONFIG = {
   // PHP Payment Details
   gcashNumber: import.meta.env.VITE_GCASH_NUMBER || "0917-123-4567",
   
-  // USD Payment Details
-  stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "",
-  
   // Business Details
   businessName: import.meta.env.VITE_BUSINESS_NAME || "Tiny Tots Milestones",
 } as const;
