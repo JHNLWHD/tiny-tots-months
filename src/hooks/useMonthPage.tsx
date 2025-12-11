@@ -6,6 +6,7 @@ import { usePhotos } from "@/hooks/usePhotos";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useAbilities } from "@/hooks/useAbilities";
 import { hasCreditsRequired } from "@/lib/abilities";
+import { CreatePhotoData } from "@/types/photo";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -92,21 +93,25 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	// Find the selected baby for sharing
 	const selectedBaby = babies.find((baby) => baby.id === selectedBabyId);
 
-	const uploadPhoto = async (data) => {
+	const uploadPhoto = async (data: CreatePhotoData) => {
 		if (!selectedBabyId) {
 			console.error("Cannot upload: No baby selected");
 			return null;
 		}
 
-		// Check photo upload permissions using CASL abilities
-		const photoAbilityCheck = abilities.check('upload', 'Photo');
+		// Determine the subject type based on whether it's a video or photo
+		const subject: 'Photo' | 'Video' = data.is_video ? 'Video' : 'Photo';
+		const uploadType = data.is_video ? 'video' : 'photo';
+
+		// Check upload permissions using CASL abilities (Video vs Photo have different rules)
+		const abilityCheck = abilities.check('upload', subject);
 		
 		// If credits are required (even if allowed is true), use executeWithAbility to spend credits
-		if (hasCreditsRequired(photoAbilityCheck.creditsRequired)) {
+		if (hasCreditsRequired(abilityCheck.creditsRequired)) {
 			// Execute with credits using abilities system
 			const success = await abilities.executeWithAbility(
 				'upload',
-				'Photo',
+				subject,
 				async () => {
 					return await uploadPhotoApi({
 						file: data.file,
@@ -116,14 +121,14 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 						is_video: data.is_video,
 					});
 				},
-				`Photo upload for month ${monthNumber}`
+				`${uploadType.charAt(0).toUpperCase() + uploadType.slice(1)} upload for month ${monthNumber}`
 			);
 			return success ? "success" : null;
 		}
 		
 		// If not allowed and no credits can help, show upgrade prompt
-		if (!photoAbilityCheck.allowed) {
-			abilities.showUpgradePrompt('upload', 'Photo');
+		if (!abilityCheck.allowed) {
+			abilities.showUpgradePrompt('upload', subject);
 			return null;
 		}
 
