@@ -109,21 +109,24 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		// If credits are required (even if allowed is true), use executeWithAbility to spend credits
 		if (hasCreditsRequired(abilityCheck.creditsRequired)) {
 			// Execute with credits using abilities system
+			// Capture the result from uploadPhotoApi to return it
+			let uploadResult: Awaited<ReturnType<typeof uploadPhotoApi>> | null = null;
 			const success = await abilities.executeWithAbility(
 				'upload',
 				subject,
 				async () => {
-					return await uploadPhotoApi({
+					uploadResult = await uploadPhotoApi({
 						file: data.file,
 						baby_id: selectedBabyId,
 						month_number: monthNumber,
 						description: data.description,
 						is_video: data.is_video,
 					});
+					return uploadResult;
 				},
 				`${uploadType.charAt(0).toUpperCase() + uploadType.slice(1)} upload for month ${monthNumber}`
 			);
-			return success ? "success" : null;
+			return success ? uploadResult : null;
 		}
 		
 		// If not allowed and no credits can help, show upgrade prompt
