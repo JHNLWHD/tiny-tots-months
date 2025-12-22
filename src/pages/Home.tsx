@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAbilities } from "@/hooks/useAbilities";
 import React, { useEffect } from "react";
 
 import AddBabyDialog from "@/components/home/AddBabyDialog";
@@ -21,6 +22,7 @@ const Home = () => {
 	} = useBabyProfiles();
 	const { isPremium, isFree, createSubscription, subscription } =
 		useSubscription();
+	const abilities = useAbilities({ babyCount: babies.length });
 	const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 	const [selectedBaby, setSelectedBaby] = React.useState(null);
 
@@ -68,12 +70,12 @@ const Home = () => {
 	};
 
 	function handleOnAddBaby() {
-		if (isFree && !isPremium && babies.length >= 1) {
-			toast("Premium Required", {
-				description:
-					"Free users can only add 1 baby profile. Upgrade to Premium to create unlimited baby profiles.",
-				className: "bg-destructive text-destructive-foreground",
-			});
+		const abilityCheck = abilities.canCreateBaby();
+		
+		if (!abilityCheck.allowed) {
+			// Use the abilities system to show the proper error message
+			// This will include credit-based alternatives if applicable
+			abilities.showUpgradePrompt('create', 'Baby');
 			return;
 		}
 
