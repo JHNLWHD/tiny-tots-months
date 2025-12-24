@@ -50,6 +50,7 @@ const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 								title={milestone.milestone_text.split("\n")[0] || "Milestone"}
 								description={milestone.milestone_text}
 								icon={<Star className="h-4 sm:h-5 w-4 sm:w-5" />}
+								onDelete={() => deleteMilestone(milestone.id)}
 							/>
 						))}
 					</div>
@@ -74,6 +75,7 @@ const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 				monthNumber={monthNumber}
 				onSubmit={createMilestone}
 				isSubmitting={isCreatingMilestone}
+				existingMilestones={milestones}
 			/>
 
 			{!hasMilestones && (
