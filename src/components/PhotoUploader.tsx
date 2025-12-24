@@ -10,7 +10,7 @@ import FileSelector from "./photoUploader/FileSelector";
 import MediaPreview from "./photoUploader/MediaPreview";
 import { validateFile } from "./photoUploader/validateFile";
 
-interface PhotoUploaderProps {
+type PhotoUploaderProps = {
 	babyId: string;
 	month: number;
 	onUploadComplete: () => void;

@@ -5,12 +5,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
-interface UploadOptions {
+type UploadOptions = {
 	description?: string;
 	onProgress?: (progress: number) => void;
 	onSuccess?: (storagePath: string) => void;
 	onError?: (error: Error) => void;
-}
+};
 
 export const usePaymentProofUpload = () => {
 	const { user } = useAuth();

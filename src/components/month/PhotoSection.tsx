@@ -17,7 +17,7 @@ import { useState } from "react";
 type SortOption = "newest" | "oldest" | "description";
 type ViewMode = "grid" | "collage";
 
-interface PhotoSectionProps {
+type PhotoSectionProps = {
 	babyId: string;
 	monthNumber: number;
 	photos: Photo[];
@@ -26,7 +26,7 @@ interface PhotoSectionProps {
 	deletePhoto: (photo: Photo) => void;
 	refetchPhotos: () => void;
 	isLoading: boolean;
-}
+};
 
 const PhotoSection: React.FC<PhotoSectionProps> = ({
 	babyId,

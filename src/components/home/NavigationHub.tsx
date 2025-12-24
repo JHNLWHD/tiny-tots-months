@@ -19,13 +19,13 @@ import {
 import React from "react";
 import { Link } from "react-router-dom";
 
-interface NavigationHubProps {
+type NavigationHubProps = {
 	selectedBaby: any;
 	babies: any[];
 	onSelectBaby: (baby: any) => void;
 	onAddBaby: () => void;
 	onDeleteBaby?: (baby: any) => void;
-}
+};
 
 const NavigationHub: React.FC<NavigationHubProps> = ({
 	selectedBaby,

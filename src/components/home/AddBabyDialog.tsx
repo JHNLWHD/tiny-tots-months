@@ -19,7 +19,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface AddBabyDialogProps {
+type AddBabyDialogProps = {
 	isOpen: boolean;
 	setIsOpen: (isOpen: boolean) => void;
 	createBaby: (data: {

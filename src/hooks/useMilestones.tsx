@@ -29,7 +29,8 @@ export const useMilestones = (babyId?: string, monthNumber?: number) => {
 			.from("milestone")
 			.select("*")
 			.eq("baby_id", babyId)
-			.eq("month_number", monthNumber);
+			.eq("month_number", monthNumber)
+			.order("created_at", { ascending: false });
 
 		const { data, error } = await query;
 
@@ -42,7 +43,14 @@ export const useMilestones = (babyId?: string, monthNumber?: number) => {
 			throw error;
 		}
 
-		return data || [];
+		// Fallback sort by created_at in case database doesn't sort
+		const sorted = (data || []).sort((a, b) => {
+			const dateA = new Date(a.created_at).getTime();
+			const dateB = new Date(b.created_at).getTime();
+			return dateB - dateA; // Descending order (newest first)
+		});
+
+		return sorted;
 	};
 
 	const {

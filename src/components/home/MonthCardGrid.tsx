@@ -2,11 +2,11 @@ import MonthCard from "@/components/MonthCard";
 import { useIsMobile } from "@/hooks/useIsMobile.tsx";
 import type React from "react";
 
-interface MonthCardGridProps {
+type MonthCardGridProps = {
 	babyId?: string;
 	babyName?: string;
 	showGrid: boolean;
-}
+};
 
 const MonthCardGrid: React.FC<MonthCardGridProps> = ({
 	babyId,

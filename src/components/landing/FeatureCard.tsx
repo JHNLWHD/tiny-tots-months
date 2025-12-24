@@ -1,12 +1,12 @@
 import { BookOpen, Camera, CheckCircle2, Lightbulb } from "lucide-react";
 import type React from "react";
 
-interface FeatureItem {
+type FeatureItem = {
 	text: string;
 	icon?: React.ReactNode;
-}
+};
 
-interface FeatureCardProps {
+type FeatureCardProps = {
 	title: string;
 	description: string;
 	features: FeatureItem[] | string[];

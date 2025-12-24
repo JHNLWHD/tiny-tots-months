@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import type React from "react";
 
-interface CaptionFormProps {
+type CaptionFormProps = {
 	caption: string;
 	onCaptionChange: (caption: string) => void;
 	onUpload: () => void;

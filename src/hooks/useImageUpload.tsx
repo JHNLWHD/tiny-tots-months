@@ -7,14 +7,14 @@ import { v4 as uuidv4 } from "uuid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreatePhotoData } from "@/types/photo";
 
-interface UploadOptions {
+type UploadOptions = {
 	babyId: string;
 	monthNumber: number;
 	description?: string;
 	onProgress?: (progress: number) => void;
 	onSuccess?: (data: UploadResult) => void;
 	onError?: (error: Error) => void;
-}
+};
 
 export type UploadResult = {
 	id: string;

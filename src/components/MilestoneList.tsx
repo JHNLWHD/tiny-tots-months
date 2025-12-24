@@ -6,11 +6,11 @@ import { format, parseISO } from "date-fns";
 import { Trash2 } from "lucide-react";
 import type React from "react";
 
-interface MilestoneListProps {
+type MilestoneListProps = {
 	milestones: Milestone[];
 	onDelete?: (id: string) => void;
 	readOnly?: boolean;
-}
+};
 
 const MilestoneList: React.FC<MilestoneListProps> = ({
 	milestones,

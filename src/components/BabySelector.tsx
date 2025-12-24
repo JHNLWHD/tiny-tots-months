@@ -9,7 +9,7 @@ import type { Baby } from "@/hooks/useBabyProfiles";
 import { format, parseISO } from "date-fns";
 import type React from "react";
 
-interface BabySelectorProps {
+type BabySelectorProps = {
 	babies: Baby[];
 	selectedBabyId: string | null;
 	onSelectBaby: (babyId: string) => void;

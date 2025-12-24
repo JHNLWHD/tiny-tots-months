@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Star } from "lucide-react";
 import type React from "react";
 
-interface MilestoneSectionProps {
+type MilestoneSectionProps = {
 	babyId: string;
 	monthNumber: number;
 	milestones: Milestone[];
@@ -14,7 +14,7 @@ interface MilestoneSectionProps {
 	createMilestone: (data: CreateMilestoneData) => void;
 	deleteMilestone: (id: string) => void;
 	isCreatingMilestone: boolean;
-}
+};
 
 const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 	babyId,
@@ -50,6 +50,7 @@ const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 								title={milestone.milestone_text.split("\n")[0] || "Milestone"}
 								description={milestone.milestone_text}
 								icon={<Star className="h-4 sm:h-5 w-4 sm:w-5" />}
+								onDelete={() => deleteMilestone(milestone.id)}
 							/>
 						))}
 					</div>
@@ -74,6 +75,7 @@ const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 				monthNumber={monthNumber}
 				onSubmit={createMilestone}
 				isSubmitting={isCreatingMilestone}
+				existingMilestones={milestones}
 			/>
 
 			{!hasMilestones && (

@@ -16,13 +16,13 @@ import { format, parseISO } from "date-fns";
 import { Baby as BabyIcon, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface BabyCardProps {
+type BabyCardProps = {
 	baby: Baby;
 	onDelete: (id: string) => void;
 	backgroundClass?: string;
 	onClick?: () => void;
 	isSelected?: boolean;
-}
+};
 
 const BabyCard = ({
 	baby,

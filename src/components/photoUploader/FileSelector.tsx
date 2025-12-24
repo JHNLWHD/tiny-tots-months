@@ -3,10 +3,10 @@ import { Label } from "@/components/ui/label";
 import { ImagePlus, VideoIcon } from "lucide-react";
 import type React from "react";
 
-interface FileSelectorProps {
+type FileSelectorProps = {
 	isPremium: boolean;
 	onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+};
 
 const FileSelector: React.FC<FileSelectorProps> = ({
 	isPremium,

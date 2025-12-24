@@ -13,21 +13,21 @@ import { Baby, Calendar, Plus, Star, TrendingUp, MoreVertical, Trash2 } from "lu
 import type React from "react";
 import { Link } from "react-router-dom";
 
-interface BabyListProps {
+type BabyListProps = {
 	babies: BabyType[];
 	isLoading: boolean;
 	onAddBaby: () => void;
 	onSelectBaby: (baby: BabyType) => void;
 	onDeleteBaby?: (baby: BabyType) => void;
 	selectedBaby: BabyType | null;
-}
+};
 
-interface BabyCardProps {
+type BabyCardProps = {
 	baby: BabyType;
 	selectedBaby: BabyType | null;
 	onSelectBaby: (baby: BabyType) => void;
 	onDeleteBaby?: (baby: BabyType) => void;
-}
+};
 
 const BabyCard: React.FC<BabyCardProps> = ({
 	baby,

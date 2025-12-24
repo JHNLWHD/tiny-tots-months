@@ -9,7 +9,7 @@ import { Play } from "lucide-react";
 import React from "react";
 import HeicImage from "./HeicImage";
 
-interface PhotoCollageProps {
+type PhotoCollageProps = {
 	photos: Photo[];
 	title?: string;
 	maxDisplayCount?: number;
