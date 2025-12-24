@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Baby, Plus } from "lucide-react";
 import type React from "react";
 
-interface EmptyStateProps {
+type EmptyStateProps = {
 	onAddBaby: () => void;
-}
+};
 
 const EmptyState: React.FC<EmptyStateProps> = ({ onAddBaby }) => {
 	return (

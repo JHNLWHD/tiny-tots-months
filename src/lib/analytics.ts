@@ -79,8 +79,8 @@ export enum ErrorCategory {
 	UNHANDLED = "unhandled",
 }
 
-// Interface for error tracking
-interface ErrorTrackingData {
+// Type for error tracking
+type ErrorTrackingData = {
 	message: string;
 	stack?: string;
 	category: ErrorCategory;

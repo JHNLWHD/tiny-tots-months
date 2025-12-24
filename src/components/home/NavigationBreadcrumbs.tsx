@@ -2,18 +2,18 @@ import { ChevronRight, Home, Baby, Calendar } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 
-interface BreadcrumbItem {
+type BreadcrumbItem = {
 	label: string;
 	href?: string;
 	icon?: React.ComponentType<{ className?: string }>;
 	current?: boolean;
-}
+};
 
-interface NavigationBreadcrumbsProps {
+type NavigationBreadcrumbsProps = {
 	items: BreadcrumbItem[];
 	selectedBaby?: any;
 	currentMonth?: number;
-}
+};
 
 const NavigationBreadcrumbs: React.FC<NavigationBreadcrumbsProps> = ({
 	items,

@@ -9,11 +9,11 @@ import { Check, ImagePlus, Loader2, X } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 
-interface ImageUploaderProps {
+type ImageUploaderProps = {
 	babyId: string;
 	month: number;
 	onUploadComplete?: (result: UploadResult) => void;
-}
+};
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
 	babyId,

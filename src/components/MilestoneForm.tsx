@@ -8,13 +8,13 @@ import { Plus, Sparkles } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 
-interface MilestoneFormProps {
+type MilestoneFormProps = {
 	babyId: string;
 	monthNumber: number;
 	onSubmit: (data: CreateMilestoneData) => void;
 	isSubmitting: boolean;
 	existingMilestones?: Milestone[];
-}
+};
 
 const MilestoneForm: React.FC<MilestoneFormProps> = ({
 	babyId,

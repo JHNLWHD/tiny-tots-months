@@ -16,7 +16,7 @@ import {
 import { Baby, ChevronDown, Plus, MoreVertical, Trash2, Edit } from "lucide-react";
 import React from "react";
 
-interface BabySelectorProps {
+type BabySelectorProps = {
 	babies: any[];
 	selectedBaby: any;
 	onSelectBaby: (baby: any) => void;

@@ -7,10 +7,10 @@ import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-interface LayoutProps {
+type LayoutProps = {
 	children: React.ReactNode;
 	hideHeader?: boolean;
-}
+};
 
 const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 	const { user, signOut, isAuthenticated } = useAuth();

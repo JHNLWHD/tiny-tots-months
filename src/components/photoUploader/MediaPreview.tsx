@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import type React from "react";
 
-interface MediaPreviewProps {
+type MediaPreviewProps = {
 	preview: string;
 	isVideo: boolean;
 	onClear: () => void;

@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { Star } from "lucide-react";
 import type React from "react";
 
-interface MilestoneSectionProps {
+type MilestoneSectionProps = {
 	babyId: string;
 	monthNumber: number;
 	milestones: Milestone[];
@@ -14,7 +14,7 @@ interface MilestoneSectionProps {
 	createMilestone: (data: CreateMilestoneData) => void;
 	deleteMilestone: (id: string) => void;
 	isCreatingMilestone: boolean;
-}
+};
 
 const MilestoneSection: React.FC<MilestoneSectionProps> = ({
 	babyId,

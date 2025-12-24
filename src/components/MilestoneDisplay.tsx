@@ -3,13 +3,13 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Trash2 } from "lucide-react";
 import type React from "react";
 
-interface MilestoneDisplayProps {
+type MilestoneDisplayProps = {
 	title: string;
 	description: string;
 	icon?: React.ReactNode;
 	onDelete?: () => void;
 	readOnly?: boolean;
-}
+};
 
 const MilestoneDisplay: React.FC<MilestoneDisplayProps> = ({
 	title,

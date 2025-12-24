@@ -46,11 +46,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface BabyFormProps {
+type BabyFormProps = {
 	isOpen: boolean;
 	onClose: () => void;
 	onSuccess?: () => void;
-}
+};
 
 const BabyForm = ({ isOpen, onClose, onSuccess }: BabyFormProps) => {
 	const { user } = useAuth();

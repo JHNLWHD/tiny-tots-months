@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { convertHeicToWebFormat } from '@/utils/heicConverter';
 import { toast } from "@/components/ui/sonner";
 
-interface HeicImageProps {
+type HeicImageProps = {
   src: string;
   alt: string;
   className?: string;

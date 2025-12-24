@@ -3,7 +3,7 @@ import { CheckCircle2 } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router-dom";
 
-interface PlanCardProps {
+type PlanCardProps = {
 	title: string;
 	description: string;
 	price: string;
@@ -12,7 +12,7 @@ interface PlanCardProps {
 	isPremium?: boolean;
 	ctaLink: string;
 	ctaText: string;
-}
+};
 
 const PlanCard: React.FC<PlanCardProps> = ({
 	title,

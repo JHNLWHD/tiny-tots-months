@@ -3,13 +3,13 @@ import { AlertCircle, Loader2, Play, Volume2, VolumeX } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
-interface VideoPlayerProps {
+type VideoPlayerProps = {
 	src: string;
 	poster?: string;
 	autoPlay?: boolean;
 	className?: string;
 	onError?: (e: React.SyntheticEvent<HTMLVideoElement, Event>) => void;
-}
+};
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
 	src,

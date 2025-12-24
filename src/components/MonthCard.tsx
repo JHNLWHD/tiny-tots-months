@@ -7,11 +7,11 @@ import { Star } from "lucide-react";
 import type React from "react";
 import { Link } from "react-router-dom";
 
-interface MonthCardProps {
+type MonthCardProps = {
 	month: number;
 	backgroundClass: string;
 	babyId?: string;
-}
+};
 
 const MonthCard: React.FC<MonthCardProps> = ({
 	month,

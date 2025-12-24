@@ -3,10 +3,10 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { Navigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
-interface ProtectedRouteProps {
+type ProtectedRouteProps = {
 	children: React.ReactNode;
 	requirePremium?: boolean;
-}
+};
 
 const ProtectedRoute = ({
 	children,
