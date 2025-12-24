@@ -112,6 +112,16 @@ export const usePaymentTracking = () => {
 			externalPaymentId?: string;
 			adminNotes?: string;
 		}): Promise<PaymentTransaction> => {
+			// First, fetch the current transaction to get its details and check if credits were already granted
+			const { data: currentTransaction, error: fetchError } = await supabase
+				.from("payment_transactions")
+				.select("*")
+				.eq("id", transactionId)
+				.single();
+
+			if (fetchError) throw fetchError;
+			if (!currentTransaction) throw new Error("Transaction not found");
+
 			const updateData: PaymentTransactionUpdate = {
 				status,
 				external_payment_id: externalPaymentId,
@@ -133,10 +143,67 @@ export const usePaymentTracking = () => {
 
 			if (error) throw error;
 
+			// If status changed to "completed", grant credits or upgrade subscription
+			if (status === "completed" && currentTransaction.status !== "completed") {
+				// Check if credits/subscription were already granted by checking for existing credit transaction
+				if (currentTransaction.transaction_type === "credits") {
+					const { data: existingCreditTransaction } = await supabase
+						.from("credit_transactions")
+						.select("id")
+						.eq("payment_transaction_id", transactionId)
+						.eq("transaction_type", "purchase")
+						.single();
+
+					// Only grant credits if they haven't been granted yet
+					if (!existingCreditTransaction && currentTransaction.metadata?.credits) {
+						const credits = currentTransaction.metadata.credits as number;
+						const amount = (currentTransaction.metadata.originalAmount as number) || 0;
+						
+						// Grant credits - need to get the user_id from the transaction
+						const transactionUserId = currentTransaction.user_id;
+						
+						// Get current credits balance
+						const { data: currentCredits } = await supabase
+							.from("user_credits")
+							.select("credits_balance")
+							.eq("user_id", transactionUserId)
+							.single();
+
+						const newBalance = (currentCredits?.credits_balance || 0) + credits;
+
+						// Update user credits
+						const { error: updateError } = await supabase
+							.from("user_credits")
+							.upsert({
+								user_id: transactionUserId,
+								credits_balance: newBalance,
+							});
+
+						if (updateError) throw updateError;
+
+						// Create credit transaction record
+						const { error: transactionError } = await supabase
+							.from("credit_transactions")
+							.insert({
+								user_id: transactionUserId,
+								amount: credits,
+								transaction_type: "purchase",
+								description: `Purchased ${credits} credits`,
+								payment_transaction_id: transactionId,
+							});
+
+						if (transactionError) throw transactionError;
+					}
+				} else if (currentTransaction.transaction_type === "subscription" || currentTransaction.transaction_type === "lifetime") {
+					// Handle subscription upgrade - this would need to be implemented similarly
+					// For now, subscription upgrades are handled separately
+				}
+			}
+
 			// Track the status update
 			trackEvent("payment_transaction_updated", {
 				transaction_id: transactionId,
-				old_status: "pending", // Would need to fetch old status in real implementation
+				old_status: currentTransaction.status,
 				new_status: status,
 			});
 
@@ -144,6 +211,7 @@ export const usePaymentTracking = () => {
 		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["paymentTransactions", user?.id] });
+			queryClient.invalidateQueries({ queryKey: ["userCredits", user?.id] });
 			
 			if (data.status === "completed") {
 				toast.success("Payment completed successfully!");

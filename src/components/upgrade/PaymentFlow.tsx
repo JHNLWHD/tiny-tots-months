@@ -102,7 +102,8 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 				setStep("success");
 				toast.success(result.instructions || "Payment processed successfully!");
 				setTimeout(() => {
-					onSuccess(result.paymentId || "");
+					// paymentTransactionId is always required when success is true
+					onSuccess(result.paymentTransactionId);
 				}, 2000);
 			} else {
 				toast.error(result.error || "Payment failed");

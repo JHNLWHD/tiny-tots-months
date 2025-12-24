@@ -31,6 +31,7 @@ export type CreditTransaction = {
 	amount: number;
 	transaction_type: string;
 	description: string | null;
+	payment_transaction_id: string | null;
 	created_at: string;
 	updated_at: string;
 };
@@ -97,6 +98,44 @@ export const useSubscription = () => {
 
 		if (error && error.code !== "PGRST116") {
 			throw error;
+		}
+
+		// Calculate effective credits balance by excluding credits from pending payments
+		if (data) {
+			// Get all credit transactions linked to payment transactions
+			const { data: creditTransactions } = await supabase
+				.from("credit_transactions")
+				.select("amount, payment_transaction_id")
+				.eq("user_id", user.id)
+				.eq("transaction_type", TRANSACTION_TYPES.PURCHASE)
+				.not("payment_transaction_id", "is", null);
+
+			if (creditTransactions && creditTransactions.length > 0) {
+				// Get payment transaction IDs
+				const paymentTransactionIds = creditTransactions
+					.map(ct => ct.payment_transaction_id)
+					.filter((id): id is string => id !== null);
+
+				// Check which payment transactions are still pending
+				const { data: paymentTransactions } = await supabase
+					.from("payment_transactions")
+					.select("id, status")
+					.in("id", paymentTransactionIds);
+
+				// Calculate credits from pending payments to exclude
+				const pendingCredits = creditTransactions
+					.filter(ct => {
+						const payment = paymentTransactions?.find(pt => pt.id === ct.payment_transaction_id);
+						return payment?.status === "pending";
+					})
+					.reduce((sum, ct) => sum + ct.amount, 0);
+
+				// Return adjusted balance (excluding pending payment credits)
+				return {
+					...data,
+					credits_balance: Math.max(0, data.credits_balance - pendingCredits),
+				};
+			}
 		}
 
 		return data;
@@ -189,7 +228,15 @@ export const useSubscription = () => {
 
 	// Credit purchase mutation
 	const purchaseCredits = useMutation({
-		mutationFn: async ({ amount, credits }: { amount: number; credits: number }) => {
+		mutationFn: async ({ 
+			amount, 
+			credits, 
+			paymentTransactionId 
+		}: { 
+			amount: number; 
+			credits: number;
+			paymentTransactionId: string; // Required - always provided when buying credits
+		}) => {
 			if (!user) throw new Error("User not authenticated");
 
 			// Add credits to user balance
@@ -210,7 +257,7 @@ export const useSubscription = () => {
 
 			if (updateError) throw updateError;
 
-			// Log the transaction
+			// Log the transaction with payment_transaction_id (required)
 			const { error: transactionError } = await supabase
 				.from("credit_transactions")
 				.insert({
@@ -218,6 +265,7 @@ export const useSubscription = () => {
 					amount: credits,
 					transaction_type: TRANSACTION_TYPES.PURCHASE,
 					description: `Purchased ${credits} credits`,
+					payment_transaction_id: paymentTransactionId,
 				});
 
 			if (transactionError) throw transactionError;
