@@ -112,7 +112,9 @@ export const usePaymentTracking = () => {
 			externalPaymentId?: string;
 			adminNotes?: string;
 		}): Promise<PaymentTransaction> => {
-			// First, fetch the current transaction to get its details and check if credits were already granted
+			if (!user) throw new Error("User not authenticated");
+
+			// Fetch current transaction to get old status for analytics
 			const { data: currentTransaction, error: fetchError } = await supabase
 				.from("payment_transactions")
 				.select("*")
@@ -122,83 +124,25 @@ export const usePaymentTracking = () => {
 			if (fetchError) throw fetchError;
 			if (!currentTransaction) throw new Error("Transaction not found");
 
-			const updateData: PaymentTransactionUpdate = {
-				status,
-				external_payment_id: externalPaymentId,
-				admin_notes: adminNotes,
-			};
+			// Call edge function to update payment transaction atomically
+			const { data, error } = await supabase.functions.invoke(
+				"update-payment-transaction",
+				{
+					body: {
+						transactionId,
+						status,
+						externalPaymentId,
+						adminNotes,
+					},
+				},
+			);
 
-			// If completing the transaction, set verified timestamp
-			if (status === "completed") {
-				updateData.verified_at = new Date().toISOString();
-				updateData.verified_by = user?.id; // In real app, this would be admin user
+			if (error) {
+				throw new Error(error.message || "Failed to update payment transaction");
 			}
 
-			const { data, error } = await supabase
-				.from("payment_transactions")
-				.update(updateData)
-				.eq("id", transactionId)
-				.select()
-				.single();
-
-			if (error) throw error;
-
-			// If status changed to "completed", grant credits or upgrade subscription
-			if (status === "completed" && currentTransaction.status !== "completed") {
-				// Check if credits/subscription were already granted by checking for existing credit transaction
-				if (currentTransaction.transaction_type === "credits") {
-					const { data: existingCreditTransaction } = await supabase
-						.from("credit_transactions")
-						.select("id")
-						.eq("payment_transaction_id", transactionId)
-						.eq("transaction_type", "purchase")
-						.single();
-
-					// Only grant credits if they haven't been granted yet
-					if (!existingCreditTransaction && currentTransaction.metadata?.credits) {
-						const credits = currentTransaction.metadata.credits as number;
-						const amount = (currentTransaction.metadata.originalAmount as number) || 0;
-						
-						// Grant credits - need to get the user_id from the transaction
-						const transactionUserId = currentTransaction.user_id;
-						
-						// Get current credits balance
-						const { data: currentCredits } = await supabase
-							.from("user_credits")
-							.select("credits_balance")
-							.eq("user_id", transactionUserId)
-							.single();
-
-						const newBalance = (currentCredits?.credits_balance || 0) + credits;
-
-						// Update user credits
-						const { error: updateError } = await supabase
-							.from("user_credits")
-							.upsert({
-								user_id: transactionUserId,
-								credits_balance: newBalance,
-							});
-
-						if (updateError) throw updateError;
-
-						// Create credit transaction record
-						const { error: transactionError } = await supabase
-							.from("credit_transactions")
-							.insert({
-								user_id: transactionUserId,
-								amount: credits,
-								transaction_type: "purchase",
-								description: `Purchased ${credits} credits`,
-								payment_transaction_id: transactionId,
-							});
-
-						if (transactionError) throw transactionError;
-					}
-				} else if (currentTransaction.transaction_type === "subscription" || currentTransaction.transaction_type === "lifetime") {
-					// Handle subscription upgrade - this would need to be implemented similarly
-					// For now, subscription upgrades are handled separately
-				}
-			}
+			// Parse the response (edge function returns JSON)
+			const updatedTransaction = data as PaymentTransaction;
 
 			// Track the status update
 			trackEvent("payment_transaction_updated", {
@@ -207,7 +151,7 @@ export const usePaymentTracking = () => {
 				new_status: status,
 			});
 
-			return data;
+			return updatedTransaction;
 		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["paymentTransactions", user?.id] });
