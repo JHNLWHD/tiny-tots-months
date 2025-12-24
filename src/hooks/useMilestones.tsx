@@ -3,20 +3,20 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export interface Milestone {
+export type Milestone = {
 	id: string;
 	baby_id: string;
 	milestone_text: string;
 	month_number: number;
 	created_at: string;
 	updated_at: string;
-}
+};
 
-export interface CreateMilestoneData {
+export type CreateMilestoneData = {
 	baby_id: string;
 	milestone_text: string;
 	month_number: number;
-}
+};
 
 export const useMilestones = (babyId?: string, monthNumber?: number) => {
 	const { user } = useAuth();

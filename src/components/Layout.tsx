@@ -34,7 +34,7 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 										className="text-white animate-bounce-soft"
 									/>
 								</div>
-								<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-bubblegum">
+								<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-heading">
 									Tiny Tots Milestones
 								</h1>
 							</Link>
@@ -58,100 +58,129 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 							</div>
 
 							{/* Desktop navigation */}
-							<div className="hidden md:flex items-center gap-3">
+							<div className="hidden md:flex items-center gap-4">
 								{isAuthenticated ? (
 									<>
+										{/* User Context */}
 										{user && (
-											<div className="mr-2 px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-700 font-medium truncate max-w-[200px]">
-												{user.email}
+											<div className="flex items-center gap-3 mr-4">
+												<div className="w-8 h-8 bg-baby-purple/20 rounded-full flex items-center justify-center">
+													<Baby className="h-4 w-4 text-baby-purple" />
+												</div>
+												<div className="text-sm">
+													<div className="font-medium text-gray-800">Welcome back!</div>
+													<div className="text-gray-500 truncate max-w-[150px]">{user.email}</div>
+												</div>
 											</div>
 										)}
-										<Link
-											to="/app/settings"
-											className="px-4 py-2 bg-white border border-baby-purple/30 hover:border-baby-purple hover:bg-white/80 hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
-										>
-											<SettingsIcon className="mr-2 h-4 w-4" />
-											<span>Settings</span>
-										</Link>
-										<Button
-											variant="ghost"
-											onClick={signOut}
-											className="px-4 py-2 hover:bg-red-100 hover:text-red-700 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105"
-										>
-											<LogOut className="mr-2 h-4 w-4" />
-											<span>Sign out</span>
-										</Button>
+
+										{/* Primary Navigation */}
 										<Link
 											to="/app"
-											className="px-4 py-2 bg-white border border-baby-purple/30 hover:border-baby-purple hover:bg-white/80 hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
+											className="px-4 py-2 bg-baby-purple text-white hover:bg-baby-purple/90 rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 flex items-center"
 										>
 											<Home className="mr-2 h-4 w-4" />
-											<span>Dashboard</span>
+											<span>App</span>
 										</Link>
+
+										{/* Secondary Actions */}
+										<div className="flex items-center gap-2">
+											<Link
+												to="/app/settings"
+												className="p-2 text-gray-600 hover:text-baby-purple hover:bg-baby-purple/10 rounded-full transition-all duration-200 hover:scale-105"
+												title="Settings"
+											>
+												<SettingsIcon className="h-5 w-5" />
+											</Link>
+											<Button
+												variant="ghost"
+												onClick={signOut}
+												className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-200 hover:scale-105"
+												title="Sign out"
+											>
+												<LogOut className="h-5 w-5" />
+											</Button>
+										</div>
 									</>
 								) : (
 									<>
 										<Link
 											to="/auth"
-											className="px-4 py-2 bg-white border border-baby-purple/30 hover:border-baby-purple hover:bg-white/80 hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
+											className="px-4 py-2 text-baby-purple hover:text-baby-purple/80 font-medium transition-colors"
 										>
 											Sign in
 										</Link>
 										<Link
-											to="/"
-											className="px-4 py-2 bg-white border border-baby-purple/30 hover:border-baby-purple hover:bg-white/80 hover:scale-105 rounded-full text-sm font-medium text-baby-purple shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
+											to="/auth"
+											className="px-6 py-2 bg-baby-purple text-white hover:bg-baby-purple/90 rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
 										>
-											<Home className="mr-2 h-4 w-4" />
-											<span>Home</span>
+											Get Started
 										</Link>
 									</>
 								)}
 							</div>
 						</div>
 
-						{/* Mobile menu - only show if authenticated */}
+						{/* Enhanced Mobile menu */}
 						{isAuthenticated && (
 							<div
 								className={cn(
 									"md:hidden overflow-hidden transition-all duration-300 ease-in-out",
 									mobileMenuOpen
-										? "max-h-60 opacity-100 mt-3"
+										? "max-h-80 opacity-100 mt-4"
 										: "max-h-0 opacity-0",
 								)}
 							>
-								<div className="py-2 flex flex-col gap-2 bg-white/90 rounded-lg">
+								<div className="py-4 flex flex-col gap-3 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-baby-purple/20">
+									{/* User Info */}
 									{user && (
-										<div className="px-4 py-2 bg-gray-100 rounded-md text-sm text-gray-700 font-medium truncate mx-2">
-											{user.email}
+										<div className="px-4 py-3 bg-gradient-to-r from-baby-purple/5 to-baby-blue/5 rounded-lg mx-3 border border-baby-purple/20">
+											<div className="flex items-center gap-3">
+												<div className="w-10 h-10 bg-baby-purple/20 rounded-full flex items-center justify-center">
+													<Baby className="h-5 w-5 text-baby-purple" />
+												</div>
+												<div>
+													<div className="font-medium text-gray-800">Welcome back!</div>
+													<div className="text-sm text-gray-500 truncate">{user.email}</div>
+												</div>
+											</div>
 										</div>
 									)}
-									<Link
-										to="/app"
-										className="flex items-center px-4 py-2 text-baby-purple hover:bg-baby-purple/10 rounded-md mx-2"
-										onClick={() => setMobileMenuOpen(false)}
-									>
-										<Home className="mr-2 h-4 w-4" />
-										<span>Dashboard</span>
-									</Link>
-									<Link
-										to="/app/settings"
-										className="flex items-center px-4 py-2 text-baby-purple hover:bg-baby-purple/10 rounded-md mx-2"
-										onClick={() => setMobileMenuOpen(false)}
-									>
-										<SettingsIcon className="mr-2 h-4 w-4" />
-										<span>Settings</span>
-									</Link>
-									<Button
-										variant="ghost"
-										onClick={() => {
-											setMobileMenuOpen(false);
-											signOut();
-										}}
-										className="flex items-center justify-start px-4 py-2 text-red-600 hover:bg-red-50 rounded-md mx-2"
-									>
-										<LogOut className="mr-2 h-4 w-4" />
-										<span>Sign out</span>
-									</Button>
+
+									{/* Navigation Links */}
+									<div className="px-2 space-y-1">
+										<Link
+											to="/app"
+											className="flex items-center px-4 py-3 text-baby-purple hover:bg-baby-purple/10 rounded-lg transition-colors"
+											onClick={() => setMobileMenuOpen(false)}
+										>
+											<Home className="mr-3 h-5 w-5" />
+											<span className="font-medium">App</span>
+										</Link>
+										<Link
+											to="/app/settings"
+											className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+											onClick={() => setMobileMenuOpen(false)}
+										>
+											<SettingsIcon className="mr-3 h-5 w-5" />
+											<span className="font-medium">Settings</span>
+										</Link>
+									</div>
+
+									{/* Sign Out */}
+									<div className="px-2 pt-2 border-t border-gray-200 mx-3">
+										<Button
+											variant="ghost"
+											onClick={() => {
+												setMobileMenuOpen(false);
+												signOut();
+											}}
+											className="w-full flex items-center justify-start px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg"
+										>
+											<LogOut className="mr-3 h-5 w-5" />
+											<span className="font-medium">Sign out</span>
+										</Button>
+									</div>
 								</div>
 							</div>
 						)}

@@ -4,6 +4,9 @@ import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { useMilestones } from "@/hooks/useMilestones";
 import { usePhotos } from "@/hooks/usePhotos";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAbilities } from "@/hooks/useAbilities";
+import { hasCreditsRequired } from "@/lib/abilities";
+import { CreatePhotoData } from "@/types/photo";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -15,7 +18,7 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	const [activeTab, setActiveTab] = useState("photos");
 
 	// Get subscription status
-	const { isPremium } = useSubscription();
+	const { isPremium, tier, creditsBalance } = useSubscription();
 
 	// Fetch all babies
 	const { babies, loading: loadingBabies } = useBabyProfiles();
@@ -29,6 +32,12 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 		uploadPhoto: uploadPhotoApi,
 		isUploading,
 	} = usePhotos(selectedBabyId || undefined, monthNumber);
+
+	// Get abilities with photo count context
+	const abilities = useAbilities({ 
+		monthNumber,
+		monthlyPhotoCount: photos.length 
+	});
 
 	// Fetch milestones for selected baby and month
 	const {
@@ -58,17 +67,17 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 			return;
 		}
 
-		// Check subscription limits
-		if (!isPremium && monthNumber > 3) {
-			toast("Premium Required", {
-				description:
-					"Free users can only track up to 3 months. Upgrade to Premium for complete 12-month tracking.",
-				className: "bg-destructive text-destructive-foreground",
-			});
+		// Check access using CASL abilities
+		// Use stable dependencies: monthNumber, tier, creditsBalance
+		// The abilities object is recreated each render, so we call the method inside the effect
+		const accessCheck = abilities.canAccessMonth(monthNumber);
+		if (!accessCheck.allowed) {
+			abilities.showUpgradePrompt('access', 'Month');
 			navigate("/app");
 			return;
 		}
-	}, [monthNumber, isPremium, navigate]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [monthNumber, tier, creditsBalance, navigate]);
 
 	const handleBabySelect = (babyId: string) => {
 		setSelectedBabyId(babyId);
@@ -84,23 +93,49 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	// Find the selected baby for sharing
 	const selectedBaby = babies.find((baby) => baby.id === selectedBabyId);
 
-	const uploadPhoto = async (data) => {
+	const uploadPhoto = async (data: CreatePhotoData) => {
 		if (!selectedBabyId) {
 			console.error("Cannot upload: No baby selected");
 			return null;
 		}
 
-		if (!isPremium) {
-			if (!data.is_video && photos.length >= 5) {
-				toast("Upload Limit Reached", {
-					description:
-						"Free users can upload maximum 5 photos per month. Upgrade to Premium for unlimited uploads.",
-					className: "bg-destructive text-destructive-foreground",
-				});
-				return null;
-			}
+		// Determine the subject type based on whether it's a video or photo
+		const subject: 'Photo' | 'Video' = data.is_video ? 'Video' : 'Photo';
+		const uploadType = data.is_video ? 'video' : 'photo';
+
+		// Check upload permissions using CASL abilities (Video vs Photo have different rules)
+		const abilityCheck = abilities.check('upload', subject);
+		
+		// If credits are required (even if allowed is true), use executeWithAbility to spend credits
+		if (hasCreditsRequired(abilityCheck.creditsRequired)) {
+			// Execute with credits using abilities system
+			// Capture the result from uploadPhotoApi to return it
+			let uploadResult: Awaited<ReturnType<typeof uploadPhotoApi>> | null = null;
+			const success = await abilities.executeWithAbility(
+				'upload',
+				subject,
+				async () => {
+					uploadResult = await uploadPhotoApi({
+						file: data.file,
+						baby_id: selectedBabyId,
+						month_number: monthNumber,
+						description: data.description,
+						is_video: data.is_video,
+					});
+					return uploadResult;
+				},
+				`${uploadType.charAt(0).toUpperCase() + uploadType.slice(1)} upload for month ${monthNumber}`
+			);
+			return success ? uploadResult : null;
+		}
+		
+		// If not allowed and no credits can help, show upgrade prompt
+		if (!abilityCheck.allowed) {
+			abilities.showUpgradePrompt('upload', subject);
+			return null;
 		}
 
+		// Action is allowed without credits - proceed directly
 		try {
 			const result = await uploadPhotoApi({
 				file: data.file,

@@ -14,18 +14,18 @@ const MonthCardGrid: React.FC<MonthCardGridProps> = ({
 	showGrid,
 }) => {
 	const monthlyBackgroundClasses = [
-		"bg-gradient-to-br from-blue-100 to-blue-200",
+		"bg-gradient-to-br from-indigo-100 to-indigo-200",
+		"bg-gradient-to-br from-violet-100 to-violet-200",
 		"bg-gradient-to-br from-purple-100 to-purple-200",
-		"bg-gradient-to-br from-pink-100 to-pink-200",
+		"bg-gradient-to-br from-blue-100 to-blue-200",
+		"bg-gradient-to-br from-sky-100 to-sky-200",
+		"bg-gradient-to-br from-cyan-100 to-cyan-200",
+		"bg-gradient-to-br from-teal-100 to-teal-200",
+		"bg-gradient-to-br from-emerald-100 to-emerald-200",
 		"bg-gradient-to-br from-green-100 to-green-200",
+		"bg-gradient-to-br from-lime-100 to-lime-200",
+		"bg-gradient-to-br from-yellow-100 to-yellow-200",
 		"bg-gradient-to-br from-amber-100 to-amber-200",
-		"bg-gradient-to-br from-yellow-100 to-orange-100",
-		"bg-gradient-to-br from-orange-100 to-red-100",
-		"bg-gradient-to-br from-rose-100 to-pink-100",
-		"bg-gradient-to-br from-teal-100 to-cyan-100",
-		"bg-gradient-to-br from-sky-100 to-blue-100",
-		"bg-gradient-to-br from-indigo-100 to-violet-100",
-		"bg-gradient-to-br from-violet-100 to-fuchsia-100",
 	];
 
 	if (!showGrid) {
@@ -33,24 +33,35 @@ const MonthCardGrid: React.FC<MonthCardGridProps> = ({
 	}
 
 	return (
-		<div className="mt-6 sm:mt-8 md:mt-12 bg-white/50 p-4 sm:p-6 md:p-8 rounded-xl shadow-sm">
-			<h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 md:mb-8 font-bubblegum text-baby-purple inline-flex items-center">
-				<span className="text-2xl sm:text-3xl mr-2">📅</span>
-				{babyName ? `${babyName}'s` : "Monthly"} Milestones
-			</h2>
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
-				{Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-					<MonthCard
-						key={month}
-						month={month}
-						backgroundClass={
-							monthlyBackgroundClasses[
-								(month - 1) % monthlyBackgroundClasses.length
-							]
-						}
-						babyId={babyId}
-					/>
-				))}
+		<div className="space-y-6">
+			{/* Month Timeline Card */}
+			<div className="p-6 border-2 border-baby-purple/20 hover:border-baby-purple/40 transition-colors rounded-xl bg-white shadow-sm">
+				<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+					<div>
+						<h2 className="text-2xl font-heading text-baby-purple flex items-center gap-2 mb-2">
+							<span className="text-2xl sm:text-3xl">📅</span>
+							{babyName ? `${babyName}'s Timeline` : "Monthly Timeline"}
+						</h2>
+						<p className="text-gray-600">
+							Track milestones and memories month by month
+						</p>
+					</div>
+				</div>
+				
+				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+					{Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+						<MonthCard
+							key={month}
+							month={month}
+							backgroundClass={
+								monthlyBackgroundClasses[
+									(month - 1) % monthlyBackgroundClasses.length
+								]
+							}
+							babyId={babyId}
+						/>
+					))}
+				</div>
 			</div>
 		</div>
 	);

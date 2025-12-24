@@ -150,6 +150,8 @@ export type Database = {
 					payment_proof: string | null;
 					start_date: string;
 					status: string;
+					tier: string;
+					payment_transaction_id: string | null;
 					updated_at: string;
 					user_id: string;
 				};
@@ -160,6 +162,8 @@ export type Database = {
 					payment_proof?: string | null;
 					start_date?: string;
 					status: string;
+					tier?: string;
+					payment_transaction_id?: string | null;
 					updated_at?: string;
 					user_id: string;
 				};
@@ -170,10 +174,157 @@ export type Database = {
 					payment_proof?: string | null;
 					start_date?: string;
 					status?: string;
+					tier?: string;
+					payment_transaction_id?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "subscription_payment_transaction_id_fkey";
+						columns: ["payment_transaction_id"];
+						isOneToOne: false;
+						referencedRelation: "payment_transactions";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			user_credits: {
+				Row: {
+					created_at: string;
+					credits_balance: number;
+					id: string;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					credits_balance?: number;
+					id?: string;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					created_at?: string;
+					credits_balance?: number;
+					id?: string;
 					updated_at?: string;
 					user_id?: string;
 				};
 				Relationships: [];
+			};
+			credit_transactions: {
+				Row: {
+					amount: number;
+					created_at: string;
+					description: string | null;
+					id: string;
+					transaction_type: string;
+					payment_transaction_id: string | null;
+					updated_at: string;
+					user_id: string;
+				};
+				Insert: {
+					amount: number;
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					transaction_type: string;
+					payment_transaction_id?: string | null;
+					updated_at?: string;
+					user_id: string;
+				};
+				Update: {
+					amount?: number;
+					created_at?: string;
+					description?: string | null;
+					id?: string;
+					transaction_type?: string;
+					payment_transaction_id?: string | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "credit_transactions_payment_transaction_id_fkey";
+						columns: ["payment_transaction_id"];
+						isOneToOne: false;
+						referencedRelation: "payment_transactions";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			payment_transactions: {
+				Row: {
+					id: string;
+					user_id: string;
+					amount_in_cents: number;
+					currency: string;
+					payment_method: string;
+					transaction_type: string;
+					status: string;
+					external_payment_id: string | null;
+					payment_proof_url: string | null;
+					description: string | null;
+					metadata: Json | null;
+					verified_by: string | null;
+					verified_at: string | null;
+					admin_notes: string | null;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					user_id: string;
+					amount_in_cents: number;
+					currency: string;
+					payment_method: string;
+					transaction_type: string;
+					status?: string;
+					external_payment_id?: string | null;
+					payment_proof_url?: string | null;
+					description?: string | null;
+					metadata?: Json | null;
+					verified_by?: string | null;
+					verified_at?: string | null;
+					admin_notes?: string | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					user_id?: string;
+					amount_in_cents?: number;
+					currency?: string;
+					payment_method?: string;
+					transaction_type?: string;
+					status?: string;
+					external_payment_id?: string | null;
+					payment_proof_url?: string | null;
+					description?: string | null;
+					metadata?: Json | null;
+					verified_by?: string | null;
+					verified_at?: string | null;
+					admin_notes?: string | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "payment_transactions_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "payment_transactions_verified_by_fkey";
+						columns: ["verified_by"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 		};
 		Views: {

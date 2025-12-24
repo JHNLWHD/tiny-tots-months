@@ -4,25 +4,27 @@ import { Link } from "react-router-dom";
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
 	return (
-		<footer className="bg-white py-12 border-t">
-			<div className="container mx-auto px-4">
-				<div className="flex flex-col md:flex-row justify-between items-center mb-8">
-					<div className="flex items-center mb-6 md:mb-0">
-						<Baby
-							className="h-8 w-8 text-baby-purple mr-2"
-							aria-hidden="true"
-						/>
-						<span className="font-bold text-lg text-baby-purple">
+		<footer className="bg-gradient-to-b from-white to-gray-50 py-16 border-t border-gray-200">
+			<div className="w-full px-4 sm:px-6 lg:px-8">
+				<div className="flex flex-col md:flex-row justify-between items-center mb-12">
+					<div className="flex items-center mb-8 md:mb-0">
+						<div className="w-12 h-12 bg-gradient-to-r from-baby-purple to-baby-blue rounded-full flex items-center justify-center mr-3 shadow-lg">
+							<Baby
+								className="h-6 w-6 text-white"
+								aria-hidden="true"
+							/>
+						</div>
+						<span className="font-bold text-2xl text-baby-purple">
 							Tiny Tots Milestones
 						</span>
 					</div>
 
-					<div className="flex space-x-4">
+					<div className="flex space-x-6">
 						<a
 							href="https://facebook.com"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-gray-500 hover:text-baby-purple transition-colors"
+							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
 							aria-label="Follow us on Facebook"
 						>
 							<Facebook size={20} />
@@ -31,7 +33,7 @@ const Footer = () => {
 							href="https://instagram.com"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-gray-500 hover:text-baby-purple transition-colors"
+							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
 							aria-label="Follow us on Instagram"
 						>
 							<Instagram size={20} />
@@ -40,7 +42,7 @@ const Footer = () => {
 							href="https://twitter.com"
 							target="_blank"
 							rel="noopener noreferrer"
-							className="text-gray-500 hover:text-baby-purple transition-colors"
+							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
 							aria-label="Follow us on Twitter"
 						>
 							<Twitter size={20} />
@@ -48,37 +50,38 @@ const Footer = () => {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
 					<div>
-						<h3 className="font-semibold mb-4">About Us</h3>
-						<p className="text-sm text-gray-600">
+						<h3 className="font-bold text-lg mb-6 text-baby-purple">About Us</h3>
+						<p className="text-gray-600 leading-relaxed">
 							Tiny Tots Milestones helps parents capture and cherish their
 							little one's journey from the first smile to the first steps and
-							beyond.
+							beyond. Creating memories that last a lifetime.
 						</p>
 					</div>
 
 					<div>
-						<h3 className="font-semibold mb-4">Quick Links</h3>
+						<h3 className="font-bold text-lg mb-6 text-baby-purple">Quick Links</h3>
 						<nav aria-label="Footer Navigation - Main">
-							<ul className="space-y-2 text-sm text-gray-600">
+							<ul className="space-y-3 text-gray-600">
 								<li>
-									<Link to="/" className="hover:text-baby-purple">
+									<Link to="/" className="hover:text-baby-purple transition-colors duration-300 flex items-center">
+										<span className="w-1 h-1 bg-baby-purple rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
 										Home
 									</Link>
 								</li>
 								<li>
-									<a href="#features" className="hover:text-baby-purple">
+									<a href="#features" className="hover:text-baby-purple transition-colors duration-300">
 										Features
 									</a>
 								</li>
 								<li>
-									<a href="#pricing" className="hover:text-baby-purple">
+									<a href="#pricing" className="hover:text-baby-purple transition-colors duration-300">
 										Pricing
 									</a>
 								</li>
 								<li>
-									<Link to="/auth" className="hover:text-baby-purple">
+									<Link to="/auth" className="hover:text-baby-purple transition-colors duration-300">
 										Sign Up
 									</Link>
 								</li>
@@ -87,29 +90,29 @@ const Footer = () => {
 					</div>
 
 					<div>
-						<h3 className="font-semibold mb-4">Legal</h3>
+						<h3 className="font-bold text-lg mb-6 text-baby-purple">Legal & Support</h3>
 						<nav aria-label="Footer Navigation - Legal">
-							<ul className="space-y-2 text-sm text-gray-600">
+							<ul className="space-y-3 text-gray-600">
 								<li>
-									<Link to="/privacy-policy" className="hover:text-baby-purple">
+									<Link to="/privacy-policy" className="hover:text-baby-purple transition-colors duration-300">
 										Privacy Policy
 									</Link>
 								</li>
 								<li>
 									<Link
 										to="/terms-of-service"
-										className="hover:text-baby-purple"
+										className="hover:text-baby-purple transition-colors duration-300"
 									>
 										Terms of Service
 									</Link>
 								</li>
 								<li>
-									<Link to="/contact" className="hover:text-baby-purple">
+									<Link to="/contact" className="hover:text-baby-purple transition-colors duration-300">
 										Contact Us
 									</Link>
 								</li>
 								<li>
-									<Link to="/help" className="hover:text-baby-purple">
+									<Link to="/help" className="hover:text-baby-purple transition-colors duration-300">
 										Help & Support
 									</Link>
 								</li>
@@ -118,14 +121,20 @@ const Footer = () => {
 					</div>
 				</div>
 
-				<div className="text-center pt-8 border-t border-gray-100">
-					<p className="text-sm text-gray-500">
+				<div className="text-center pt-8 border-t border-gray-200">
+					<p className="text-gray-500 mb-2">
 						© {currentYear} Tiny Tots Milestones. All rights reserved.
 					</p>
 
-					<p className="text-xs text-gray-400 mt-2">
+					<p className="text-sm text-gray-400">
 						Helping parents document their baby's precious moments since 2025.
 					</p>
+					
+					<div className="mt-4 flex justify-center items-center space-x-2">
+						<div className="w-2 h-2 bg-baby-purple rounded-full"></div>
+						<span className="text-xs text-gray-400">Made with ❤️ for families worldwide</span>
+						<div className="w-2 h-2 bg-baby-purple rounded-full"></div>
+					</div>
 				</div>
 			</div>
 		</footer>

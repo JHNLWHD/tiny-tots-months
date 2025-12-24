@@ -37,18 +37,18 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 	};
 
 	return (
-		<article className={`flex flex-col ${contentOrder} gap-8 items-center`}>
-			<div className="md:w-1/2">
-				<h3 className={`text-2xl font-semibold mb-4 ${colorClass}`}>{title}</h3>
-				<p className="text-gray-600 mb-4">{description}</p>
-				<ul className="space-y-2">
+		<article className={`flex flex-col ${contentOrder} gap-12 items-center`}>
+			<div className="md:w-1/2 space-y-6">
+				<h3 className={`text-3xl md:text-4xl font-bold mb-6 ${colorClass}`}>{title}</h3>
+				<p className="text-xl text-gray-600 mb-8 leading-relaxed">{description}</p>
+				<ul className="space-y-4">
 					{features.map((item, index) => {
 						// Check if the item is a string or an object with text and icon properties
 						const isString = typeof item === "string";
 						const text = isString ? item : item.text;
 						const itemIcon = isString ? (
 							<CheckCircle2
-								className="h-5 w-5 text-green-500 mr-2"
+								className="h-6 w-6 text-baby-purple mr-3"
 								aria-hidden="true"
 							/>
 						) : (
@@ -56,27 +56,28 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 						);
 
 						return (
-							<li key={text || index} className="flex items-center">
+							<li key={text || index} className="flex items-start">
 								{itemIcon || (
 									<CheckCircle2
-										className="h-5 w-5 text-green-500 mr-2"
+										className="h-6 w-6 text-baby-purple mr-3 mt-0.5"
 										aria-hidden="true"
 									/>
 								)}
-								<span>{text}</span>
+								<span className="text-lg text-gray-700">{text}</span>
 							</li>
 						);
 					})}
 				</ul>
 			</div>
-			<div
-				className={`md:w-1/2 ${colorClass.replace("text", "bg")}/5 p-4 rounded-xl flex items-center justify-center`}
-			>
-				<div
-					className={`w-32 h-32 rounded-full ${colorClass.replace("text", "bg")}/20 flex items-center justify-center`}
-				>
-					{icon || getDefaultIcon()}
+			<div className="md:w-1/2 relative">
+				<div className="bg-gradient-to-br from-baby-purple/5 to-baby-blue/5 p-8 rounded-3xl flex items-center justify-center shadow-lg border border-baby-purple/10">
+					<div className="w-40 h-40 rounded-full bg-gradient-to-br from-baby-purple/10 to-baby-blue/10 flex items-center justify-center shadow-inner">
+						{icon || getDefaultIcon()}
+					</div>
 				</div>
+				{/* Decorative elements */}
+				<div className="absolute -top-4 -right-4 w-8 h-8 bg-baby-purple/20 rounded-full"></div>
+				<div className="absolute -bottom-4 -left-4 w-6 h-6 bg-baby-blue/20 rounded-full"></div>
 			</div>
 		</article>
 	);

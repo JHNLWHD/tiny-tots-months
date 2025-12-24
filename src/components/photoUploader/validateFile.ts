@@ -1,15 +1,30 @@
 import { toast } from "@/components/ui/sonner";
 import { fileTypeFromBlob } from "file-type";
 
-export interface FileValidationResult {
+export type FileValidationResult = {
 	isValid: boolean;
 	isVideo: boolean;
 	effectiveMimeType: string;
-}
+};
+
+// Helper function to extract file extension from a filename or path
+export const getFileExtension = (fileName: string): string => {
+	if (!fileName) return '';
+	
+	const pathWithoutQuery = fileName.split('?')[0];
+	const extension = pathWithoutQuery.split('.').pop()?.toLowerCase() || '';
+	const isValidExtension = extension && extension.length > 0 && extension.length <= 5;
+	
+	if (isValidExtension) {
+		return extension;
+	}
+	
+	return '';
+};
 
 // Helper function to detect file type from extension as a fallback
 const getMimeTypeFromExtension = (fileName: string): string => {
-	const extension = fileName.split('.').pop()?.toLowerCase() || '';
+	const extension = getFileExtension(fileName);
 	
 	const extensionMap: Record<string, string> = {
 		// Image formats
@@ -108,7 +123,7 @@ const validateWithMimeType = (
 
 	if (isVideo && !isPremium) {
 		toast("Premium Required", {
-			description: "Video uploads are only available for premium users",
+			description: "Video uploads require premium subscription or credits",
 			className: "bg-destructive text-destructive-foreground",
 		});
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };

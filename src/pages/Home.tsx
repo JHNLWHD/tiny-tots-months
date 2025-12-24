@@ -1,16 +1,16 @@
 import { useAuth } from "@/context/AuthContext";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Crown } from "lucide-react";
+import { useAbilities } from "@/hooks/useAbilities";
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
 
 import AddBabyDialog from "@/components/home/AddBabyDialog";
-// Component imports
-import BabyList from "@/components/home/BabyList";
+import NavigationHub from "@/components/home/NavigationHub";
+import NavigationBreadcrumbs from "@/components/home/NavigationBreadcrumbs";
+import ProgressIndicator from "@/components/home/ProgressIndicator";
 import EmptyState from "@/components/home/EmptyState";
 import MonthCardGrid from "@/components/home/MonthCardGrid";
-import { toast } from "@/components/ui/sonner.tsx";
+import { toast } from "sonner";
 
 const Home = () => {
 	const { user } = useAuth();
@@ -18,9 +18,11 @@ const Home = () => {
 		babies,
 		loading: isLoading,
 		createBaby: createBabyMutation,
+		deleteBaby: deleteBabyMutation,
 	} = useBabyProfiles();
 	const { isPremium, isFree, createSubscription, subscription } =
 		useSubscription();
+	const abilities = useAbilities({ babyCount: babies.length });
 	const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 	const [selectedBaby, setSelectedBaby] = React.useState(null);
 
@@ -42,13 +44,38 @@ const Home = () => {
 		});
 	};
 
-	function handleOnAddBaby() {
-		if (isFree && !isPremium) {
-			toast("Premium Required", {
-				description:
-					"Free users can only add 1 baby profile. Upgrade to Premium to create unlimited baby profiles.",
-				className: "bg-destructive text-destructive-foreground",
+	const handleDeleteBaby = (baby: any) => {
+		if (window.confirm(`Are you sure you want to delete ${baby.name}'s profile? This action cannot be undone.`)) {
+			deleteBabyMutation(baby.id, {
+				onSuccess: () => {
+					// If we're deleting the selected baby, auto-select another baby
+					if (selectedBaby?.id === baby.id) {
+						// Find the next baby to select (excluding the one being deleted)
+						const remainingBabies = babies.filter(b => b.id !== baby.id);
+						if (remainingBabies.length > 0) {
+							// Select the first remaining baby (most recently created)
+							setSelectedBaby(remainingBabies[0]);
+						} else {
+							// No babies left, clear selection
+							setSelectedBaby(null);
+						}
+					}
+					toast.success(`${baby.name}'s profile has been deleted.`);
+				},
+				onError: (error) => {
+					toast.error(`Failed to delete ${baby.name}'s profile: ${error.message}`);
+				},
 			});
+		}
+	};
+
+	function handleOnAddBaby() {
+		const abilityCheck = abilities.canCreateBaby();
+		
+		if (!abilityCheck.allowed) {
+			// Use the abilities system to show the proper error message
+			// This will include credit-based alternatives if applicable
+			abilities.showUpgradePrompt('create', 'Baby');
 			return;
 		}
 
@@ -60,7 +87,7 @@ const Home = () => {
 			return;
 		}
 
-		createSubscription();
+		createSubscription("PHP");
 	}, [subscription, createSubscription]);
 
 	// Set first baby as selected when babies load if none is selected
@@ -71,49 +98,63 @@ const Home = () => {
 	}, [babies, selectedBaby]);
 
 	return (
-		<div className="max-w-full mx-auto px-2 sm:px-4 py-4 sm:py-8">
-			<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8">
-				<h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 md:mb-0">
-					Welcome,{" "}
-					<span className="text-baby-purple truncate block sm:inline">
-						{user?.email}
-					</span>
-				</h1>
-
-				{!isPremium && (
-					<Link
-						to="/app/upgrade"
-						className="text-sm md:text-base px-4 md:px-6 py-1.5 md:py-2 bg-baby-purple text-white rounded-lg shadow hover:bg-baby-purple/90 transition-colors flex items-center whitespace-nowrap"
-					>
-						<Crown className="mr-1.5 md:mr-2 h-4 md:h-5 w-4 md:w-5" />
-						Get Premium
-					</Link>
-				)}
-			</div>
-
-			<BabyList
-				babies={babies}
-				isLoading={isLoading}
-				onAddBaby={handleOnAddBaby}
-				onSelectBaby={setSelectedBaby}
+		<div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+			{/* Navigation Breadcrumbs */}
+			<NavigationBreadcrumbs
+				items={[]}
 				selectedBaby={selectedBaby}
 			/>
 
-			<MonthCardGrid
-				babyId={selectedBaby?.id}
-				babyName={selectedBaby?.name}
-				showGrid={selectedBaby !== null && !isLoading}
+			{/* Main Navigation Hub */}
+			<NavigationHub
+				selectedBaby={selectedBaby}
+				babies={babies}
+				onSelectBaby={setSelectedBaby}
+				onAddBaby={handleOnAddBaby}
+				onDeleteBaby={handleDeleteBaby}
 			/>
 
+			{/* Progress Indicator */}
+			{selectedBaby && (
+				<ProgressIndicator
+					selectedBaby={selectedBaby}
+					showDetailed={false}
+				/>
+			)}
+
+			{/* Main Content */}
+			<div className="space-y-8">
+				{/* Month Timeline */}
+				{selectedBaby && (
+					<MonthCardGrid
+						babyId={selectedBaby?.id}
+						babyName={selectedBaby?.name}
+						showGrid={selectedBaby !== null && !isLoading}
+					/>
+				)}
+
+				{/* Empty State */}
+				{babies.length === 0 && !isLoading && (
+					<EmptyState onAddBaby={() => setIsDialogOpen(true)} />
+				)}
+			</div>
+
+			{/* Detailed Progress (Mobile) */}
+			{selectedBaby && (
+				<div className="xl:hidden">
+					<ProgressIndicator
+						selectedBaby={selectedBaby}
+						showDetailed={true}
+					/>
+				</div>
+			)}
+
+			{/* Add Baby Dialog */}
 			<AddBabyDialog
 				isOpen={isDialogOpen}
 				setIsOpen={setIsDialogOpen}
 				createBaby={createBaby}
 			/>
-
-			{babies.length === 0 && !isLoading && (
-				<EmptyState onAddBaby={() => setIsDialogOpen(true)} />
-			)}
 		</div>
 	);
 };

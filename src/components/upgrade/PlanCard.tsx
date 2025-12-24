@@ -2,19 +2,19 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type React from "react";
 
-interface PlanFeature {
+type PlanFeature = {
 	text: string;
 	isNegative?: boolean;
-}
+};
 
-interface PlanCardProps {
+type PlanCardProps = {
 	title: string;
 	price: string;
 	isPremium?: boolean;
 	features: PlanFeature[];
 	priceSubtext?: string;
 	children?: React.ReactNode;
-}
+};
 
 export const PlanCard: React.FC<PlanCardProps> = ({
 	title,

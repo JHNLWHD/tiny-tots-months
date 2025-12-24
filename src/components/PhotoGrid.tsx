@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -12,24 +9,25 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Photo } from "@/hooks/usePhotos";
-import { Play, Trash2 } from "lucide-react";
 import React from "react";
-import VideoPlayer from "./VideoPlayer";
-import HeicImage from "./HeicImage";
+import PhotoCard from "./PhotoCard";
+import PhotoLightbox from "./PhotoLightbox";
 
-interface PhotoGridProps {
+type PhotoGridProps = {
 	photos: Photo[];
 	onDelete?: (id: string) => void;
 	readOnly?: boolean;
-}
+	babyName?: string;
+};
 
 const PhotoGrid: React.FC<PhotoGridProps> = ({
 	photos,
 	onDelete,
 	readOnly = false,
+	babyName = "baby",
 }) => {
-	const [selectedPhoto, setSelectedPhoto] = React.useState<Photo | null>(null);
-	const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+	const [lightboxOpen, setLightboxOpen] = React.useState(false);
+	const [lightboxIndex, setLightboxIndex] = React.useState(0);
 	const [photoToDelete, setPhotoToDelete] = React.useState<Photo | null>(null);
 
 	if (!photos || photos.length === 0) {
@@ -41,8 +39,9 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 	}
 
 	const handlePhotoClick = (photo: Photo) => {
-		setSelectedPhoto(photo);
-		setIsDialogOpen(true);
+		const index = photos.findIndex(p => p.id === photo.id);
+		setLightboxIndex(index);
+		setLightboxOpen(true);
 	};
 
 	const handleDeleteClick = (photo: Photo) => {
@@ -62,85 +61,29 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 
 	return (
 		<>
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
 				{photos.map((photo) => (
-					<Card
+					<PhotoCard
 						key={photo.id}
-						className="overflow-hidden group relative cursor-pointer"
-						onClick={() => handlePhotoClick(photo)}
-					>
-						<div className="aspect-square relative">
-							{photo.is_video ? (
-								<div className="absolute inset-0 flex items-center justify-center bg-black/20">
-									<Play className="h-8 w-8 text-white" />
-								</div>
-							) : null}
-
-							<HeicImage
-								src={photo.url || "/placeholder.svg"}
-								alt={photo.description || "Baby photo"}
-								className="w-full h-full object-cover"
-								loading="lazy"
-								onError={(e) => {
-									console.error("Image failed to load:", photo.storage_path);
-									const imgElement = e.currentTarget;
-									imgElement.onerror = null; // Prevent infinite error loops
-									imgElement.src = "/placeholder.svg"; // Fallback image
-								}}
-							/>
-
-							{photo.description && (
-								<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs truncate">
-									{photo.description}
-								</div>
-							)}
-
-							{!readOnly && onDelete && (
-								<Button
-									variant="destructive"
-									size="icon"
-									className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-									onClick={(e) => {
-										e.stopPropagation();
-										handleDeleteClick(photo);
-									}}
-								>
-									<Trash2 size={16} />
-								</Button>
-							)}
-						</div>
-					</Card>
+						photo={photo}
+						onClick={handlePhotoClick}
+						onDelete={handleDeleteClick}
+						showDeleteButton={!readOnly && !!onDelete}
+						showMonthBadge={true}
+					/>
 				))}
 			</div>
 
-			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-				<DialogTrigger className="hidden">Open</DialogTrigger>
-				<DialogContent className="max-w-3xl p-0 overflow-hidden">
-					{selectedPhoto && (
-						<div className="relative">
-							{selectedPhoto.is_video ? (
-								<VideoPlayer
-									src={selectedPhoto.url || ""}
-									className="w-full"
-									onError={(e) => console.error("Video failed to load:", e)}
-								/>
-							) : (
-								<HeicImage
-									src={selectedPhoto.url || "/placeholder.svg"}
-									alt={selectedPhoto.description || "Baby photo"}
-									className="w-full h-auto"
-								/>
-							)}
-
-							{selectedPhoto.description && (
-								<div className="p-4 bg-background">
-									<p className="text-foreground">{selectedPhoto.description}</p>
-								</div>
-							)}
-						</div>
-					)}
-				</DialogContent>
-			</Dialog>
+			<PhotoLightbox
+				photos={photos}
+				open={lightboxOpen}
+				index={lightboxIndex}
+				onClose={() => setLightboxOpen(false)}
+				babyName={babyName}
+				showCaptions={true}
+				showDownload={true}
+				showThumbnails={true}
+			/>
 
 			<AlertDialog open={!!photoToDelete} onOpenChange={() => setPhotoToDelete(null)}>
 				<AlertDialogContent>

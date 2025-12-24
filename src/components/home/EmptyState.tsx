@@ -12,7 +12,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onAddBaby }) => {
 			<div className="w-16 sm:w-20 h-16 sm:h-20 bg-baby-purple/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 animate-float">
 				<Baby className="h-8 sm:h-10 w-8 sm:w-10 text-baby-purple" />
 			</div>
-			<h2 className="text-2xl sm:text-3xl font-bold text-gray-700 mb-3 sm:mb-4 font-bubblegum">
+			<h2 className="text-2xl sm:text-3xl font-bold text-gray-700 mb-3 sm:mb-4 font-heading">
 				No Babies Added Yet
 			</h2>
 			<p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto">

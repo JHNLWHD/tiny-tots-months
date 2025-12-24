@@ -4,10 +4,10 @@ import { CheckCircle2, Clock } from "lucide-react";
 import type React from "react";
 import { useNavigate } from "react-router-dom";
 
-interface SubscriptionStatusProps {
+type SubscriptionStatusProps = {
 	isPremium: boolean;
 	isPending: boolean;
-}
+};
 
 export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 	isPremium,
@@ -26,7 +26,7 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 					You already have access to all our premium features. Enjoy tracking
 					your baby's milestones without limitations.
 				</p>
-				<Button onClick={() => navigate("/app")}>Go to Dashboard</Button>
+				<Button onClick={() => navigate("/app")}>Go to App</Button>
 			</Card>
 		);
 	}
@@ -44,7 +44,7 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 					We've received your payment proof and are currently processing your
 					request. Your premium features will be activated within 24 hours.
 				</p>
-				<Button onClick={() => navigate("/app")}>Go to Dashboard</Button>
+				<Button onClick={() => navigate("/app")}>Go to App</Button>
 			</Card>
 		);
 	}

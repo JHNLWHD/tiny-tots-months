@@ -24,6 +24,7 @@ export function useBabyProfiles() {
 	const [babies, setBabies] = useState<Baby[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [creating, setCreating] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -130,10 +131,49 @@ export function useBabyProfiles() {
 			});
 	};
 
+	const deleteBaby = (
+		babyId: string,
+		options?: { onSuccess?: () => void; onError?: (err: Error) => void },
+	) => {
+		setDeleting(true);
+
+		supabase
+			.from("baby")
+			.delete()
+			.eq("id", babyId)
+			.eq("user_id", user?.id) // Ensure user can only delete their own babies
+			.then(({ error }) => {
+				if (error) {
+					console.error("Error deleting baby:", error);
+					setError(error.message);
+
+					trackEvent("baby_deletion_failed", {
+						error_message: error.message,
+						baby_id: babyId,
+					});
+					trackDatabaseError(error, "delete", "baby", user?.id);
+
+					options?.onError?.(new Error(error.message));
+				} else {
+					trackEvent("baby_deleted", {
+						baby_id: babyId,
+					});
+
+					refetch();
+					options?.onSuccess?.();
+				}
+
+				setDeleting(false);
+			});
+	};
+
 	return {
 		babies,
 		loading,
 		error,
+		creating,
+		deleting,
 		createBaby,
+		deleteBaby,
 	};
 }
