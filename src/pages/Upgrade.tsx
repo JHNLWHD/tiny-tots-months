@@ -104,26 +104,24 @@ const Upgrade = () => {
 		setShowPaymentDialog(true);
 	};
 
-	const handlePaymentSuccess = (paymentId: string) => {
+	const handlePaymentSuccess = (paymentTransactionId: string) => {
 		setShowPaymentDialog(false);
 		
+		// Don't grant credits/subscription immediately - wait for payment approval
+		// Credits will be granted when payment status is updated to "completed" by admin
 		if (currentPaymentRequest?.type === "credits") {
-			// Handle credit purchase success
-			const credits = currentPaymentRequest.metadata?.credits || 0;
-			purchaseCredits({ amount: currentPaymentRequest.amount, credits });
-			trackEvent("credit_purchase_completed", {
-				paymentId,
-				credits,
+			trackEvent("credit_purchase_submitted", {
+				paymentId: paymentTransactionId,
+				credits: currentPaymentRequest.metadata?.credits || 0,
 				amount: currentPaymentRequest.amount,
 				currency: currentPaymentRequest.currency
 			});
 		} else {
-			// Handle subscription upgrade success
+			// Handle subscription upgrade - also wait for approval
 			const tier = currentPaymentRequest?.metadata?.tier;
 			if (tier) {
-				requestSubscriptionUpgrade({ tier });
-				trackEvent("subscription_upgrade_completed", {
-					paymentId,
+				trackEvent("subscription_upgrade_submitted", {
+					paymentId: paymentTransactionId,
 					tier,
 					amount: currentPaymentRequest?.amount,
 					currency: currentPaymentRequest?.currency

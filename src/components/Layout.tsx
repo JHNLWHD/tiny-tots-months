@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/useIsMobile.tsx";
 import { cn } from "@/lib/utils";
-import { Baby, Home, LogOut, Menu, X, Settings as SettingsIcon } from "lucide-react";
+import { Baby, Home, LogOut, Menu, X, Settings as SettingsIcon, Zap } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -14,6 +16,7 @@ type LayoutProps = {
 
 const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 	const { user, signOut, isAuthenticated } = useAuth();
+	const { creditsBalance } = useSubscription();
 	const isMobile = useIsMobile();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -39,21 +42,31 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 								</h1>
 							</Link>
 
-							{/* Mobile menu button */}
-							<div className="block md:hidden">
+							{/* Mobile menu button and credits */}
+							<div className="block md:hidden flex items-center gap-2">
 								{isAuthenticated && (
-									<Button
-										variant="ghost"
-										onClick={toggleMobileMenu}
-										className="p-2 rounded-full hover:bg-gray-100"
-										aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-									>
-										{mobileMenuOpen ? (
-											<X className="h-6 w-6 text-baby-purple" />
-										) : (
-											<Menu className="h-6 w-6 text-baby-purple" />
-										)}
-									</Button>
+									<>
+										{/* Credits Display - Mobile */}
+										<Badge 
+											variant="outline" 
+											className="flex items-center gap-1 px-2 py-1 bg-blue-50 border-blue-200 text-blue-700 font-medium text-xs"
+										>
+											<Zap className="h-3 w-3" />
+											<span>{creditsBalance || 0}</span>
+										</Badge>
+										<Button
+											variant="ghost"
+											onClick={toggleMobileMenu}
+											className="p-2 rounded-full hover:bg-gray-100"
+											aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+										>
+											{mobileMenuOpen ? (
+												<X className="h-6 w-6 text-baby-purple" />
+											) : (
+												<Menu className="h-6 w-6 text-baby-purple" />
+											)}
+										</Button>
+									</>
 								)}
 							</div>
 
@@ -72,6 +85,17 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 													<div className="text-gray-500 truncate max-w-[150px]">{user.email}</div>
 												</div>
 											</div>
+										)}
+
+										{/* Credits Display */}
+										{isAuthenticated && (
+											<Badge 
+												variant="outline" 
+												className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border-blue-200 text-blue-700 font-medium"
+											>
+												<Zap className="h-3.5 w-3.5" />
+												<span>{creditsBalance || 0} Credits</span>
+											</Badge>
 										)}
 
 										{/* Primary Navigation */}
@@ -136,10 +160,10 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 									{user && (
 										<div className="px-4 py-3 bg-gradient-to-r from-baby-purple/5 to-baby-blue/5 rounded-lg mx-3 border border-baby-purple/20">
 											<div className="flex items-center gap-3">
-												<div className="w-10 h-10 bg-baby-purple/20 rounded-full flex items-center justify-center">
+												<div className="w-10 h-10 bg-baby-purple/20 rounded-full flex items-center justify-center flex-shrink-0">
 													<Baby className="h-5 w-5 text-baby-purple" />
 												</div>
-												<div>
+												<div className="flex-1 min-w-0">
 													<div className="font-medium text-gray-800">Welcome back!</div>
 													<div className="text-sm text-gray-500 truncate">{user.email}</div>
 												</div>

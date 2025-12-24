@@ -25,8 +25,7 @@ export type PaymentRequest = {
 
 export type PaymentResult = {
 	success: boolean;
-	paymentId?: string;
-	transactionId?: string; // Payment transaction record ID
+	paymentTransactionId: string; // Payment transaction record ID (required when success is true)
 	error?: string;
 	requiresProof?: boolean;
 	instructions?: string;
@@ -89,6 +88,7 @@ export const usePaymentIntegration = () => {
 			});
 
 			// Process payment (all methods are manual)
+			// paymentTransactionId is always available here since transaction was created successfully
 			return await processManualPayment(request, method, proofPath, paymentTransaction.id);
 		} catch (error) {
 			console.error("Payment processing error:", error);
@@ -100,10 +100,9 @@ export const usePaymentIntegration = () => {
 				error: error instanceof Error ? error.message : "Unknown error"
 			});
 			
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : "Payment processing failed"
-			};
+			// If transaction creation failed, we don't have a paymentTransactionId
+			// Re-throw the error so PaymentFlow can handle it gracefully
+			throw error;
 		} finally {
 			setIsProcessing(false);
 		}
@@ -114,12 +113,13 @@ export const usePaymentIntegration = () => {
 		request: PaymentRequest,
 		method: PaymentMethod,
 		proofPath: string | undefined,
-		transactionId: string
+		paymentTransactionId: string
 	): Promise<PaymentResult> => {
 		// For manual payments, we need proof of payment
 		if (!proofPath) {
 			return {
 				success: false,
+				paymentTransactionId: paymentTransactionId, // Always include the transaction ID even on error
 				error: "Payment proof is required for this payment method",
 				requiresProof: true,
 				instructions: method.instructions
@@ -146,8 +146,7 @@ export const usePaymentIntegration = () => {
 		
 		return {
 			success: true,
-			paymentId: `manual_${method.type}_${Date.now()}`,
-			transactionId: transactionId,
+			paymentTransactionId: paymentTransactionId,
 			instructions: `Payment submitted successfully! We'll verify your ${method.name} payment within 24 hours and activate your purchase.`
 		};
 	};
