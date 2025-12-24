@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +15,14 @@ type PaymentFlowProps = {
 	request: PaymentRequest;
 	onSuccess: (paymentId: string) => void;
 	onCancel: () => void;
+	onStepChange?: (step: "method" | "details" | "proof" | "processing" | "success") => void;
 };
 
 export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 	request,
 	onSuccess,
 	onCancel,
+	onStepChange,
 }) => {
 	const {
 		isProcessing,
@@ -38,6 +40,11 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 	const [proofFile, setProofFile] = useState<File | null>(null);
 	const [notes, setNotes] = useState("");
 	const [paymentResult, setPaymentResult] = useState<any>(null);
+
+	// Notify parent of step changes
+	useEffect(() => {
+		onStepChange?.(step);
+	}, [step, onStepChange]);
 
 	const availableMethods = getAvailablePaymentMethods(request.currency);
 
@@ -101,10 +108,8 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 			if (result.success) {
 				setStep("success");
 				toast.success(result.instructions || "Payment processed successfully!");
-				setTimeout(() => {
-					// paymentTransactionId is always required when success is true
-					onSuccess(result.paymentTransactionId);
-				}, 2000);
+				// Don't auto-close - let user read the information and close manually
+				// onSuccess will be called when user clicks the Close button
 			} else {
 				toast.error(result.error || "Payment failed");
 				setStep(result.requiresProof ? "proof" : "details");
@@ -232,13 +237,23 @@ export const PaymentFlow: React.FC<PaymentFlowProps> = ({
 			<p className="text-gray-600 mb-4">
 				{paymentResult?.instructions || "Your payment has been processed successfully."}
 			</p>
-			<div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm">
+			<div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-sm mb-6">
 				<p className="font-medium text-blue-800 mb-1">What happens next?</p>
 				<p className="text-blue-700">
 					We'll verify your payment within 24 hours and activate your purchase. 
 					You'll receive an email confirmation once it's complete.
 				</p>
 			</div>
+			<Button 
+				onClick={() => {
+					// Payment is already submitted - just close the info modal
+					// paymentTransactionId is always present when success is true
+					onSuccess(paymentResult.paymentTransactionId);
+				}}
+				className="w-full"
+			>
+				Got it
+			</Button>
 		</Card>
 	);
 

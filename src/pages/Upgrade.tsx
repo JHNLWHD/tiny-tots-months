@@ -42,6 +42,7 @@ const Upgrade = () => {
 	const [selectedTab, setSelectedTab] = useState("credits");
 	const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 	const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
+	const [paymentStep, setPaymentStep] = useState<"method" | "details" | "proof" | "processing" | "success">("method");
 
 	// Track page view with additional details
 	useEffect(() => {
@@ -411,8 +412,31 @@ const Upgrade = () => {
 				</div>
 
 				{/* Payment Dialog */}
-				<Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-					<DialogContent className="max-w-lg">
+				<Dialog 
+					open={showPaymentDialog} 
+					onOpenChange={(open) => {
+						// Prevent closing when on success step - user must click "Got it" button
+						if (!open && paymentStep === "success") {
+							return;
+						}
+						setShowPaymentDialog(open);
+					}}
+				>
+					<DialogContent 
+						className="max-w-lg"
+						onInteractOutside={(e) => {
+							// Prevent closing on outside click when on success step
+							if (paymentStep === "success") {
+								e.preventDefault();
+							}
+						}}
+						onEscapeKeyDown={(e) => {
+							// Prevent closing on Escape key when on success step
+							if (paymentStep === "success") {
+								e.preventDefault();
+							}
+						}}
+					>
 						<DialogHeader>
 							<DialogTitle>Complete Payment</DialogTitle>
 						</DialogHeader>
@@ -421,6 +445,7 @@ const Upgrade = () => {
 								request={currentPaymentRequest}
 								onSuccess={handlePaymentSuccess}
 								onCancel={handlePaymentCancel}
+								onStepChange={setPaymentStep}
 							/>
 						)}
 					</DialogContent>
