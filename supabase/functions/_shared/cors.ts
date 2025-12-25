@@ -8,7 +8,17 @@ export const corsHeaders = {
 export function handleCors(request: Request): Response | null {
 	// Handle CORS preflight requests
 	if (request.method === "OPTIONS") {
-		return new Response("ok", { headers: corsHeaders });
+		console.log("[CORS] Handling OPTIONS preflight request");
+		const response = new Response(null, { 
+			status: 200,
+			headers: {
+				...corsHeaders,
+				"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+				"Access-Control-Max-Age": "86400",
+			},
+		});
+		console.log("[CORS] OPTIONS response headers:", Object.fromEntries(response.headers.entries()));
+		return response;
 	}
 	return null;
 }
