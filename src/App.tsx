@@ -16,6 +16,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { TrackingConsentBanner } from "./components/TrackingConsentBanner";
 import Auth from "./pages/Auth";
 import BabyGallery from "./pages/BabyGallery";
+import BabyJasmineBinyag from "./pages/BabyJasmineBinyag";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
 import Home from "./pages/Home";
@@ -49,6 +50,7 @@ function App() {
 								<Route path="/terms-of-service" element={<TermsOfService />} />
 								<Route path="/contact" element={<Contact />} />
 								<Route path="/help" element={<Help />} />
+								<Route path="/baby-jasmine-binyag" element={<BabyJasmineBinyag />} />
 
 								<Route
 									path="/app"
