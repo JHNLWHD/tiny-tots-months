@@ -3,7 +3,7 @@
 import { corsHeaders, handleCors, createCorsResponse, createCorsErrorResponse } from "../_shared/cors.ts";
 import { db, getAuthenticatedUser } from "../_shared/db-drizzle.ts";
 import { userCredits, creditTransactions } from "../_shared/schema.ts";
-import { eq } from "https://esm.sh/drizzle-orm@0.45.1";
+import { eq } from "https://esm.sh/drizzle-orm@0.34.0";
 
 Deno.serve(async (req) => {
 	// Handle CORS preflight

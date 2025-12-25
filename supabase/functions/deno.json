@@ -4,9 +4,10 @@
 		"strict": true
 	},
 	"imports": {
-		"drizzle-orm": "https://esm.sh/drizzle-orm@0.45.1",
-		"drizzle-orm/pg-core": "https://esm.sh/drizzle-orm@0.45.1/pg-core",
-		"drizzle-orm/postgres-js": "https://esm.sh/drizzle-orm@0.45.1/postgres-js",
+		"drizzle-orm": "https://esm.sh/drizzle-orm@0.34.0",
+		"drizzle-orm/": "https://esm.sh/drizzle-orm@0.34.0/",
+		"drizzle-orm/pg-core": "https://esm.sh/drizzle-orm@0.34.0/pg-core",
+		"drizzle-orm/postgres-js": "https://esm.sh/drizzle-orm@0.34.0/postgres-js",
 		"postgres": "https://deno.land/x/postgresjs@v3.4.3/mod.js"
 	}
 }

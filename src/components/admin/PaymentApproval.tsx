@@ -31,6 +31,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { useAdminPayments, type AdminPaymentFilters } from "@/hooks/useAdminPayments";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCentsAmount } from "@/utils/currency";
@@ -118,13 +125,13 @@ export const PaymentApproval: React.FC = () => {
 
 	const handleApprove = (transaction: PaymentTransaction) => {
 		setActionTransaction(transaction);
-		setAdminNotes(transaction.admin_notes || "");
+		setAdminNotes((transaction as any).adminNotes || (transaction as any).admin_notes || "");
 		setApproveDialogOpen(true);
 	};
 
 	const handleReject = (transaction: PaymentTransaction) => {
 		setActionTransaction(transaction);
-		setAdminNotes(transaction.admin_notes || "");
+		setAdminNotes((transaction as any).adminNotes || (transaction as any).admin_notes || "");
 		setRejectDialogOpen(true);
 	};
 
@@ -267,37 +274,28 @@ export const PaymentApproval: React.FC = () => {
 							/>
 						</div>
 						<div className="flex gap-2">
-							<Button
-								variant={filters.status === "pending" ? "default" : "outline"}
-								size="sm"
-								onClick={() => setFilters({ ...filters, status: "pending" })}
-							>
-								Pending
-							</Button>
-							<Button
-								variant={filters.status === "completed" ? "default" : "outline"}
-								size="sm"
-								onClick={() => setFilters({ ...filters, status: "completed" })}
-							>
-								Completed
-							</Button>
-							<Button
-								variant={filters.status === "failed" ? "default" : "outline"}
-								size="sm"
-								onClick={() => setFilters({ ...filters, status: "failed" })}
-							>
-								Failed
-							</Button>
-							<Button
-								variant={!filters.status ? "default" : "outline"}
-								size="sm"
-								onClick={() => {
-									const { status, ...rest } = filters;
-									setFilters(rest);
+							<Select
+								value={filters.status || "all"}
+								onValueChange={(value) => {
+									if (value === "all") {
+										const { status, ...rest } = filters;
+										setFilters(rest);
+									} else {
+										setFilters({ ...filters, status: value as "pending" | "completed" | "failed" });
+									}
 								}}
 							>
-								All
-							</Button>
+								<SelectTrigger className="w-[140px]">
+									<SelectValue placeholder="Filter by status" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="all">All Statuses</SelectItem>
+									<SelectItem value="pending">Pending</SelectItem>
+									<SelectItem value="completed">Completed</SelectItem>
+									<SelectItem value="failed">Failed</SelectItem>
+									<SelectItem value="refunded">Refunded</SelectItem>
+								</SelectContent>
+							</Select>
 							<Button
 								variant="outline"
 								size="sm"
@@ -361,21 +359,21 @@ export const PaymentApproval: React.FC = () => {
 										return (
 											<TableRow key={transaction.id}>
 												<TableCell className="font-mono text-xs">
-													{transaction.id.slice(0, 8)}...
+													{transaction.id?.slice(0, 8) || "N/A"}...
 												</TableCell>
 												<TableCell className="font-mono text-xs">
-													{transaction.user_id.slice(0, 8)}...
+													{((transaction as any).userId || (transaction as any).user_id)?.slice(0, 8) || "N/A"}...
 												</TableCell>
 												<TableCell className="font-semibold">
 													{formatAmount(
-														transaction.amount_in_cents,
+														(transaction as any).amountInCents || (transaction as any).amount_in_cents || 0,
 														transaction.currency,
 													)}
 												</TableCell>
 												<TableCell>
 													<div className="flex flex-col">
 														<span className="capitalize">
-															{transaction.transaction_type}
+															{(transaction as any).transactionType || (transaction as any).transaction_type || "N/A"}
 														</span>
 														{metadata?.credits && (
 															<span className="text-xs text-gray-500">
@@ -390,7 +388,7 @@ export const PaymentApproval: React.FC = () => {
 													</div>
 												</TableCell>
 												<TableCell className="capitalize">
-													{transaction.payment_method.replace("_", " ")}
+													{((transaction as any).paymentMethod || (transaction as any).payment_method || "").replace("_", " ")}
 												</TableCell>
 												<TableCell>
 													<Badge className={getStatusColor(transaction.status)}>
@@ -404,7 +402,7 @@ export const PaymentApproval: React.FC = () => {
 												</TableCell>
 												<TableCell className="text-sm">
 													{format(
-														new Date(transaction.created_at),
+														new Date((transaction as any).createdAt || (transaction as any).created_at || new Date()),
 														"MMM dd, yyyy",
 													)}
 												</TableCell>
@@ -423,20 +421,21 @@ export const PaymentApproval: React.FC = () => {
 														{transaction.status === "pending" && (
 															<>
 																<Button
-																	variant="default"
+																	variant="outline"
 																	size="sm"
 																	onClick={() => handleApprove(transaction)}
 																	disabled={isUpdatingStatus}
-																	className="bg-green-600 hover:bg-green-700"
+																	className="border-green-600 text-green-600 hover:bg-green-50"
 																>
 																	<CheckCircle2 className="w-3 h-3 mr-1" />
 																	Approve
 																</Button>
 																<Button
-																	variant="destructive"
+																	variant="outline"
 																	size="sm"
 																	onClick={() => handleReject(transaction)}
 																	disabled={isUpdatingStatus}
+																	className="border-red-600 text-red-600 hover:bg-red-50"
 																>
 																	<XCircle className="w-3 h-3 mr-1" />
 																	Reject
@@ -476,14 +475,14 @@ export const PaymentApproval: React.FC = () => {
 								<div>
 									<Label className="text-xs text-muted-foreground">User ID</Label>
 									<p className="font-mono text-sm">
-										{selectedTransaction.user_id}
+										{(selectedTransaction as any).userId || (selectedTransaction as any).user_id || "N/A"}
 									</p>
 								</div>
 								<div>
 									<Label className="text-xs text-muted-foreground">Amount</Label>
 									<p className="font-semibold">
 										{formatAmount(
-											selectedTransaction.amount_in_cents,
+											(selectedTransaction as any).amountInCents || (selectedTransaction as any).amount_in_cents || 0,
 											selectedTransaction.currency,
 										)}
 									</p>
@@ -501,12 +500,12 @@ export const PaymentApproval: React.FC = () => {
 								</div>
 								<div>
 									<Label className="text-xs text-muted-foreground">Type</Label>
-									<p className="capitalize">{selectedTransaction.transaction_type}</p>
+									<p className="capitalize">{(selectedTransaction as any).transactionType || (selectedTransaction as any).transaction_type || "N/A"}</p>
 								</div>
 								<div>
 									<Label className="text-xs text-muted-foreground">Method</Label>
 									<p className="capitalize">
-										{selectedTransaction.payment_method.replace("_", " ")}
+										{((selectedTransaction as any).paymentMethod || (selectedTransaction as any).payment_method || "").replace("_", " ")}
 									</p>
 								</div>
 								<div>
@@ -515,19 +514,19 @@ export const PaymentApproval: React.FC = () => {
 									</Label>
 									<p className="text-sm">
 										{format(
-											new Date(selectedTransaction.created_at),
+											new Date((selectedTransaction as any).createdAt || (selectedTransaction as any).created_at || new Date()),
 											"MMM dd, yyyy 'at' h:mm a",
 										)}
 									</p>
 								</div>
-								{selectedTransaction.verified_at && (
+								{((selectedTransaction as any).verifiedAt || (selectedTransaction as any).verified_at) && (
 									<div>
 										<Label className="text-xs text-muted-foreground">
 											Verified At
 										</Label>
 										<p className="text-sm">
 											{format(
-												new Date(selectedTransaction.verified_at),
+												new Date((selectedTransaction as any).verifiedAt || (selectedTransaction as any).verified_at),
 												"MMM dd, yyyy 'at' h:mm a",
 											)}
 										</p>
@@ -544,23 +543,23 @@ export const PaymentApproval: React.FC = () => {
 								</div>
 							)}
 
-							{selectedTransaction.external_payment_id && (
+							{((selectedTransaction as any).externalPaymentId || (selectedTransaction as any).external_payment_id) && (
 								<div>
 									<Label className="text-xs text-muted-foreground">
 										External Payment ID
 									</Label>
 									<p className="font-mono text-sm">
-										{selectedTransaction.external_payment_id}
+										{(selectedTransaction as any).externalPaymentId || (selectedTransaction as any).external_payment_id}
 									</p>
 								</div>
 							)}
 
-							{selectedTransaction.admin_notes && (
+							{((selectedTransaction as any).adminNotes || (selectedTransaction as any).admin_notes) && (
 								<div>
 									<Label className="text-xs text-muted-foreground">
 										Admin Notes
 									</Label>
-									<p className="text-sm">{selectedTransaction.admin_notes}</p>
+									<p className="text-sm">{(selectedTransaction as any).adminNotes || (selectedTransaction as any).admin_notes}</p>
 								</div>
 							)}
 
@@ -573,7 +572,7 @@ export const PaymentApproval: React.FC = () => {
 								</div>
 							)}
 
-							{selectedTransaction.payment_proof_url && (
+							{((selectedTransaction as any).paymentProofUrl || (selectedTransaction as any).payment_proof_url) && (
 								<div>
 									<Label className="text-xs text-muted-foreground">
 										Payment Proof
@@ -582,7 +581,7 @@ export const PaymentApproval: React.FC = () => {
 										variant="outline"
 										size="sm"
 										onClick={() =>
-											handleViewProof(selectedTransaction.payment_proof_url!)
+											handleViewProof((selectedTransaction as any).paymentProofUrl || (selectedTransaction as any).payment_proof_url!)
 										}
 										className="mt-2"
 									>
