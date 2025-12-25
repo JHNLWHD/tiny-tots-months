@@ -62,11 +62,12 @@ const GuestPhotoUpload = () => {
 
 	const handlePasscodeSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		if (verifyPasscode(inputPasscode)) {
+		if (verifyPasscode(inputPasscode, inputName)) {
 			toast("Access Granted", {
 				description: "You can now upload photos!",
 			});
 			setInputPasscode("");
+			setInputName("");
 		} else {
 			toast("Invalid Passcode", {
 				description: "Please check the passcode and try again.",
