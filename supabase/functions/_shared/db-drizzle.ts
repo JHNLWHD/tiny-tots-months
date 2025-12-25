@@ -1,38 +1,45 @@
 /// <reference path="./deno.d.ts" />
 // Drizzle database client setup for Supabase Edge Functions
-import { drizzle } from "https://esm.sh/drizzle-orm@0.45.1/postgres-js";
+import { drizzle } from "https://esm.sh/drizzle-orm@0.34.0/postgres-js";
 import postgres from "https://deno.land/x/postgresjs@v3.4.3/mod.js";
 import * as schema from "./schema.ts";
 
 // Get environment variables
-// Note: Cannot use SUPABASE_ prefix as it's reserved by Supabase
+// Note: SUPABASE_DB_URL is automatically provided by Supabase Edge Functions (if available)
+// DATABASE_URL should contain the full connection string with database password
+// SERVICE_ROLE_KEY is for Supabase API, not for direct database connections
+const SUPABASE_DB_URL = Deno.env.get("SUPABASE_DB_URL") ?? "";
+const DATABASE_URL = Deno.env.get("DATABASE_URL") ?? "";
 const PROJECT_URL = Deno.env.get("PROJECT_URL") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY") ?? "";
-const DATABASE_URL = Deno.env.get("DATABASE_URL") ?? "";
 
-if (!PROJECT_URL || !SERVICE_ROLE_KEY) {
+// Build connection string
+// Priority: 1. SUPABASE_DB_URL (auto-provided by Supabase), 2. DATABASE_URL (user-provided)
+// Note: We cannot construct from SERVICE_ROLE_KEY as it's for API access, not database access
+const connectionString = SUPABASE_DB_URL || DATABASE_URL;
+
+if (!connectionString) {
 	throw new Error(
-		"Missing PROJECT_URL or SERVICE_ROLE_KEY environment variables",
+		"Missing database connection string. Please set DATABASE_URL environment variable.\n" +
+		"Get it from: Supabase Dashboard > Settings > Database > Connection string > Connection pooling\n" +
+		"Format: postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:[port]/postgres\n" +
+		"Or use: supabase secrets set DATABASE_URL=your-connection-string"
 	);
 }
 
-// Build connection string from Supabase URL
-// If DATABASE_URL is provided, use it directly
-// Otherwise, construct from PROJECT_URL and service role key
-let connectionString = DATABASE_URL;
-
-if (!connectionString) {
-	// Extract project ref from PROJECT_URL (e.g., https://htxczdhdospkxjesvztw.supabase.co)
-	const projectRef = PROJECT_URL.replace("https://", "").replace(".supabase.co", "");
-	
-	// Use connection pooler for better performance in serverless
-	// Format: postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
-	// Default to us-east-1, but this may need to be adjusted based on your region
-	connectionString = `postgresql://postgres.${projectRef}:${SERVICE_ROLE_KEY}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`;
+// Validate that we have PROJECT_URL and SERVICE_ROLE_KEY for auth operations
+if (!PROJECT_URL || !SERVICE_ROLE_KEY) {
+	console.warn(
+		"Warning: PROJECT_URL or SERVICE_ROLE_KEY not set. Authentication features may not work."
+	);
 }
 
 // Create postgres client
 // Note: In Deno, we need to use the postgres-js package compatible with Deno
+// Mask password in connection string for logging
+const maskedConnectionString = connectionString.replace(/:([^:@]+)@/, ":****@");
+console.log("[db-drizzle] Using connection:", maskedConnectionString);
+
 const client = postgres(connectionString, {
 	max: 1, // Edge functions should use a single connection
 	ssl: "require",

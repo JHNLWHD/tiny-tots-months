@@ -1,5 +1,5 @@
 // Drizzle ORM schema definitions
-import { pgTable, uuid, text, integer, timestamp, jsonb, boolean } from "https://esm.sh/drizzle-orm@0.45.1/pg-core";
+import { pgTable, uuid, text, integer, timestamp, jsonb, boolean } from "https://esm.sh/drizzle-orm@0.34.0/pg-core";
 
 export const paymentTransactions = pgTable("payment_transactions", {
 	id: uuid("id").defaultRandom().primaryKey(),
