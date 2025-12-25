@@ -31,6 +31,7 @@ export type CreditTransaction = {
 	amount: number;
 	transaction_type: string;
 	description: string | null;
+	payment_transaction_id: string | null;
 	created_at: string;
 	updated_at: string;
 };
@@ -97,6 +98,44 @@ export const useSubscription = () => {
 
 		if (error && error.code !== "PGRST116") {
 			throw error;
+		}
+
+		// Calculate effective credits balance by excluding credits from pending payments
+		if (data) {
+			// Get all credit transactions linked to payment transactions
+			const { data: creditTransactions } = await supabase
+				.from("credit_transactions")
+				.select("amount, payment_transaction_id")
+				.eq("user_id", user.id)
+				.eq("transaction_type", TRANSACTION_TYPES.PURCHASE)
+				.not("payment_transaction_id", "is", null);
+
+			if (creditTransactions && creditTransactions.length > 0) {
+				// Get payment transaction IDs
+				const paymentTransactionIds = creditTransactions
+					.map(ct => ct.payment_transaction_id)
+					.filter((id): id is string => id !== null);
+
+				// Check which payment transactions are still pending
+				const { data: paymentTransactions } = await supabase
+					.from("payment_transactions")
+					.select("id, status")
+					.in("id", paymentTransactionIds);
+
+				// Calculate credits from pending payments to exclude
+				const pendingCredits = creditTransactions
+					.filter(ct => {
+						const payment = paymentTransactions?.find(pt => pt.id === ct.payment_transaction_id);
+						return payment?.status === "pending";
+					})
+					.reduce((sum, ct) => sum + ct.amount, 0);
+
+				// Return adjusted balance (excluding pending payment credits)
+				return {
+					...data,
+					credits_balance: Math.max(0, data.credits_balance - pendingCredits),
+				};
+			}
 		}
 
 		return data;
@@ -189,40 +228,38 @@ export const useSubscription = () => {
 
 	// Credit purchase mutation
 	const purchaseCredits = useMutation({
-		mutationFn: async ({ amount, credits }: { amount: number; credits: number }) => {
+		mutationFn: async ({ 
+			amount, 
+			credits, 
+			paymentTransactionId 
+		}: { 
+			amount: number; 
+			credits: number;
+			paymentTransactionId: string; // Required - always provided when buying credits
+		}) => {
 			if (!user) throw new Error("User not authenticated");
 
-			// Add credits to user balance
-			const { data: currentCredits } = await supabase
-				.from("user_credits")
-				.select("credits_balance")
-				.eq("user_id", user.id)
-				.single();
+			// Call edge function to purchase credits atomically
+			const { data, error } = await supabase.functions.invoke(
+				"purchase-credits",
+				{
+					body: {
+						amount,
+						credits,
+						paymentTransactionId,
+					},
+				},
+			);
 
-			const newBalance = (currentCredits?.credits_balance || 0) + credits;
+			if (error) {
+				throw new Error(error.message || "Failed to purchase credits");
+			}
 
-			const { error: updateError } = await supabase
-				.from("user_credits")
-				.upsert({
-					user_id: user.id,
-					credits_balance: newBalance,
-				});
-
-			if (updateError) throw updateError;
-
-			// Log the transaction
-			const { error: transactionError } = await supabase
-				.from("credit_transactions")
-				.insert({
-					user_id: user.id,
-					amount: credits,
-					transaction_type: TRANSACTION_TYPES.PURCHASE,
-					description: `Purchased ${credits} credits`,
-				});
-
-			if (transactionError) throw transactionError;
-
-			return { newBalance, credits };
+			// Parse the response
+			return {
+				newBalance: data.newBalance,
+				credits: data.credits,
+			};
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["userCredits", user?.id] });
@@ -239,42 +276,26 @@ export const useSubscription = () => {
 		mutationFn: async ({ amount, description }: { amount: number; description: string }) => {
 			if (!user) throw new Error("User not authenticated");
 
-			const { data: currentCredits } = await supabase
-				.from("user_credits")
-				.select("credits_balance")
-				.eq("user_id", user.id)
-				.single();
+			// Call edge function to spend credits atomically
+			const { data, error } = await supabase.functions.invoke(
+				"spend-credits",
+				{
+					body: {
+						amount,
+						description,
+					},
+				},
+			);
 
-			const currentBalance = currentCredits?.credits_balance || 0;
-			
-			if (currentBalance < amount) {
-				throw new Error("Insufficient credits");
+			if (error) {
+				throw new Error(error.message || "Failed to spend credits");
 			}
 
-			const newBalance = currentBalance - amount;
-
-			const { error: updateError } = await supabase
-				.from("user_credits")
-				.upsert({
-					user_id: user.id,
-					credits_balance: newBalance,
-				});
-
-			if (updateError) throw updateError;
-
-			// Log the transaction
-			const { error: transactionError } = await supabase
-				.from("credit_transactions")
-				.insert({
-					user_id: user.id,
-					amount: -amount,
-					transaction_type: TRANSACTION_TYPES.SPEND,
-					description: description,
-				});
-
-			if (transactionError) throw transactionError;
-
-			return { newBalance, spent: amount };
+			// Parse the response
+			return {
+				newBalance: data.newBalance,
+				spent: data.spent,
+			};
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["userCredits", user?.id] });

@@ -112,38 +112,50 @@ export const usePaymentTracking = () => {
 			externalPaymentId?: string;
 			adminNotes?: string;
 		}): Promise<PaymentTransaction> => {
-			const updateData: PaymentTransactionUpdate = {
-				status,
-				external_payment_id: externalPaymentId,
-				admin_notes: adminNotes,
-			};
+			if (!user) throw new Error("User not authenticated");
 
-			// If completing the transaction, set verified timestamp
-			if (status === "completed") {
-				updateData.verified_at = new Date().toISOString();
-				updateData.verified_by = user?.id; // In real app, this would be admin user
-			}
-
-			const { data, error } = await supabase
+			// Fetch current transaction to get old status for analytics
+			const { data: currentTransaction, error: fetchError } = await supabase
 				.from("payment_transactions")
-				.update(updateData)
+				.select("*")
 				.eq("id", transactionId)
-				.select()
 				.single();
 
-			if (error) throw error;
+			if (fetchError) throw fetchError;
+			if (!currentTransaction) throw new Error("Transaction not found");
+
+			// Call edge function to update payment transaction atomically
+			const { data, error } = await supabase.functions.invoke(
+				"update-payment-transaction",
+				{
+					body: {
+						transactionId,
+						status,
+						externalPaymentId,
+						adminNotes,
+					},
+				},
+			);
+
+			if (error) {
+				throw new Error(error.message || "Failed to update payment transaction");
+			}
+
+			// Parse the response (edge function returns JSON)
+			const updatedTransaction = data as PaymentTransaction;
 
 			// Track the status update
 			trackEvent("payment_transaction_updated", {
 				transaction_id: transactionId,
-				old_status: "pending", // Would need to fetch old status in real implementation
+				old_status: currentTransaction.status,
 				new_status: status,
 			});
 
-			return data;
+			return updatedTransaction;
 		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ["paymentTransactions", user?.id] });
+			queryClient.invalidateQueries({ queryKey: ["userCredits", user?.id] });
 			
 			if (data.status === "completed") {
 				toast.success("Payment completed successfully!");

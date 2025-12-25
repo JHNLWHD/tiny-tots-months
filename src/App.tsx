@@ -13,8 +13,10 @@ import {
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import { TrackingConsentBanner } from "./components/TrackingConsentBanner";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import BabyGallery from "./pages/BabyGallery";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
@@ -66,6 +68,16 @@ function App() {
 									<Route path="upgrade" element={<Upgrade />} />
 									<Route path="settings" element={<Settings />} />
 								</Route>
+
+								{/* Admin Routes */}
+								<Route
+									path="/admin"
+									element={
+										<AdminRoute>
+											<Admin />
+										</AdminRoute>
+									}
+								/>
 
 								<Route path="*" element={<NotFound />} />
 							</Routes>

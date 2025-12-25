@@ -42,6 +42,7 @@ const Upgrade = () => {
 	const [selectedTab, setSelectedTab] = useState("credits");
 	const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 	const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
+	const [paymentStep, setPaymentStep] = useState<"method" | "details" | "proof" | "processing" | "success">("method");
 
 	// Track page view with additional details
 	useEffect(() => {
@@ -104,26 +105,24 @@ const Upgrade = () => {
 		setShowPaymentDialog(true);
 	};
 
-	const handlePaymentSuccess = (paymentId: string) => {
+	const handlePaymentSuccess = (paymentTransactionId: string) => {
 		setShowPaymentDialog(false);
 		
+		// Don't grant credits/subscription immediately - wait for payment approval
+		// Credits will be granted when payment status is updated to "completed" by admin
 		if (currentPaymentRequest?.type === "credits") {
-			// Handle credit purchase success
-			const credits = currentPaymentRequest.metadata?.credits || 0;
-			purchaseCredits({ amount: currentPaymentRequest.amount, credits });
-			trackEvent("credit_purchase_completed", {
-				paymentId,
-				credits,
+			trackEvent("credit_purchase_submitted", {
+				paymentId: paymentTransactionId,
+				credits: currentPaymentRequest.metadata?.credits || 0,
 				amount: currentPaymentRequest.amount,
 				currency: currentPaymentRequest.currency
 			});
 		} else {
-			// Handle subscription upgrade success
+			// Handle subscription upgrade - also wait for approval
 			const tier = currentPaymentRequest?.metadata?.tier;
 			if (tier) {
-				requestSubscriptionUpgrade({ tier });
-				trackEvent("subscription_upgrade_completed", {
-					paymentId,
+				trackEvent("subscription_upgrade_submitted", {
+					paymentId: paymentTransactionId,
 					tier,
 					amount: currentPaymentRequest?.amount,
 					currency: currentPaymentRequest?.currency
@@ -413,8 +412,31 @@ const Upgrade = () => {
 				</div>
 
 				{/* Payment Dialog */}
-				<Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-					<DialogContent className="max-w-lg">
+				<Dialog 
+					open={showPaymentDialog} 
+					onOpenChange={(open) => {
+						// Prevent closing when on success step - user must click "Got it" button
+						if (!open && paymentStep === "success") {
+							return;
+						}
+						setShowPaymentDialog(open);
+					}}
+				>
+					<DialogContent 
+						className="max-w-lg"
+						onInteractOutside={(e) => {
+							// Prevent closing on outside click when on success step
+							if (paymentStep === "success") {
+								e.preventDefault();
+							}
+						}}
+						onEscapeKeyDown={(e) => {
+							// Prevent closing on Escape key when on success step
+							if (paymentStep === "success") {
+								e.preventDefault();
+							}
+						}}
+					>
 						<DialogHeader>
 							<DialogTitle>Complete Payment</DialogTitle>
 						</DialogHeader>
@@ -423,6 +445,7 @@ const Upgrade = () => {
 								request={currentPaymentRequest}
 								onSuccess={handlePaymentSuccess}
 								onCancel={handlePaymentCancel}
+								onStepChange={setPaymentStep}
 							/>
 						)}
 					</DialogContent>
