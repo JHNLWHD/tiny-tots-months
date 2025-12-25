@@ -1,7 +1,8 @@
 /// <reference path="../_shared/deno.d.ts" />
 // Edge function to update payment transaction status with atomic credit granting using Drizzle ORM
 import { corsHeaders, handleCors, createCorsResponse, createCorsErrorResponse } from "../_shared/cors.ts";
-import { db, getAuthenticatedUser } from "../_shared/db-drizzle.ts";
+import { db } from "../_shared/db-drizzle.ts";
+import { requireAdminUser } from "../_shared/admin.ts";
 import { paymentTransactions, userCredits, creditTransactions } from "../_shared/schema.ts";
 import { eq, and } from "https://esm.sh/drizzle-orm@0.45.1";
 
@@ -11,10 +12,15 @@ Deno.serve(async (req) => {
 	if (corsResponse) return corsResponse;
 
 	try {
-		// Verify authentication
-		const user = await getAuthenticatedUser(req);
-		if (!user) {
-			return createCorsErrorResponse("Unauthorized", 401);
+		// Verify authentication and admin access
+		let adminUser;
+		try {
+			adminUser = await requireAdminUser(req);
+		} catch (error) {
+			return createCorsErrorResponse(
+				"Admin access required",
+				403,
+			);
 		}
 
 		// Parse request body
@@ -65,7 +71,7 @@ Deno.serve(async (req) => {
 
 			if (isCompleting) {
 				updateData.verifiedAt = new Date();
-				updateData.verifiedBy = user.id;
+				updateData.verifiedBy = adminUser.id;
 			}
 
 			const [updatedTransaction] = await tx
