@@ -16,11 +16,81 @@ import { Helmet } from "react-helmet-async";
 const BabyJasmineBinyag = () => {
 	return (
 		<GuestPhotoAuthProvider>
-		<div className="min-h-screen relative overflow-hidden" style={{
-			background: 'linear-gradient(135deg, #fefefe 0%, #f9f7f5 50%, #f5f3f0 100%)',
-		}}>
-			{/* Decorative Background Elements */}
-			<div className="absolute inset-0 pointer-events-none overflow-hidden">
+			<Helmet>
+				<title>Baby Jasmine Binyag - December 28, 2025</title>
+				<meta
+					name="description"
+					content="You're invited to Baby Jasmine's Binyag on December 28, 2025 at Our Lady of Fatima Chapel (WESMINCOM). Reception at Vista del Mar Resort and Recreation Center. Join us for this special celebration!"
+				/>
+				<meta
+					name="keywords"
+					content="Baby Jasmine, Binyag, baptism, December 2025, Our Lady of Fatima Chapel, Vista del Mar Resort, celebration, invitation"
+				/>
+
+				{/* Open Graph tags for social sharing - override index.html */}
+				<meta
+					property="og:title"
+					content="Baby Jasmine Binyag - December 28, 2025"
+				/>
+				<meta
+					property="og:description"
+					content="You're invited to Baby Jasmine's Binyag on December 28, 2025 at Our Lady of Fatima Chapel (WESMINCOM). Reception at Vista del Mar Resort and Recreation Center."
+				/>
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={window.location.href} />
+				<meta
+					property="og:image"
+					content={`${window.location.origin}/baby-jasmine-sticker.png`}
+				/>
+				<meta property="og:image:alt" content="Baby Jasmine" />
+
+				{/* Twitter Card data - override index.html (using both name and property to ensure override) */}
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta property="twitter:card" content="summary_large_image" />
+				<meta
+					name="twitter:title"
+					content="Baby Jasmine Binyag - December 28, 2025"
+				/>
+				<meta
+					property="twitter:title"
+					content="Baby Jasmine Binyag - December 28, 2025"
+				/>
+				<meta
+					name="twitter:description"
+					content="You're invited to Baby Jasmine's Binyag on December 28, 2025 at Our Lady of Fatima Chapel (WESMINCOM). Reception at Vista del Mar Resort and Recreation Center."
+				/>
+				<meta
+					property="twitter:description"
+					content="You're invited to Baby Jasmine's Binyag on December 28, 2025 at Our Lady of Fatima Chapel (WESMINCOM). Reception at Vista del Mar Resort and Recreation Center."
+				/>
+				<meta
+					name="twitter:url"
+					content={window.location.href}
+				/>
+				<meta
+					property="twitter:url"
+					content={window.location.href}
+				/>
+				<meta
+					name="twitter:image"
+					content={`${window.location.origin}/baby-jasmine-sticker.png`}
+				/>
+				<meta
+					property="twitter:image"
+					content={`${window.location.origin}/baby-jasmine-sticker.png`}
+				/>
+				<meta name="twitter:image:alt" content="Baby Jasmine" />
+				<meta property="twitter:image:alt" content="Baby Jasmine" />
+
+				{/* Canonical URL - override index.html */}
+				<link rel="canonical" href={window.location.href} />
+			</Helmet>
+
+			<div className="min-h-screen relative overflow-hidden" style={{
+				background: 'linear-gradient(135deg, #fefefe 0%, #f9f7f5 50%, #f5f3f0 100%)',
+			}}>
+				{/* Decorative Background Elements */}
+				<div className="absolute inset-0 pointer-events-none overflow-hidden">
 				{/* Gold accent splashes */}
 				<div className="absolute top-0 left-0 w-64 h-64 opacity-20" style={{
 					background: 'radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%)',
@@ -103,22 +173,6 @@ const BabyJasmineBinyag = () => {
 					</svg>
 				</div>
 			</div>
-
-			<Helmet>
-				<title>Baby Jasmine Binyag - December 28, 2025</title>
-				<meta
-					name="description"
-					content="You're invited to Baby Jasmine's Binyag on December 28, 2025 at Our Lady of Fatima Chapel (WESMINCOM). Reception at Vista del Mar Resort and Recreation Center."
-				/>
-				<meta
-					property="og:title"
-					content="Baby Jasmine Binyag - December 28, 2025"
-				/>
-				<meta
-					property="og:description"
-					content="Join us for Baby Jasmine's Binyag celebration"
-				/>
-			</Helmet>
 
 			<div className="max-w-4xl mx-auto px-4 py-12 md:py-16 relative z-10">
 				{/* Elegant Invitation Card */}
