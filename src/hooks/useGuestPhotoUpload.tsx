@@ -99,7 +99,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 		// Generate signed URLs for each photo and extract guest name from filename
 		const photos = await Promise.all(
 			(files || [])
-				.filter((file) => !file.name.endsWith(".json")) // Exclude metadata files
+				.filter((file) => !file.name.endsWith(".json") && file.metadata.size > 0)
 				.map(async (file) => {
 					const storagePath = file.name;
 					const { data: signedUrlData } = await supabase.storage
