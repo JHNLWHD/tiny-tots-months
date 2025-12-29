@@ -23,16 +23,14 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 	const queryClient = useQueryClient();
 
 	const uploadPhoto = useMutation({
-		mutationFn: async (data: GuestPhotoUpload) => {
-			const file = data.file;
+		mutationFn: async (data: GuestPhotoUpload | GuestPhotoUpload[]) => {
+			// Normalize to array
+			const uploads = Array.isArray(data) ? data : [data];
 			
-			// Validate it's an image
-			if (!file.type.startsWith("image/")) {
-				throw new Error("Only image files are allowed");
+			if (uploads.length === 0) {
+				throw new Error("No files to upload");
 			}
 
-			const fileExt = file.name.split(".").pop();
-			
 			// Sanitize guest name for filename (remove special chars, limit length)
 			const sanitizeName = (name: string): string => {
 				return name
@@ -43,40 +41,99 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 					.replace(/-+/g, '-') // Replace multiple hyphens with single
 					.substring(0, 30); // Limit length
 			};
-			
-			const guestNamePrefix = data.guest_name 
-				? `${sanitizeName(data.guest_name)}-` 
-				: '';
-			
-			const fileName = `${guestNamePrefix}${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-			// Upload to storage
-			const { error: uploadError } = await supabase.storage
-				.from(STORAGE_BUCKET)
-				.upload(fileName, file, {
-					cacheControl: "3600",
-					upsert: false,
-					contentType: file.type,
-				});
+			// Upload all files in parallel
+			const uploadPromises = uploads.map(async (uploadData) => {
+				const file = uploadData.file;
+				
+				// Validate it's an image
+				if (!file.type.startsWith("image/")) {
+					throw new Error(`"${file.name}" is not an image file`);
+				}
 
-			if (uploadError) {
-				throw uploadError;
+				const fileExt = file.name.split(".").pop();
+				const guestNamePrefix = uploadData.guest_name 
+					? `${sanitizeName(uploadData.guest_name)}-` 
+					: '';
+				
+				// Use unique timestamp per file to avoid collisions
+				const fileName = `${guestNamePrefix}${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+				// Upload to storage
+				const { error: uploadError } = await supabase.storage
+					.from(STORAGE_BUCKET)
+					.upload(fileName, file, {
+						cacheControl: "3600",
+						upsert: false,
+						contentType: file.type,
+					});
+
+				if (uploadError) {
+					throw new Error(`Failed to upload "${file.name}": ${uploadError.message}`);
+				}
+				
+				return { storage_path: fileName, guest_name: uploadData.guest_name || null };
+			});
+
+			// Use allSettled to handle partial failures gracefully
+			const results = await Promise.allSettled(uploadPromises);
+			
+			const successful: Array<{ storage_path: string; guest_name: string | null }> = [];
+			const failed: Array<{ file: string; error: string }> = [];
+
+			results.forEach((result, index) => {
+				if (result.status === "fulfilled") {
+					successful.push(result.value);
+				} else {
+					failed.push({
+						file: uploads[index].file.name,
+						error: result.reason?.message || "Unknown error",
+					});
+				}
+			});
+
+			// If all failed, throw an error
+			if (successful.length === 0) {
+				const errorMessages = failed.map(f => `${f.file}: ${f.error}`).join("; ");
+				throw new Error(`All uploads failed: ${errorMessages}`);
 			}
-			
-			return { storage_path: fileName, guest_name: data.guest_name || null };
+
+			// Return results with success/failure info
+			return {
+				successful,
+				failed,
+				total: uploads.length,
+			};
 		},
-		onSuccess: () => {
+		onSuccess: (result) => {
 			queryClient.invalidateQueries({
 				queryKey: ["guest-photos", EVENT_ID],
 			});
-			toast("Upload Complete", {
-				description: "Your photo was uploaded successfully!",
-			});
+			
+			const { successful, failed, total } = result;
+			if (failed.length === 0) {
+				// All successful
+				if (total === 1) {
+					toast("Upload Complete", {
+						description: "Your photo was uploaded successfully!",
+					});
+				} else {
+					toast("Upload Complete", {
+						description: `All ${total} photos were uploaded successfully!`,
+					});
+				}
+			} else {
+				// Partial success
+				toast("Upload Partially Complete", {
+					description: `${successful.length} of ${total} photos uploaded successfully. ${failed.length} failed.`,
+					className: "bg-yellow-500 text-white",
+				});
+			}
 		},
 		onError: (error: Error) => {
 			console.error("Upload error:", error);
 			toast("Upload Error", {
-				description: error.message || "Failed to upload photo",
+				description: error.message || "Failed to upload photos",
 				className: "bg-destructive text-destructive-foreground",
 			});
 		},

@@ -8,56 +8,85 @@ import type React from "react";
 import { useState } from "react";
 import { useGuestPhotoUpload } from "@/hooks/useGuestPhotoUpload";
 
+type FileWithPreview = {
+	file: File;
+	preview: string;
+};
+
 const GuestPhotoUpload = () => {
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [preview, setPreview] = useState<string | null>(null);
+	const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
 	const [inputPasscode, setInputPasscode] = useState("");
 	const [inputName, setInputName] = useState("");
 	const { isAuthenticated, guestName, verifyPasscode, logout } = useGuestPhotoAuth();
 	const { uploadPhoto, isUploading } = useGuestPhotoUpload();
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		if (e.target.files?.[0]) {
-			const file = e.target.files[0];
-			
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = Array.from(e.target.files || []);
+		if (files.length === 0) return;
+
+		const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif'];
+		const invalidFiles: string[] = [];
+		const tooLargeFiles: string[] = [];
+		const validFiles: File[] = [];
+
+		// First pass: validate all files
+		files.forEach((file) => {
 			// Validate file type - only images allowed
 			if (!file.type.startsWith("image/")) {
-				toast("Invalid File Type", {
-					description: "Please select an image file (JPG, PNG, GIF, etc.)",
-					className: "bg-destructive text-destructive-foreground",
-				});
+				invalidFiles.push(file.name);
 				return;
 			}
 
 			// Validate image extensions
-			const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'tif'];
 			const fileExtension = file.name.split('.').pop()?.toLowerCase();
 			if (!fileExtension || !validExtensions.includes(fileExtension)) {
-				toast("Invalid File Type", {
-					description: "Only image files are allowed (JPG, PNG, GIF, WEBP, BMP, TIFF)",
-					className: "bg-destructive text-destructive-foreground",
-				});
+				invalidFiles.push(file.name);
 				return;
 			}
 
 			// Validate file size (max 50MB - Supabase limit)
 			if (file.size > 50 * 1024 * 1024) {
-				toast("File Too Large", {
-					description: "File size must be less than 50MB",
-					className: "bg-destructive text-destructive-foreground",
-				});
+				tooLargeFiles.push(file.name);
 				return;
 			}
 
-			setSelectedFile(file);
+			validFiles.push(file);
+		});
 
-			// Create preview
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setPreview(reader.result as string);
-			};
-			reader.readAsDataURL(file);
+		// Show error messages for invalid files
+		if (invalidFiles.length > 0) {
+			toast("Invalid File Type", {
+				description: `${invalidFiles.length} file(s) were skipped. Only image files are allowed (JPG, PNG, GIF, WEBP, BMP, TIFF)`,
+				className: "bg-destructive text-destructive-foreground",
+			});
 		}
+
+		if (tooLargeFiles.length > 0) {
+			toast("File Too Large", {
+				description: `${tooLargeFiles.length} file(s) were skipped. File size must be less than 50MB`,
+				className: "bg-destructive text-destructive-foreground",
+			});
+		}
+
+		// Create previews for all valid files
+		const previewPromises = validFiles.map((file) => {
+			return new Promise<FileWithPreview>((resolve) => {
+				const reader = new FileReader();
+				reader.onloadend = () => {
+					resolve({
+						file,
+						preview: reader.result as string,
+					});
+				};
+				reader.readAsDataURL(file);
+			});
+		});
+
+		const newFiles = await Promise.all(previewPromises);
+		setSelectedFiles((prev) => [...prev, ...newFiles]);
+
+		// Reset input to allow selecting the same files again
+		e.target.value = '';
 	};
 
 	const handlePasscodeSubmit = (e: React.FormEvent) => {
@@ -78,7 +107,7 @@ const GuestPhotoUpload = () => {
 	};
 
 	const handleUpload = () => {
-		if (!selectedFile) return;
+		if (selectedFiles.length === 0) return;
 
 		if (!guestName || !guestName.trim()) {
 			toast("Name Required", {
@@ -88,31 +117,48 @@ const GuestPhotoUpload = () => {
 			return;
 		}
 
-		uploadPhoto({
-			file: selectedFile,
-			guest_name: guestName,
-		});
+		// Upload all files as an array
+		uploadPhoto(
+			selectedFiles.map((item) => ({
+				file: item.file,
+				guest_name: guestName,
+			}))
+		);
 
-		// Reset form
-		setSelectedFile(null);
-		setPreview(null);
+		// Clean up preview URLs and reset form
+		selectedFiles.forEach((item) => {
+			if (item.preview.startsWith("blob:")) {
+				URL.revokeObjectURL(item.preview);
+			}
+		});
+		setSelectedFiles([]);
 	};
 
-	const handleClear = () => {
-		if (preview && preview.startsWith("blob:")) {
-			URL.revokeObjectURL(preview);
+	const handleRemoveFile = (index: number) => {
+		const fileToRemove = selectedFiles[index];
+		if (fileToRemove.preview.startsWith("blob:")) {
+			URL.revokeObjectURL(fileToRemove.preview);
 		}
-		setSelectedFile(null);
-		setPreview(null);
+		setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+	};
+
+	const handleClearAll = () => {
+		selectedFiles.forEach((item) => {
+			if (item.preview.startsWith("blob:")) {
+				URL.revokeObjectURL(item.preview);
+			}
+		});
+		setSelectedFiles([]);
 	};
 
 	const handleLogout = () => {
 		logout();
-		setSelectedFile(null);
-		setPreview(null);
-		if (preview && preview.startsWith("blob:")) {
-			URL.revokeObjectURL(preview);
-		}
+		selectedFiles.forEach((item) => {
+			if (item.preview.startsWith("blob:")) {
+				URL.revokeObjectURL(item.preview);
+			}
+		});
+		setSelectedFiles([]);
 	};
 
 	return (
@@ -200,7 +246,7 @@ const GuestPhotoUpload = () => {
 								Logout
 							</Button>
 						</div>
-					{!preview ? (
+					{selectedFiles.length === 0 ? (
 						<div className="border-2 border-dashed border-baby-purple/30 rounded-lg p-8 text-center hover:border-baby-purple/50 transition-colors">
 							<label
 								htmlFor="guest-photo-upload"
@@ -212,7 +258,7 @@ const GuestPhotoUpload = () => {
 										Click to upload or drag and drop
 									</p>
 									<p className="text-sm text-gray-500 mt-1">
-										JPG, PNG, GIF, WEBP up to 50MB
+										JPG, PNG, GIF, WEBP up to 50MB (multiple files allowed)
 									</p>
 								</div>
 							</label>
@@ -222,40 +268,64 @@ const GuestPhotoUpload = () => {
 								accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/bmp,image/tiff"
 								onChange={handleFileChange}
 								className="hidden"
+								multiple
 							/>
 						</div>
 					) : (
 						<div className="space-y-4">
-							<div className="relative rounded-lg overflow-hidden border-2 border-baby-purple/20">
-								<img
-									src={preview}
-									alt="Preview"
-									className="w-full max-h-64 object-contain bg-gray-100"
-								/>
-								<button
-									onClick={handleClear}
-									className="absolute top-2 right-2 p-2 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
-									type="button"
-								>
-									<X className="h-4 w-4 text-gray-700" />
-								</button>
+							<div className="flex items-center justify-between mb-2">
+								<p className="text-sm text-gray-600">
+									{selectedFiles.length} photo{selectedFiles.length !== 1 ? 's' : ''} selected
+								</p>
+								{selectedFiles.length > 0 && (
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={handleClearAll}
+										className="text-gray-600 hover:text-gray-800 text-xs"
+									>
+										Clear All
+									</Button>
+								)}
 							</div>
-
+							<div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+								{selectedFiles.map((item, index) => (
+									<div key={index} className="relative group">
+										<div className="relative rounded-lg overflow-hidden border-2 border-baby-purple/20 aspect-square">
+											<img
+												src={item.preview}
+												alt={`Preview ${index + 1}`}
+												className="w-full h-full object-cover bg-gray-100"
+											/>
+											<button
+												onClick={() => handleRemoveFile(index)}
+												className="absolute top-1 right-1 p-1.5 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md opacity-0 group-hover:opacity-100"
+												type="button"
+											>
+												<X className="h-3 w-3 text-gray-700" />
+											</button>
+										</div>
+										<p className="text-xs text-gray-500 mt-1 truncate" title={item.file.name}>
+											{item.file.name}
+										</p>
+									</div>
+								))}
+							</div>
 
 							<Button
 								onClick={handleUpload}
-								disabled={isUploading}
+								disabled={isUploading || selectedFiles.length === 0}
 								className="w-full bg-baby-purple hover:bg-baby-purple/90"
 							>
 								{isUploading ? (
 									<>
 										<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-										Uploading...
+										Uploading {selectedFiles.length} photo{selectedFiles.length !== 1 ? 's' : ''}...
 									</>
 								) : (
 									<>
 										<Upload className="h-4 w-4 mr-2" />
-										Upload Photo
+										Upload {selectedFiles.length} Photo{selectedFiles.length !== 1 ? 's' : ''}
 									</>
 								)}
 							</Button>
