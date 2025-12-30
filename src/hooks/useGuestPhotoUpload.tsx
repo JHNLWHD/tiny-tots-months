@@ -16,10 +16,11 @@ export type GuestPhotoUpload = {
 	guest_name?: string;
 };
 
-const EVENT_ID = "baby-jasmine-binyag";
-const STORAGE_BUCKET = "baby_jasmine_binyag";
-
-export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
+export const useGuestPhotoUpload = (
+	eventId: string,
+	storageBucket: string,
+	isAuthenticated: boolean = false
+) => {
 	const queryClient = useQueryClient();
 
 	const uploadPhoto = useMutation({
@@ -61,7 +62,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 
 				// Upload to storage
 				const { error: uploadError } = await supabase.storage
-					.from(STORAGE_BUCKET)
+					.from(storageBucket)
 					.upload(fileName, file, {
 						cacheControl: "3600",
 						upsert: false,
@@ -107,7 +108,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 		},
 		onSuccess: (result) => {
 			queryClient.invalidateQueries({
-				queryKey: ["guest-photos", EVENT_ID],
+				queryKey: ["guest-photos", eventId],
 			});
 			
 			const { successful, failed, total } = result;
@@ -142,7 +143,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 	const fetchPhotos = async (): Promise<GuestPhoto[]> => {
 		// List files from storage
 		const { data: files, error } = await supabase.storage
-			.from(STORAGE_BUCKET)
+			.from(storageBucket)
 			.list("", {
 				limit: 100,
 				sortBy: { column: "created_at", order: "desc" },
@@ -160,7 +161,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 				.map(async (file) => {
 					const storagePath = file.name;
 					const { data: signedUrlData } = await supabase.storage
-						.from(STORAGE_BUCKET)
+						.from(storageBucket)
 						.createSignedUrl(storagePath, 3600);
 
 					// Extract guest name from filename
@@ -183,7 +184,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 
 					return {
 						id: file.id || file.name,
-						event_id: EVENT_ID,
+						event_id: eventId,
 						storage_path: storagePath,
 						guest_name: guestName,
 						created_at: file.created_at || new Date().toISOString(),
@@ -196,7 +197,7 @@ export const useGuestPhotoUpload = (isAuthenticated: boolean = false) => {
 	};
 
 	const { data: photos = [], isLoading } = useQuery({
-		queryKey: ["guest-photos", EVENT_ID],
+		queryKey: ["guest-photos", eventId],
 		queryFn: fetchPhotos,
 		enabled: isAuthenticated, // Only fetch when authenticated
 		refetchInterval: isAuthenticated ? 30000 : false, // Refetch every 30 seconds when authenticated
