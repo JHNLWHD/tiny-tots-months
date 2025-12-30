@@ -20,6 +20,7 @@ import BabyJasmineBinyag from "./pages/BabyJasmineBinyag";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
 import Home from "./pages/Home";
+import IbsAndHashWedding from "./pages/IbsAndHashWedding";
 import Landing from "./pages/Landing";
 import Month from "./pages/Month";
 import NotFound from "./pages/NotFound";
@@ -51,6 +52,7 @@ function App() {
 								<Route path="/contact" element={<Contact />} />
 								<Route path="/help" element={<Help />} />
 								<Route path="/baby-jasmine-binyag" element={<BabyJasmineBinyag />} />
+								<Route path="/ibs-and-hash-wedding" element={<IbsAndHashWedding />} />
 
 								<Route
 									path="/app"

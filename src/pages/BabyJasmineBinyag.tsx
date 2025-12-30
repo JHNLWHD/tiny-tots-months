@@ -535,12 +535,19 @@ const BabyJasmineBinyag = () => {
 
 				{/* Photo Upload Section */}
 				<div className="mt-12 mb-8">
-					<GuestPhotoUpload />
+					<GuestPhotoUpload 
+						eventId="baby-jasmine-binyag"
+						storageBucket="baby_jasmine_binyag"
+					/>
 				</div>
 
 				{/* Photo Gallery Section */}
 				<div className="mb-8">
-					<GuestPhotoGallery />
+					<GuestPhotoGallery 
+						eventId="baby-jasmine-binyag"
+						storageBucket="baby_jasmine_binyag"
+						eventName="Baby Jasmine"
+					/>
 				</div>
 
 				{/* Footer Message */}

@@ -13,12 +13,38 @@ type FileWithPreview = {
 	preview: string;
 };
 
-const GuestPhotoUpload = () => {
+export type ColorTheme = {
+	primary: string;
+	primaryHover: string;
+	primaryLight: string;
+	primaryDark: string;
+	shadow: string;
+	border: string;
+	bg: string;
+};
+
+const defaultColorTheme: ColorTheme = {
+	primary: "#6a3be4", // baby-purple
+	primaryHover: "rgba(106, 59, 228, 0.9)",
+	primaryLight: "rgba(106, 59, 228, 0.1)",
+	primaryDark: "rgba(106, 59, 228, 0.2)",
+	shadow: "rgba(106, 59, 228, 0.15)",
+	border: "rgba(106, 59, 228, 0.2)",
+	bg: "rgba(106, 59, 228, 0.05)",
+};
+
+type GuestPhotoUploadProps = {
+	eventId: string;
+	storageBucket: string;
+	colorTheme?: ColorTheme;
+};
+
+const GuestPhotoUpload = ({ eventId, storageBucket, colorTheme = defaultColorTheme }: GuestPhotoUploadProps) => {
 	const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
 	const [inputPasscode, setInputPasscode] = useState("");
 	const [inputName, setInputName] = useState("");
 	const { isAuthenticated, guestName, verifyPasscode, logout } = useGuestPhotoAuth();
-	const { uploadPhoto, isUploading } = useGuestPhotoUpload();
+	const { uploadPhoto, isUploading } = useGuestPhotoUpload(eventId, storageBucket, isAuthenticated);
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const files = Array.from(e.target.files || []);
@@ -163,10 +189,10 @@ const GuestPhotoUpload = () => {
 
 	return (
 		<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
-			boxShadow: '0 20px 60px rgba(106, 59, 228, 0.15), 0 0 0 1px rgba(106, 59, 228, 0.05)',
+			boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
 		}}>
 			<div className="p-6 md:p-8">
-				<h3 className="text-xl font-semibold text-baby-purple mb-2 flex items-center justify-center gap-2 font-heading">
+				<h3 className="text-xl font-semibold mb-2 flex items-center justify-center gap-2 font-heading" style={{ color: colorTheme.primary }}>
 					<Camera className="h-5 w-5" />
 					Share Your Photos
 				</h3>
@@ -176,8 +202,11 @@ const GuestPhotoUpload = () => {
 
 				{!isAuthenticated ? (
 					<div className="space-y-4">
-						<div className="bg-baby-purple/5 border-2 border-baby-purple/20 rounded-lg p-6">
-							<div className="flex items-center gap-2 mb-4 text-baby-purple">
+						<div className="rounded-lg p-6 border-2" style={{ 
+							backgroundColor: colorTheme.bg,
+							borderColor: colorTheme.border,
+						}}>
+							<div className="flex items-center gap-2 mb-4" style={{ color: colorTheme.primary }}>
 								<Lock className="h-5 w-5" />
 								<h4 className="font-semibold">Access Required</h4>
 							</div>
@@ -215,7 +244,12 @@ const GuestPhotoUpload = () => {
 								</div>
 								<Button
 									type="submit"
-									className="w-full bg-baby-purple hover:bg-baby-purple/90"
+									className="w-full"
+									style={{ 
+										backgroundColor: colorTheme.primary,
+									}}
+									onMouseEnter={(e) => e.currentTarget.style.backgroundColor = colorTheme.primaryHover}
+									onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colorTheme.primary}
 								>
 									<Lock className="h-4 w-4 mr-2" />
 									Verify Access
@@ -247,12 +281,14 @@ const GuestPhotoUpload = () => {
 							</Button>
 						</div>
 					{selectedFiles.length === 0 ? (
-						<div className="border-2 border-dashed border-baby-purple/30 rounded-lg p-8 text-center hover:border-baby-purple/50 transition-colors">
+						<div className="border-2 border-dashed rounded-lg p-8 text-center transition-colors" style={{
+							borderColor: colorTheme.primaryDark,
+						}} onMouseEnter={(e) => e.currentTarget.style.borderColor = colorTheme.primary} onMouseLeave={(e) => e.currentTarget.style.borderColor = colorTheme.primaryDark}>
 							<label
 								htmlFor="guest-photo-upload"
 								className="cursor-pointer flex flex-col items-center gap-3"
 							>
-								<Upload className="h-10 w-10 text-baby-purple" />
+								<Upload className="h-10 w-10" style={{ color: colorTheme.primary }} />
 								<div>
 									<p className="text-gray-700 font-medium">
 										Click to upload or drag and drop
@@ -291,7 +327,9 @@ const GuestPhotoUpload = () => {
 							<div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
 								{selectedFiles.map((item, index) => (
 									<div key={index} className="relative group">
-										<div className="relative rounded-lg overflow-hidden border-2 border-baby-purple/20 aspect-square">
+										<div className="relative rounded-lg overflow-hidden border-2 aspect-square" style={{
+											borderColor: colorTheme.border,
+										}}>
 											<img
 												src={item.preview}
 												alt={`Preview ${index + 1}`}
@@ -315,7 +353,12 @@ const GuestPhotoUpload = () => {
 							<Button
 								onClick={handleUpload}
 								disabled={isUploading || selectedFiles.length === 0}
-								className="w-full bg-baby-purple hover:bg-baby-purple/90"
+								className="w-full"
+								style={{ 
+									backgroundColor: colorTheme.primary,
+								}}
+								onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = colorTheme.primaryHover)}
+								onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colorTheme.primary}
 							>
 								{isUploading ? (
 									<>

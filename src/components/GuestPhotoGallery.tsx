@@ -5,10 +5,33 @@ import { useState } from "react";
 import { useGuestPhotoAuth } from "@/context/GuestPhotoAuthContext";
 import type { GuestPhoto } from "@/hooks/useGuestPhotoUpload";
 import { useGuestPhotoUpload } from "@/hooks/useGuestPhotoUpload";
+import type { ColorTheme } from "./GuestPhotoUpload";
 
-const GuestPhotoGallery = () => {
+const defaultColorTheme: ColorTheme = {
+	primary: "#6a3be4", // baby-purple
+	primaryHover: "rgba(106, 59, 228, 0.9)",
+	primaryLight: "rgba(106, 59, 228, 0.1)",
+	primaryDark: "rgba(106, 59, 228, 0.2)",
+	shadow: "rgba(106, 59, 228, 0.15)",
+	border: "rgba(106, 59, 228, 0.2)",
+	bg: "rgba(106, 59, 228, 0.05)",
+};
+
+type GuestPhotoGalleryProps = {
+	eventId: string;
+	storageBucket: string;
+	eventName?: string;
+	colorTheme?: ColorTheme;
+};
+
+const GuestPhotoGallery = ({ 
+	eventId, 
+	storageBucket, 
+	eventName = "Event",
+	colorTheme = defaultColorTheme 
+}: GuestPhotoGalleryProps) => {
 	const { isAuthenticated } = useGuestPhotoAuth();
-	const { photos, isLoading } = useGuestPhotoUpload(isAuthenticated);
+	const { photos, isLoading } = useGuestPhotoUpload(eventId, storageBucket, isAuthenticated);
 	const [lightboxOpen, setLightboxOpen] = useState(false);
 	const [lightboxIndex, setLightboxIndex] = useState(0);
 
@@ -48,7 +71,7 @@ const GuestPhotoGallery = () => {
 	if (!isAuthenticated) {
 		return (
 			<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
-				boxShadow: '0 20px 60px rgba(106, 59, 228, 0.15), 0 0 0 1px rgba(106, 59, 228, 0.05)',
+				boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
 			}}>
 				<div className="p-6 md:p-8">
 					<div className="text-center py-12">
@@ -64,11 +87,11 @@ const GuestPhotoGallery = () => {
 	if (isLoading) {
 		return (
 			<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
-				boxShadow: '0 20px 60px rgba(106, 59, 228, 0.15), 0 0 0 1px rgba(106, 59, 228, 0.05)',
+				boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
 			}}>
 				<div className="p-6 md:p-8">
 					<div className="flex items-center justify-center py-12">
-						<Loader2 className="h-8 w-8 text-baby-purple animate-spin" />
+						<Loader2 className="h-8 w-8 animate-spin" style={{ color: colorTheme.primary }} />
 					</div>
 				</div>
 			</div>
@@ -78,7 +101,7 @@ const GuestPhotoGallery = () => {
 	if (photos.length === 0) {
 		return (
 			<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
-				boxShadow: '0 20px 60px rgba(106, 59, 228, 0.15), 0 0 0 1px rgba(106, 59, 228, 0.05)',
+				boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
 			}}>
 				<div className="p-6 md:p-8">
 					<div className="text-center py-12">
@@ -92,18 +115,23 @@ const GuestPhotoGallery = () => {
 
 	return (
 		<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
-			boxShadow: '0 20px 60px rgba(106, 59, 228, 0.15), 0 0 0 1px rgba(106, 59, 228, 0.05)',
+			boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
 		}}>
 			<div className="p-6 md:p-8">
-				<h3 className="text-xl font-semibold text-baby-purple mb-6 text-center font-heading">
+				<h3 className="text-xl font-semibold mb-6 text-center font-heading" style={{ color: colorTheme.primary }}>
 					Event Photos ({photos.length})
 				</h3>
 				<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 					{photos.map((photo, index) => (
 						<div
 							key={photo.id}
-							className="relative rounded-lg overflow-hidden border-2 border-baby-purple/20 hover:border-baby-purple/40 transition-colors group cursor-pointer"
+							className="relative rounded-lg overflow-hidden border-2 transition-colors group cursor-pointer"
+							style={{
+								borderColor: colorTheme.border,
+							}}
 							onClick={() => handlePhotoClick(index)}
+							onMouseEnter={(e) => e.currentTarget.style.borderColor = colorTheme.primary}
+							onMouseLeave={(e) => e.currentTarget.style.borderColor = colorTheme.border}
 						>
 							<div className="relative aspect-square">
 								{photo.url ? (
@@ -136,7 +164,7 @@ const GuestPhotoGallery = () => {
 					open={lightboxOpen}
 					index={lightboxIndex}
 					onClose={() => setLightboxOpen(false)}
-					babyName="Baby Jasmine"
+					babyName={eventName}
 					showCaptions={true}
 					showDownload={true}
 					showThumbnails={true}
