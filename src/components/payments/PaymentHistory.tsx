@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
+import { supabase } from "@/integrations/supabase/client";
 import { formatCentsAmount, fromCents } from "@/utils/currency";
 import { 
 	CreditCard, 
@@ -11,9 +13,11 @@ import {
 	XCircle, 
 	RefreshCw,
 	Download,
-	Eye
+	Eye,
+	Loader2
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 type PaymentHistoryProps = {
 	showSummary?: boolean;
@@ -30,6 +34,32 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 		paymentSummary,
 		refetchTransactions 
 	} = usePaymentTracking();
+
+	const [viewingProof, setViewingProof] = useState<{ url: string; loading: boolean } | null>(null);
+
+	const handleViewProof = async (storagePath: string) => {
+		setViewingProof({ url: "", loading: true });
+
+		try {
+			// Generate a signed URL for the payment proof (1 hour expiry)
+			const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+				.from("baby_images")
+				.createSignedUrl(storagePath, 3600);
+
+			if (signedUrlError) {
+				console.error("Error generating signed URL:", signedUrlError);
+				toast.error("Failed to load payment proof");
+				setViewingProof(null);
+				return;
+			}
+
+			setViewingProof({ url: signedUrlData.signedUrl, loading: false });
+		} catch (error) {
+			console.error("Error viewing proof:", error);
+			toast.error("Failed to load payment proof");
+			setViewingProof(null);
+		}
+	};
 
 	const getStatusIcon = (status: string) => {
 		switch (status) {
@@ -253,7 +283,11 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 									
 									<div className="flex items-center space-x-2">
 										{transaction.payment_proof_url && (
-											<Button variant="outline" size="sm">
+											<Button 
+												variant="outline" 
+												size="sm"
+												onClick={() => handleViewProof(transaction.payment_proof_url!)}
+											>
 												<Eye className="w-3 h-3 mr-1" />
 												View Proof
 											</Button>
@@ -272,6 +306,38 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 					</div>
 				)}
 			</Card>
+
+			{/* Payment Proof Viewer Dialog */}
+			<Dialog open={!!viewingProof} onOpenChange={(open) => !open && setViewingProof(null)}>
+				<DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+					<DialogHeader>
+						<DialogTitle>Payment Proof</DialogTitle>
+					</DialogHeader>
+					{viewingProof?.loading ? (
+						<div className="flex items-center justify-center py-12">
+							<Loader2 className="w-8 h-8 animate-spin text-baby-purple" />
+							<span className="ml-3">Loading proof...</span>
+						</div>
+					) : viewingProof?.url ? (
+						<div className="mt-4">
+							<img
+								src={viewingProof.url}
+								alt="Payment Proof"
+								className="w-full h-auto rounded-lg border"
+							/>
+							<div className="mt-4 flex justify-end">
+								<Button
+									variant="outline"
+									onClick={() => window.open(viewingProof.url, '_blank')}
+								>
+									<Download className="w-4 h-4 mr-2" />
+									Open in New Tab
+								</Button>
+							</div>
+						</div>
+					) : null}
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 };
