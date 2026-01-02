@@ -1,6 +1,7 @@
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from "react";
 
 export type GuestPhoto = {
 	id: string;
@@ -16,10 +17,17 @@ export type GuestPhotoUpload = {
 	guest_name?: string;
 };
 
+type FetchPhotosResult = {
+	photos: GuestPhoto[];
+	totalCount: number;
+	hasMorePages: boolean;
+};
+
 export const useGuestPhotoUpload = (
 	eventId: string,
 	storageBucket: string,
-	isAuthenticated: boolean = false
+	isAuthenticated: boolean = false,
+	pageSize: number = 12
 ) => {
 	const queryClient = useQueryClient();
 
@@ -107,9 +115,14 @@ export const useGuestPhotoUpload = (
 			};
 		},
 		onSuccess: (result) => {
+			// Invalidate queries to refresh the photo list
 			queryClient.invalidateQueries({
 				queryKey: ["guest-photos", eventId],
 			});
+			// Reset loaded photos to trigger a fresh fetch
+			setLoadedPhotos([]);
+			setTotalCount(0);
+			setHasMorePages(true);
 			
 			const { successful, failed, total } = result;
 			if (failed.length === 0) {
@@ -140,74 +153,201 @@ export const useGuestPhotoUpload = (
 		},
 	});
 
-	const fetchPhotos = async (): Promise<GuestPhoto[]> => {
-		// List files from storage
-		const { data: files, error } = await supabase.storage
+	// Helper function to get or generate signed URL
+	// React Query will handle caching of the fetchPhotos result
+	const getSignedUrl = useCallback(async (storagePath: string): Promise<string | undefined> => {
+		// Generate signed URL with 2 hour expiry
+		const { data: signedUrlData } = await supabase.storage
 			.from(storageBucket)
-			.list("", {
-				limit: 100,
-				sortBy: { column: "created_at", order: "desc" },
-			});
+			.createSignedUrl(storagePath, 7200);
 
-		if (error) {
-			console.error("Error fetching photos:", error);
-			return [];
+		return signedUrlData?.signedUrl;
+	}, [storageBucket]);
+
+	// Helper function to extract guest name from filename
+	const extractGuestName = (storagePath: string): string | null => {
+		const nameMatch = storagePath.match(/^([a-z0-9-]+?)-(\d+)-/);
+		if (nameMatch && nameMatch[1]) {
+			const sanitized = nameMatch[1];
+			if (sanitized.length > 3 && /[a-z]/.test(sanitized)) {
+				return sanitized
+					.split('-')
+					.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+					.join(' ');
+			}
 		}
-
-		// Generate signed URLs for each photo and extract guest name from filename
-		const photos = await Promise.all(
-			(files || [])
-				.filter((file) => !file.name.endsWith(".json") && file.metadata.size > 0)
-				.map(async (file) => {
-					const storagePath = file.name;
-					const { data: signedUrlData } = await supabase.storage
-						.from(storageBucket)
-						.createSignedUrl(storagePath, 3600);
-
-					// Extract guest name from filename
-					// Format: {name}-{timestamp}-{random}.{ext}
-					// Or: {timestamp}-{random}.{ext} (if no name)
-					let guestName: string | null = null;
-					const nameMatch = storagePath.match(/^([a-z0-9-]+?)-(\d+)-/);
-					if (nameMatch && nameMatch[1]) {
-						// Convert back from sanitized format
-						const sanitized = nameMatch[1];
-						// Check if it's actually a name (not just numbers/timestamp)
-						// If it contains letters or is longer than typical timestamp prefix, it's likely a name
-						if (sanitized.length > 3 && /[a-z]/.test(sanitized)) {
-							guestName = sanitized
-								.split('-')
-								.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-								.join(' ');
-						}
-					}
-
-					return {
-						id: file.id || file.name,
-						event_id: eventId,
-						storage_path: storagePath,
-						guest_name: guestName,
-						created_at: file.created_at || new Date().toISOString(),
-						url: signedUrlData?.signedUrl,
-					} as GuestPhoto;
-				}),
-		);
-
-		return photos;
+		return null;
 	};
 
-	const { data: photos = [], isLoading } = useQuery({
-		queryKey: ["guest-photos", eventId],
-		queryFn: fetchPhotos,
+	// Fetch only the files needed for the current page (much faster!)
+	const fetchPhotos = useCallback(async (offset: number = 0, limit: number = pageSize): Promise<FetchPhotosResult> => {
+		try {
+			// Fetch only the files we need for this page (much faster than fetching all)
+			// We fetch a bit more than needed to check if there are more photos
+			const fetchLimit = limit + 1; // Fetch one extra to check if there are more
+			
+			const { data: files, error } = await supabase.storage
+				.from(storageBucket)
+				.list("", {
+					limit: fetchLimit,
+					offset,
+					sortBy: { column: "created_at", order: "desc" },
+				});
+
+			if (error) {
+				console.error("Error fetching photos:", error);
+				throw error;
+			}
+
+			// Filter out JSON files and empty files
+			const validFiles = (files || []).filter((file) => 
+				!file.name.endsWith(".json") && file.metadata && file.metadata.size && file.metadata.size > 0
+			);
+
+			// Check if there are more photos (if we got more than requested, there are more)
+			const hasMorePages = validFiles.length > limit;
+			const pageFiles = hasMorePages ? validFiles.slice(0, limit) : validFiles;
+
+			// Generate signed URLs in parallel for all photos in the current page
+			// This is much faster than sequential generation
+			const photos = await Promise.all(
+				pageFiles.map(async (file) => {
+					try {
+						const storagePath = file.name;
+						const url = await getSignedUrl(storagePath);
+						const guestName = extractGuestName(storagePath);
+
+						return {
+							id: file.id || file.name,
+							event_id: eventId,
+							storage_path: storagePath,
+							guest_name: guestName,
+							created_at: file.created_at || new Date().toISOString(),
+							url,
+						} as GuestPhoto;
+					} catch (error) {
+						console.error(`Error processing photo ${file.name}:`, error);
+						// Return photo without URL if URL generation fails
+						return {
+							id: file.id || file.name,
+							event_id: eventId,
+							storage_path: file.name,
+							guest_name: extractGuestName(file.name),
+							created_at: file.created_at || new Date().toISOString(),
+							url: undefined,
+						} as GuestPhoto;
+					}
+				}),
+			);
+
+			// For total count, we'll estimate based on what we've loaded so far
+			// If we got a full page and there are more, we know there are at least offset + limit + 1
+			// Otherwise, total is offset + photos.length
+			const estimatedTotal = hasMorePages 
+				? offset + limit + 1 // At least this many, but we don't know exact
+				: offset + photos.length; // This is the exact total
+
+			return { photos, totalCount: estimatedTotal, hasMorePages };
+		} catch (error) {
+			console.error("Error in fetchPhotos:", error);
+			throw error;
+		}
+	}, [pageSize, eventId, storageBucket, getSignedUrl]);
+
+	const [loadedPhotos, setLoadedPhotos] = useState<GuestPhoto[]>([]);
+	const [totalCount, setTotalCount] = useState<number>(0);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [hasMorePages, setHasMorePages] = useState(true);
+
+	// Fetch photos only after authentication (security requirement)
+	// React Query handles caching automatically - no need for manual cache
+	const { data: initialData, isLoading, error: fetchError, refetch } = useQuery({
+		queryKey: ["guest-photos", eventId, "initial"],
+		queryFn: () => fetchPhotos(0, pageSize),
 		enabled: isAuthenticated, // Only fetch when authenticated
-		refetchInterval: isAuthenticated ? 30000 : false, // Refetch every 30 seconds when authenticated
+		refetchInterval: isAuthenticated ? 30000 : false,
+		retry: 2,
+		retryDelay: 1000,
+		staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+		gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
 	});
+
+	// Update state when initial data is loaded and preload images for faster display
+	useEffect(() => {
+		if (initialData) {
+			setLoadedPhotos(initialData.photos);
+			setTotalCount(initialData.totalCount);
+			setHasMorePages(initialData.hasMorePages);
+			
+			// Preload images in browser cache for faster display
+			// This happens AFTER authentication, so it's secure
+			initialData.photos.forEach(photo => {
+				if (photo.url) {
+					const img = new Image();
+					img.src = photo.url;
+				}
+			});
+		}
+		
+		// Handle fetch errors
+		if (fetchError) {
+			console.error("Error fetching photos:", fetchError);
+			toast("Error", {
+				description: "Failed to load photos. Please try refreshing the page.",
+				className: "bg-destructive text-destructive-foreground",
+			});
+		}
+	}, [initialData, fetchError]);
+
+	const loadMore = useCallback(async () => {
+		if (isLoadingMore || !hasMorePages) return;
+
+		setIsLoadingMore(true);
+		try {
+			const result = await fetchPhotos(loadedPhotos.length, pageSize);
+			setLoadedPhotos(prev => [...prev, ...result.photos]);
+			setTotalCount(result.totalCount);
+			setHasMorePages(result.hasMorePages);
+		} catch (error) {
+			console.error("Error loading more photos:", error);
+			toast("Error", {
+				description: "Failed to load more photos. Please try again.",
+				className: "bg-destructive text-destructive-foreground",
+			});
+		} finally {
+			setIsLoadingMore(false);
+		}
+	}, [loadedPhotos.length, isLoadingMore, hasMorePages, pageSize, fetchPhotos]);
+
+	// Reset loaded photos when authentication changes or eventId changes
+	useEffect(() => {
+		if (!isAuthenticated) {
+			setLoadedPhotos([]);
+			setTotalCount(0);
+			setHasMorePages(true);
+		}
+	}, [isAuthenticated, eventId]);
+
+	const handleRefresh = useCallback(async () => {
+		// Reset loaded photos to trigger fresh fetch
+		setLoadedPhotos([]);
+		setTotalCount(0);
+		setHasMorePages(true);
+		// Refetch the query
+		await refetch();
+	}, [refetch]);
 
 	return {
 		uploadPhoto: uploadPhoto.mutate,
 		isUploading: uploadPhoto.isPending,
-		photos,
-		isLoading,
+		photos: loadedPhotos,
+		isLoading: isLoading && loadedPhotos.length === 0,
+		isLoadingMore,
+		loadMore,
+		hasMore: hasMorePages,
+		totalCount,
+		refresh: handleRefresh,
+		isRefreshing: isLoading,
 	};
 };
 
