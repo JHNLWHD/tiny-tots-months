@@ -171,7 +171,7 @@ const GuestPhotoGallery = ({
 		);
 	}
 
-	if (isLoading) {
+	if (isLoading || (photos.length === 0 && isRefreshing)) {
 		return (
 			<div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-100 overflow-hidden relative" style={{
 				boxShadow: `0 20px 60px ${colorTheme.shadow}, 0 0 0 1px ${colorTheme.shadow.replace('0.15', '0.05')}`,
