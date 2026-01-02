@@ -35,7 +35,6 @@ type PhotoItemProps = {
 
 const PhotoItem = memo(({ photo, index, colorTheme, onClick }: PhotoItemProps) => {
 	const [imageError, setImageError] = useState(false);
-	const [imageLoading, setImageLoading] = useState(true);
 
 	return (
 		<div
@@ -48,11 +47,6 @@ const PhotoItem = memo(({ photo, index, colorTheme, onClick }: PhotoItemProps) =
 			onMouseLeave={(e) => e.currentTarget.style.borderColor = colorTheme.border}
 		>
 			<div className="relative aspect-square bg-gray-100">
-				{imageLoading && (
-					<div className="absolute inset-0 bg-gray-100 flex items-center justify-center z-10">
-						<Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-					</div>
-				)}
 				{photo.url && !imageError ? (
 					<img
 						src={photo.url}
@@ -61,15 +55,9 @@ const PhotoItem = memo(({ photo, index, colorTheme, onClick }: PhotoItemProps) =
 						loading={index < 6 ? "eager" : "lazy"}
 						decoding="async"
 						fetchPriority={index < 6 ? "high" : "auto"}
-						onLoad={() => setImageLoading(false)}
-						onError={(e) => {
+						onError={() => {
 							setImageError(true);
-							setImageLoading(false);
 							console.error("Image failed to load:", photo.storage_path);
-						}}
-						style={{ 
-							opacity: imageLoading ? 0 : 1,
-							transition: 'opacity 0.2s ease-in-out'
 						}}
 					/>
 				) : (
