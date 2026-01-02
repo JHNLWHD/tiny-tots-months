@@ -32,14 +32,14 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 					<div className="container mx-auto py-3 px-4">
 						<div className="flex items-center justify-between">
 							<Link to="/" className="flex items-center group">
-								<div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-baby-purple to-baby-blue rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md group-hover:shadow-lg transition-all duration-300 transform group-hover:scale-105">
+								<div className="w-10 h-10 md:w-12 md:h-12 bg-baby-purple rounded-full flex items-center justify-center mr-2 md:mr-3 shadow-md group-hover:shadow-lg transition-all duration-300 transform group-hover:scale-105">
 									<Baby
 										size={isMobile ? 18 : 24}
 										className="text-white animate-bounce-soft"
 									/>
 								</div>
 								<div className="flex items-center gap-2">
-									<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-heading">
+									<h1 className="text-xl md:text-2xl font-bold text-baby-purple font-heading">
 										Tiny Tots Milestones
 									</h1>
 									<BetaBadge size="sm" />

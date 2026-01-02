@@ -9,7 +9,7 @@ const Footer = () => {
 			<div className="w-full px-4 sm:px-6 lg:px-8">
 				<div className="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-10 md:mb-12">
 					<div className="flex items-center mb-6 sm:mb-8 md:mb-0">
-						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-baby-purple to-baby-blue rounded-full flex items-center justify-center mr-2 sm:mr-3 shadow-lg">
+						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-baby-purple rounded-full flex items-center justify-center mr-2 sm:mr-3 shadow-lg">
 							<Baby
 								className="h-5 w-5 sm:h-6 sm:w-6 text-white"
 								aria-hidden="true"
