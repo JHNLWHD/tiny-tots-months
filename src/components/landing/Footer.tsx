@@ -70,7 +70,6 @@ const Footer = () => {
 							<ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
 								<li>
 									<Link to="/" className="hover:text-baby-purple transition-colors duration-300 flex items-center">
-										<span className="w-1 h-1 bg-baby-purple rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
 										Home
 									</Link>
 								</li>
