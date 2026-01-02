@@ -204,8 +204,11 @@ export const useGuestPhotoUpload = (
 				!file.name.endsWith(".json") && file.metadata && file.metadata.size && file.metadata.size > 0
 			);
 
-			// Check if there are more photos (if we got more than requested, there are more)
-			const hasMorePages = validFiles.length > limit;
+			// Check if there are more photos by checking if storage returned the full fetchLimit
+			// If storage returns exactly fetchLimit files, there are more files available
+			// We check the raw files count, not validFiles, because filtering might reduce the count
+			const rawFilesCount = (files || []).length;
+			const hasMorePages = rawFilesCount === fetchLimit;
 			const pageFiles = hasMorePages ? validFiles.slice(0, limit) : validFiles;
 
 			// Generate signed URLs in parallel for all photos in the current page
