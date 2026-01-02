@@ -283,24 +283,37 @@ export const useGuestPhotoUpload = (
 	});
 
 	// Update state when initial data is loaded and preload images for faster display
+	// Only update on initial load, not on refetches, to preserve user's loaded pages
 	useEffect(() => {
 		if (initialData) {
-			setPaginationState({
-				photos: initialData.photos,
-				isLoadingMore: false,
-				hasMore: initialData.hasMorePages,
-				storageOffset: initialData.filesFetched,
-			});
-			
-			// Preload images in browser cache for faster display
-			// This happens AFTER authentication, so it's secure
-			initialData.photos.forEach(photo => {
-				if (photo.url) {
-					const img = new Image();
-					img.src = photo.url;
+			// Only initialize if storageOffset is 0 (initial load or after reset)
+			// This prevents refetches from resetting user's loaded pages
+			setPaginationState(prev => {
+				if (prev.storageOffset === 0) {
+					// Initial load: set pagination state from initialData
+					// Preload images in browser cache for faster display
+					// This happens AFTER authentication, so it's secure
+					initialData.photos.forEach(photo => {
+						if (photo.url) {
+							const img = new Image();
+							img.src = photo.url;
+						}
+					});
+					
+					return {
+						photos: initialData.photos,
+						isLoadingMore: false,
+						hasMore: initialData.hasMorePages,
+						storageOffset: initialData.filesFetched,
+					};
 				}
+				// Refetch: preserve existing state
+				return prev;
 			});
 		}
+		// Note: We intentionally skip updating state on refetches to preserve
+		// the user's loaded pages and scroll position. The refetchInterval
+		// will still update the cache, but won't reset the UI state.
 		
 		// Handle fetch errors
 		if (fetchError) {
