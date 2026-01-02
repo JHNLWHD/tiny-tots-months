@@ -19,6 +19,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import BabyGallery from "./pages/BabyGallery";
 import BabyJasmineBinyag from "./pages/BabyJasmineBinyag";
+import BabyWrapped from "./pages/BabyWrapped";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
 import Home from "./pages/Home";
@@ -69,6 +70,7 @@ function App() {
 									<Route index element={<Home />} />
 									<Route path="month/:babyId/:monthId" element={<Month />} />
 									<Route path="baby/:babyId/gallery" element={<BabyGallery />} />
+									<Route path="baby/:babyId/wrapped" element={<BabyWrapped />} />
 									<Route path="upgrade" element={<Upgrade />} />
 									<Route path="settings" element={<Settings />} />
 								</Route>

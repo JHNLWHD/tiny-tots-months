@@ -170,9 +170,9 @@ const NavigationHub: React.FC<NavigationHubProps> = ({
 				{/* Current Baby Context */}
 			{selectedBaby && (
 				<Card className="p-6 bg-gradient-to-r from-baby-purple/5 to-baby-blue/5 border border-baby-purple/20">
-					<div className="flex items-center justify-between">
+					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 						<div className="flex items-center gap-4">
-							<div className="w-16 h-16 bg-baby-purple/20 rounded-full flex items-center justify-center">
+							<div className="w-16 h-16 bg-baby-purple/20 rounded-full flex items-center justify-center flex-shrink-0">
 								<Baby className="h-8 w-8 text-baby-purple" />
 							</div>
 							<div>
@@ -184,12 +184,21 @@ const NavigationHub: React.FC<NavigationHubProps> = ({
 								</p>
 							</div>
 						</div>
-						<Link
-							to={`/app/baby/${selectedBaby.id}/gallery`}
-							className="px-6 py-3 bg-baby-purple text-white rounded-full hover:bg-baby-purple/90 transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 duration-300"
-						>
-							View Gallery
-						</Link>
+						<div className="flex flex-col sm:flex-row gap-3">
+							<Link
+								to={`/app/baby/${selectedBaby.id}/wrapped`}
+								className="px-6 py-3 bg-baby-purple text-white rounded-full hover:bg-baby-purple/90 transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 flex items-center justify-center gap-2 text-center"
+							>
+								<span>🎉</span>
+								View Wrapped
+							</Link>
+							<Link
+								to={`/app/baby/${selectedBaby.id}/gallery`}
+								className="px-6 py-3 bg-baby-purple text-white rounded-full hover:bg-baby-purple/90 transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 text-center"
+							>
+								View Gallery
+							</Link>
+						</div>
 					</div>
 				</Card>
 			)}
