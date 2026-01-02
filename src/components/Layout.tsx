@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/useIsMobile.tsx";
 import { cn } from "@/lib/utils";
+import { BetaBadge } from "@/components/BetaBadge";
 import { Baby, Home, LogOut, Menu, X, Settings as SettingsIcon, Zap } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -37,9 +38,12 @@ const Layout = ({ children, hideHeader = false }: LayoutProps) => {
 										className="text-white animate-bounce-soft"
 									/>
 								</div>
-								<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-heading">
-									Tiny Tots Milestones
-								</h1>
+								<div className="flex items-center gap-2">
+									<h1 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-baby-purple to-baby-blue font-heading">
+										Tiny Tots Milestones
+									</h1>
+									<BetaBadge size="sm" />
+								</div>
 							</Link>
 
 							{/* Mobile menu button and credits */}

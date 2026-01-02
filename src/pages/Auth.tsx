@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { BetaBadge } from "@/components/BetaBadge";
 import {
 	Card,
 	CardContent,
@@ -90,9 +91,12 @@ const Auth = () => {
 						size={48}
 						className="mx-auto text-baby-purple mb-2 animate-bounce-soft"
 					/>
-					<h1 className="text-3xl font-bold text-baby-purple">
-						Tiny Tots Milestones
-					</h1>
+					<div className="flex items-center justify-center gap-2 mb-2">
+						<h1 className="text-3xl font-bold text-baby-purple">
+							Tiny Tots Milestones
+						</h1>
+						<BetaBadge size="sm" />
+					</div>
 					<p className="text-gray-600">Capture every precious moment</p>
 				</div>
 

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { BetaBadge } from "@/components/BetaBadge";
 import { ArrowRight, Baby } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -28,16 +29,19 @@ const HeroSection = () => {
 						/>
 					</div>
 				</div>
-				<h1
-					id="hero-heading"
-					className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-800 mb-8 leading-tight"
-				>
-					Capture Every Precious{" "}
-					<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
-						Milestone
-					</span>{" "}
-					of Your Little One
-				</h1>
+				<div className="flex flex-col items-center gap-4 mb-8">
+					<h1
+						id="hero-heading"
+						className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-800 leading-tight"
+					>
+						Capture Every Precious{" "}
+						<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
+							Milestone
+						</span>{" "}
+						of Your Little One
+					</h1>
+					<BetaBadge size="lg" />
+				</div>
 				<p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
 					Document and share your baby's developmental journey month by month
 					with photos, videos, and milestone tracking in one beautiful app.

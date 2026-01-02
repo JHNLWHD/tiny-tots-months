@@ -1,6 +1,7 @@
 import { Baby, Facebook, Instagram, Twitter } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { BetaBadge } from "@/components/BetaBadge";
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
 	return (
@@ -14,9 +15,12 @@ const Footer = () => {
 								aria-hidden="true"
 							/>
 						</div>
-						<span className="font-bold text-2xl text-baby-purple">
-							Tiny Tots Milestones
-						</span>
+						<div className="flex items-center gap-2">
+							<span className="font-bold text-2xl text-baby-purple">
+								Tiny Tots Milestones
+							</span>
+							<BetaBadge size="sm" />
+						</div>
 					</div>
 
 					<div className="flex space-x-6">
