@@ -1,6 +1,7 @@
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export type GuestPhoto = {
 	id: string;
@@ -16,12 +17,21 @@ export type GuestPhotoUpload = {
 	guest_name?: string;
 };
 
+type FetchPhotosResult = {
+	photos: GuestPhoto[];
+	hasMorePages: boolean;
+	filesFetched: number; // Number of files actually fetched from storage (before filtering)
+};
+
 export const useGuestPhotoUpload = (
 	eventId: string,
 	storageBucket: string,
-	isAuthenticated: boolean = false
+	isAuthenticated: boolean = false,
+	pageSize: number = 12
 ) => {
 	const queryClient = useQueryClient();
+	// Track generation number to invalidate in-flight loadMore operations on refresh
+	const generationRef = useRef<number>(0);
 
 	const uploadPhoto = useMutation({
 		mutationFn: async (data: GuestPhotoUpload | GuestPhotoUpload[]) => {
@@ -107,8 +117,18 @@ export const useGuestPhotoUpload = (
 			};
 		},
 		onSuccess: (result) => {
+			// Increment generation to invalidate any in-flight loadMore operations
+			generationRef.current += 1;
+			// Invalidate queries to refresh the photo list
 			queryClient.invalidateQueries({
 				queryKey: ["guest-photos", eventId],
+			});
+			// Reset pagination state to trigger a fresh fetch
+			setPaginationState({
+				photos: [],
+				isLoadingMore: false,
+				hasMore: true,
+				storageOffset: 0,
 			});
 			
 			const { successful, failed, total } = result;
@@ -140,74 +160,288 @@ export const useGuestPhotoUpload = (
 		},
 	});
 
-	const fetchPhotos = async (): Promise<GuestPhoto[]> => {
-		// List files from storage
-		const { data: files, error } = await supabase.storage
+	// Helper function to get or generate signed URL
+	// React Query will handle caching of the fetchPhotos result
+	const getSignedUrl = useCallback(async (storagePath: string): Promise<string | undefined> => {
+		// Generate signed URL with 2 hour expiry
+		const { data: signedUrlData } = await supabase.storage
 			.from(storageBucket)
-			.list("", {
-				limit: 100,
-				sortBy: { column: "created_at", order: "desc" },
-			});
+			.createSignedUrl(storagePath, 7200);
 
-		if (error) {
-			console.error("Error fetching photos:", error);
-			return [];
+		return signedUrlData?.signedUrl;
+	}, [storageBucket]);
+
+	// Helper function to extract guest name from filename
+	const extractGuestName = (storagePath: string): string | null => {
+		const nameMatch = storagePath.match(/^([a-z0-9-]+?)-(\d+)-/);
+		if (nameMatch && nameMatch[1]) {
+			const sanitized = nameMatch[1];
+			if (sanitized.length > 3 && /[a-z]/.test(sanitized)) {
+				return sanitized
+					.split('-')
+					.map(word => word.charAt(0).toUpperCase() + word.slice(1))
+					.join(' ');
+			}
 		}
-
-		// Generate signed URLs for each photo and extract guest name from filename
-		const photos = await Promise.all(
-			(files || [])
-				.filter((file) => !file.name.endsWith(".json") && file.metadata.size > 0)
-				.map(async (file) => {
-					const storagePath = file.name;
-					const { data: signedUrlData } = await supabase.storage
-						.from(storageBucket)
-						.createSignedUrl(storagePath, 3600);
-
-					// Extract guest name from filename
-					// Format: {name}-{timestamp}-{random}.{ext}
-					// Or: {timestamp}-{random}.{ext} (if no name)
-					let guestName: string | null = null;
-					const nameMatch = storagePath.match(/^([a-z0-9-]+?)-(\d+)-/);
-					if (nameMatch && nameMatch[1]) {
-						// Convert back from sanitized format
-						const sanitized = nameMatch[1];
-						// Check if it's actually a name (not just numbers/timestamp)
-						// If it contains letters or is longer than typical timestamp prefix, it's likely a name
-						if (sanitized.length > 3 && /[a-z]/.test(sanitized)) {
-							guestName = sanitized
-								.split('-')
-								.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-								.join(' ');
-						}
-					}
-
-					return {
-						id: file.id || file.name,
-						event_id: eventId,
-						storage_path: storagePath,
-						guest_name: guestName,
-						created_at: file.created_at || new Date().toISOString(),
-						url: signedUrlData?.signedUrl,
-					} as GuestPhoto;
-				}),
-		);
-
-		return photos;
+		return null;
 	};
 
-	const { data: photos = [], isLoading } = useQuery({
-		queryKey: ["guest-photos", eventId],
-		queryFn: fetchPhotos,
-		enabled: isAuthenticated, // Only fetch when authenticated
-		refetchInterval: isAuthenticated ? 30000 : false, // Refetch every 30 seconds when authenticated
+	// Fetch only the files needed for the current page (much faster!)
+	const fetchPhotos = useCallback(async (offset: number = 0, limit: number = pageSize): Promise<FetchPhotosResult> => {
+		try {
+			// Fetch only the files we need for this page (much faster than fetching all)
+			// We fetch a bit more than needed to check if there are more photos
+			const fetchLimit = limit + 1; // Fetch one extra to check if there are more
+			
+			const { data: files, error } = await supabase.storage
+				.from(storageBucket)
+				.list("", {
+					limit: fetchLimit,
+					offset,
+					sortBy: { column: "created_at", order: "desc" },
+				});
+
+			if (error) {
+				console.error("Error fetching photos:", error);
+				throw error;
+			}
+
+			// Filter out JSON files and empty files
+			const validFiles = (files || []).filter((file) => 
+				!file.name.endsWith(".json") && file.metadata && file.metadata.size && file.metadata.size > 0
+			);
+
+			// Check if there are more photos by checking if storage returned the full fetchLimit
+			// If storage returns exactly fetchLimit files, there are more files available
+			// We check the raw files count, not validFiles, because filtering might reduce the count
+			const rawFilesCount = (files || []).length;
+			const hasMorePages = rawFilesCount === fetchLimit;
+			const pageFiles = hasMorePages ? validFiles.slice(0, limit) : validFiles;
+
+			// Generate signed URLs in parallel for all photos in the current page
+			// This is much faster than sequential generation
+			const photos = await Promise.all(
+				pageFiles.map(async (file) => {
+					try {
+						const storagePath = file.name;
+						const url = await getSignedUrl(storagePath);
+						const guestName = extractGuestName(storagePath);
+
+						return {
+							id: file.id || file.name,
+							event_id: eventId,
+							storage_path: storagePath,
+							guest_name: guestName,
+							created_at: file.created_at || new Date().toISOString(),
+							url,
+						} as GuestPhoto;
+					} catch (error) {
+						console.error(`Error processing photo ${file.name}:`, error);
+						// Return photo without URL if URL generation fails
+						return {
+							id: file.id || file.name,
+							event_id: eventId,
+							storage_path: file.name,
+							guest_name: extractGuestName(file.name),
+							created_at: file.created_at || new Date().toISOString(),
+							url: undefined,
+						} as GuestPhoto;
+					}
+				}),
+			);
+
+			// Calculate the number of raw files that correspond to the files we actually processed
+			// This is critical for correct pagination: we must only advance the offset by the number
+			// of raw files that were needed to get the processed files, not the full fetchLimit.
+			// 
+			// If hasMorePages is true, we processed exactly 'limit' valid files, but we need to
+			// count how many raw files (including filtered ones) were needed to get those 'limit' files.
+			// We do this by finding the index of the last processed file in the raw files array.
+			let filesFetched: number;
+			if (hasMorePages && pageFiles.length > 0) {
+				// Find the last processed file in the raw files array
+				const lastProcessedFile = pageFiles[pageFiles.length - 1];
+				const lastProcessedIndex = (files || []).findIndex(f => f.name === lastProcessedFile.name);
+				// filesFetched should be the number of files up to and including the last processed file
+				// Add 1 because findIndex is 0-based, and we want the count
+				filesFetched = lastProcessedIndex >= 0 ? lastProcessedIndex + 1 : rawFilesCount;
+			} else {
+				// If hasMorePages is false, we processed all valid files, so we fetched all raw files
+				filesFetched = rawFilesCount;
+			}
+
+			return { photos, hasMorePages, filesFetched };
+		} catch (error) {
+			console.error("Error in fetchPhotos:", error);
+			throw error;
+		}
+	}, [pageSize, eventId, storageBucket, getSignedUrl]);
+
+	// Consolidated pagination state
+	const [paginationState, setPaginationState] = useState({
+		photos: [] as GuestPhoto[],
+		isLoadingMore: false,
+		hasMore: true,
+		storageOffset: 0, // Number of files fetched from storage (before filtering)
 	});
+
+	// Fetch photos only after authentication (security requirement)
+	// React Query handles caching automatically - no need for manual cache
+	const { data: initialData, isLoading, isFetching, error: fetchError, refetch } = useQuery({
+		queryKey: ["guest-photos", eventId, "initial"],
+		queryFn: () => fetchPhotos(0, pageSize),
+		enabled: isAuthenticated, // Only fetch when authenticated
+		refetchInterval: isAuthenticated ? 30000 : false,
+		retry: 2,
+		retryDelay: 1000,
+		staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+		gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (formerly cacheTime)
+	});
+
+	// Update state when initial data is loaded and preload images for faster display
+	// Only update on initial load, not on refetches, to preserve user's loaded pages
+	useEffect(() => {
+		if (initialData) {
+			// Only initialize if storageOffset is 0 (initial load or after reset)
+			// This prevents refetches from resetting user's loaded pages
+			setPaginationState(prev => {
+				if (prev.storageOffset === 0) {
+					// Initial load: set pagination state from initialData
+					// Preload images in browser cache for faster display
+					// This happens AFTER authentication, so it's secure
+					initialData.photos.forEach(photo => {
+						if (photo.url) {
+							const img = new Image();
+							img.src = photo.url;
+						}
+					});
+					
+					return {
+						photos: initialData.photos,
+						isLoadingMore: false,
+						hasMore: initialData.hasMorePages,
+						storageOffset: initialData.filesFetched,
+					};
+				}
+				// Refetch: preserve existing state
+				return prev;
+			});
+		}
+		// Note: We intentionally skip updating state on refetches to preserve
+		// the user's loaded pages and scroll position. The refetchInterval
+		// will still update the cache, but won't reset the UI state.
+		
+		// Handle fetch errors
+		if (fetchError) {
+			console.error("Error fetching photos:", fetchError);
+			toast("Error", {
+				description: "Failed to load photos. Please try refreshing the page.",
+				className: "bg-destructive text-destructive-foreground",
+			});
+		}
+	}, [initialData, fetchError]);
+
+	const loadMore = useCallback(async () => {
+		// Capture the current generation at the start of the operation
+		const currentGeneration = generationRef.current;
+		
+		// Use functional state update to read latest state and set loading
+		setPaginationState(prev => {
+			// Guard: if already loading or no more pages, do nothing
+			if (prev.isLoadingMore || !prev.hasMore) {
+				return prev;
+			}
+			return { ...prev, isLoadingMore: true };
+		});
+		
+		try {
+			// Read storageOffset from latest state and fetch
+			const result = await new Promise<FetchPhotosResult>((resolve, reject) => {
+				setPaginationState(prev => {
+					fetchPhotos(prev.storageOffset, pageSize).then(resolve).catch(reject);
+					return prev;
+				});
+			});
+			
+			// Check if generation has changed (refresh happened during fetch)
+			if (generationRef.current !== currentGeneration) {
+				console.log("loadMore result discarded: refresh occurred during fetch");
+				setPaginationState(prev => ({ ...prev, isLoadingMore: false }));
+				return;
+			}
+			
+			// Use Set to deduplicate photos by ID (handles race conditions from double-clicks)
+			setPaginationState(prev => {
+				const existingIds = new Set(prev.photos.map(p => p.id));
+				const newPhotos = result.photos.filter(p => !existingIds.has(p.id));
+				
+				return {
+					photos: [...prev.photos, ...newPhotos],
+					isLoadingMore: false,
+					hasMore: result.hasMorePages,
+					storageOffset: prev.storageOffset + result.filesFetched,
+				};
+			});
+		} catch (error) {
+			// Only show error if generation hasn't changed (refresh didn't happen)
+			if (generationRef.current === currentGeneration) {
+				console.error("Error loading more photos:", error);
+				toast("Error", {
+					description: "Failed to load more photos. Please try again.",
+					className: "bg-destructive text-destructive-foreground",
+				});
+				setPaginationState(prev => ({ ...prev, isLoadingMore: false }));
+			}
+		}
+	}, [pageSize, fetchPhotos]);
+
+	// Reset loaded photos when authentication changes or eventId changes
+	const prevEventIdRef = useRef<string>(eventId);
+	useEffect(() => {
+		const eventIdChanged = prevEventIdRef.current !== eventId;
+		
+		// Reset if authentication is lost or eventId changes
+		if (!isAuthenticated || eventIdChanged) {
+			// Increment generation to invalidate any in-flight loadMore operations
+			generationRef.current += 1;
+			setPaginationState({
+				photos: [],
+				isLoadingMore: false,
+				hasMore: true,
+				storageOffset: 0,
+			});
+		}
+		
+		// Update ref to track current eventId
+		if (eventIdChanged) {
+			prevEventIdRef.current = eventId;
+		}
+	}, [isAuthenticated, eventId]);
+
+	const handleRefresh = useCallback(async () => {
+		// Increment generation to invalidate any in-flight loadMore operations
+		generationRef.current += 1;
+		// Reset pagination state to trigger fresh fetch
+		setPaginationState({
+			photos: [],
+			isLoadingMore: false,
+			hasMore: true,
+			storageOffset: 0,
+		});
+		// Refetch the query
+		await refetch();
+	}, [refetch]);
 
 	return {
 		uploadPhoto: uploadPhoto.mutate,
 		isUploading: uploadPhoto.isPending,
-		photos,
-		isLoading,
+		photos: paginationState.photos,
+		isLoading: isLoading && paginationState.photos.length === 0,
+		isLoadingMore: paginationState.isLoadingMore,
+		loadMore,
+		hasMore: paginationState.hasMore,
+		refresh: handleRefresh,
+		isRefreshing: isFetching,
 	};
 };
 
