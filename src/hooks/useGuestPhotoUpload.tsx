@@ -259,7 +259,7 @@ export const useGuestPhotoUpload = (
 
 	// Fetch photos only after authentication (security requirement)
 	// React Query handles caching automatically - no need for manual cache
-	const { data: initialData, isLoading, error: fetchError, refetch } = useQuery({
+	const { data: initialData, isLoading, isFetching, error: fetchError, refetch } = useQuery({
 		queryKey: ["guest-photos", eventId, "initial"],
 		queryFn: () => fetchPhotos(0, pageSize),
 		enabled: isAuthenticated, // Only fetch when authenticated
@@ -348,7 +348,7 @@ export const useGuestPhotoUpload = (
 		loadMore,
 		hasMore: hasMorePages,
 		refresh: handleRefresh,
-		isRefreshing: isLoading,
+		isRefreshing: isFetching,
 	};
 };
 
