@@ -342,30 +342,46 @@ export const useGuestPhotoUpload = (
 	}, [initialData, fetchError]);
 
 	const loadMore = useCallback(async () => {
-		if (paginationState.isLoadingMore || !paginationState.hasMore) return;
-
 		// Capture the current generation at the start of the operation
 		const currentGeneration = generationRef.current;
 		
-		setPaginationState(prev => ({ ...prev, isLoadingMore: true }));
+		// Use functional state update to read latest state and set loading
+		setPaginationState(prev => {
+			// Guard: if already loading or no more pages, do nothing
+			if (prev.isLoadingMore || !prev.hasMore) {
+				return prev;
+			}
+			return { ...prev, isLoadingMore: true };
+		});
+		
 		try {
-			// Use storageOffset (number of files fetched from storage) instead of photos.length
-			// This ensures we skip the correct number of files in storage, accounting for filtered files
-			const result = await fetchPhotos(paginationState.storageOffset, pageSize);
+			// Read storageOffset from latest state and fetch
+			const result = await new Promise<FetchPhotosResult>((resolve, reject) => {
+				setPaginationState(prev => {
+					fetchPhotos(prev.storageOffset, pageSize).then(resolve).catch(reject);
+					return prev;
+				});
+			});
 			
 			// Check if generation has changed (refresh happened during fetch)
-			// If so, discard this stale result to prevent race condition
 			if (generationRef.current !== currentGeneration) {
 				console.log("loadMore result discarded: refresh occurred during fetch");
+				setPaginationState(prev => ({ ...prev, isLoadingMore: false }));
 				return;
 			}
 			
-			setPaginationState(prev => ({
-				photos: [...prev.photos, ...result.photos],
-				isLoadingMore: false,
-				hasMore: result.hasMorePages,
-				storageOffset: prev.storageOffset + result.filesFetched,
-			}));
+			// Use Set to deduplicate photos by ID (handles race conditions from double-clicks)
+			setPaginationState(prev => {
+				const existingIds = new Set(prev.photos.map(p => p.id));
+				const newPhotos = result.photos.filter(p => !existingIds.has(p.id));
+				
+				return {
+					photos: [...prev.photos, ...newPhotos],
+					isLoadingMore: false,
+					hasMore: result.hasMorePages,
+					storageOffset: prev.storageOffset + result.filesFetched,
+				};
+			});
 		} catch (error) {
 			// Only show error if generation hasn't changed (refresh didn't happen)
 			if (generationRef.current === currentGeneration) {
@@ -377,7 +393,7 @@ export const useGuestPhotoUpload = (
 				setPaginationState(prev => ({ ...prev, isLoadingMore: false }));
 			}
 		}
-	}, [paginationState.storageOffset, paginationState.isLoadingMore, paginationState.hasMore, pageSize, fetchPhotos]);
+	}, [pageSize, fetchPhotos]);
 
 	// Reset loaded photos when authentication changes or eventId changes
 	const prevEventIdRef = useRef<string>(eventId);
