@@ -3,7 +3,7 @@
 import { corsHeaders, handleCors, createCorsResponse, createCorsErrorResponse } from "../_shared/cors.ts";
 import { db } from "../_shared/db-drizzle.ts";
 import { requireAdminUser } from "../_shared/admin.ts";
-import { paymentTransactions, userCredits, creditTransactions } from "../_shared/schema.ts";
+import { paymentTransactions, userCredits, creditTransactions, subscriptions } from "../_shared/schema.ts";
 import { eq, and } from "https://esm.sh/drizzle-orm@0.34.0";
 
 Deno.serve(async (req) => {
@@ -135,6 +135,79 @@ Deno.serve(async (req) => {
 						});
 					}
 				}
+			}
+
+			// Activate subscription for subscription or lifetime transactions
+			const isSubscriptionOrLifetimeTransaction = 
+				isCompleting && 
+				(currentTransaction.transactionType === "subscription" || currentTransaction.transactionType === "lifetime");
+			
+			if (!isSubscriptionOrLifetimeTransaction) {
+				return updatedTransaction;
+			}
+
+			// Check if subscription was already activated for this transaction
+			const [existingSubscription] = await tx
+				.select()
+				.from(subscriptions)
+				.where(eq(subscriptions.paymentTransactionId, transactionId))
+				.limit(1);
+
+			const shouldActivateSubscription = !existingSubscription && currentTransaction.metadata;
+			if (!shouldActivateSubscription) {
+				return updatedTransaction;
+			}
+
+			const metadata = currentTransaction.metadata as any;
+			const tier = metadata.tier as string | undefined;
+			const billingType = metadata.billingType as "monthly" | "yearly" | undefined;
+			const isValidTier = tier && (tier === "family" || tier === "lifetime");
+
+			if (!isValidTier) {
+				return updatedTransaction;
+			}
+
+			const now = new Date();
+			const subscriptionData: any = {
+				userId: currentTransaction.userId,
+				tier: tier,
+				status: "active",
+				startDate: now,
+				paymentTransactionId: transactionId,
+				updatedAt: now,
+			};
+
+			if (currentTransaction.paymentProofUrl) {
+				subscriptionData.paymentProof = currentTransaction.paymentProofUrl;
+			}
+
+			const isFamilySubscription = tier === "family";
+			if (isFamilySubscription) {
+				const endDate = new Date(now);
+				if (billingType === "monthly") {
+					endDate.setMonth(endDate.getMonth() + 1);
+				} else {
+					endDate.setFullYear(endDate.getFullYear() + 1);
+				}
+				subscriptionData.endDate = endDate;
+			} else {
+				subscriptionData.endDate = null;
+			}
+
+			// Check if user already has a subscription record
+			const [userSubscription] = await tx
+				.select()
+				.from(subscriptions)
+				.where(eq(subscriptions.userId, currentTransaction.userId))
+				.limit(1);
+
+			if (userSubscription) {
+				await tx
+					.update(subscriptions)
+					.set(subscriptionData)
+					.where(eq(subscriptions.userId, currentTransaction.userId));
+			} else {
+				await tx.insert(subscriptions).values(subscriptionData);
 			}
 
 			return updatedTransaction;
