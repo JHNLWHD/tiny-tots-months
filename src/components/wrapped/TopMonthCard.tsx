@@ -5,7 +5,6 @@ import type React from "react";
 
 type TopMonthCardProps = {
 	data: WrappedStats;
-	isVisible?: boolean;
 };
 
 const monthNames = [
@@ -25,11 +24,10 @@ const monthNames = [
 
 export const TopMonthCard: React.FC<TopMonthCardProps> = ({
 	data,
-	isVisible = true,
 }) => {
 	if (!data.mostActiveMonth) {
 		return (
-			<WrappedCard isVisible={isVisible} className="flex flex-col items-center justify-center">
+			<WrappedCard className="flex flex-col items-center justify-center">
 				<div className="text-center">
 					<Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
 					<p className="text-xl text-gray-500">No photos yet</p>
@@ -45,7 +43,6 @@ export const TopMonthCard: React.FC<TopMonthCardProps> = ({
 
 	return (
 		<WrappedCard
-			isVisible={isVisible}
 			className="flex flex-col items-center justify-center bg-gradient-to-br from-yellow-50 to-amber-50"
 		>
 			<div className="text-center space-y-6">

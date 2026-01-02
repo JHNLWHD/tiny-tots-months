@@ -35,7 +35,7 @@ export const MonthDistributionCard: React.FC<MonthDistributionCardProps> = ({
 	}));
 
 	return (
-		<WrappedCard isVisible={isVisible} className="flex flex-col">
+		<WrappedCard className="flex flex-col">
 			<div className="flex items-center gap-3 mb-6">
 				<BarChart3 className="h-8 w-8 text-baby-purple" />
 				<h2 className="text-3xl font-heading text-baby-purple">
