@@ -250,9 +250,25 @@ export const useGuestPhotoUpload = (
 				}),
 			);
 
-			// Return the number of files actually fetched from storage (before filtering)
-			// This is needed to correctly calculate the next offset
-			const filesFetched = (files || []).length;
+			// Calculate the number of raw files that correspond to the files we actually processed
+			// This is critical for correct pagination: we must only advance the offset by the number
+			// of raw files that were needed to get the processed files, not the full fetchLimit.
+			// 
+			// If hasMorePages is true, we processed exactly 'limit' valid files, but we need to
+			// count how many raw files (including filtered ones) were needed to get those 'limit' files.
+			// We do this by finding the index of the last processed file in the raw files array.
+			let filesFetched: number;
+			if (hasMorePages && pageFiles.length > 0) {
+				// Find the last processed file in the raw files array
+				const lastProcessedFile = pageFiles[pageFiles.length - 1];
+				const lastProcessedIndex = (files || []).findIndex(f => f.name === lastProcessedFile.name);
+				// filesFetched should be the number of files up to and including the last processed file
+				// Add 1 because findIndex is 0-based, and we want the count
+				filesFetched = lastProcessedIndex >= 0 ? lastProcessedIndex + 1 : rawFilesCount;
+			} else {
+				// If hasMorePages is false, we processed all valid files, so we fetched all raw files
+				filesFetched = rawFilesCount;
+			}
 
 			return { photos, hasMorePages, filesFetched };
 		} catch (error) {
