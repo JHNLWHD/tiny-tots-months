@@ -1,7 +1,7 @@
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export type GuestPhoto = {
 	id: string;
@@ -322,11 +322,20 @@ export const useGuestPhotoUpload = (
 	}, [storageOffset, isLoadingMore, hasMorePages, pageSize, fetchPhotos]);
 
 	// Reset loaded photos when authentication changes or eventId changes
+	const prevEventIdRef = useRef<string>(eventId);
 	useEffect(() => {
-		if (!isAuthenticated) {
+		const eventIdChanged = prevEventIdRef.current !== eventId;
+		
+		// Reset if authentication is lost or eventId changes
+		if (!isAuthenticated || eventIdChanged) {
 			setLoadedPhotos([]);
 			setHasMorePages(true);
 			setStorageOffset(0);
+		}
+		
+		// Update ref to track current eventId
+		if (eventIdChanged) {
+			prevEventIdRef.current = eventId;
 		}
 	}, [isAuthenticated, eventId]);
 
