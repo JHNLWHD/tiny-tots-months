@@ -2,8 +2,8 @@
 // Edge function to purchase credits atomically using Drizzle ORM
 import { corsHeaders, handleCors, createCorsResponse, createCorsErrorResponse } from "../_shared/cors.ts";
 import { db, getAuthenticatedUser } from "../_shared/db-drizzle.ts";
-import { userCredits, creditTransactions } from "../_shared/schema.ts";
-import { eq } from "https://esm.sh/drizzle-orm@0.34.0";
+import { userCredits, creditTransactions, paymentTransactions } from "../_shared/schema.ts";
+import { eq, and } from "https://esm.sh/drizzle-orm@0.34.0";
 
 Deno.serve(async (req) => {
 	// Handle CORS preflight
@@ -37,6 +37,64 @@ Deno.serve(async (req) => {
 
 		// Use Drizzle transaction to ensure atomicity
 		const result = await db.transaction(async (tx) => {
+			// Validate payment transaction exists and belongs to user
+			const [paymentTransaction] = await tx
+				.select()
+				.from(paymentTransactions)
+				.where(eq(paymentTransactions.id, paymentTransactionId))
+				.limit(1);
+
+			if (!paymentTransaction) {
+				throw new Error("Payment transaction not found");
+			}
+
+			// Verify payment transaction belongs to authenticated user
+			if (paymentTransaction.userId !== user.id) {
+				throw new Error("Payment transaction does not belong to authenticated user");
+			}
+
+			// Verify payment transaction has completed status
+			if (paymentTransaction.status !== "completed") {
+				throw new Error(
+					`Payment transaction must have status "completed" to grant credits. Current status: ${paymentTransaction.status}`
+				);
+			}
+
+			// Verify payment transaction is for credits
+			if (paymentTransaction.transactionType !== "credits") {
+				throw new Error(
+					`Payment transaction must be of type "credits". Current type: ${paymentTransaction.transactionType}`
+				);
+			}
+
+			// Check if credits have already been granted (idempotency)
+			const [existingCreditTransaction] = await tx
+				.select()
+				.from(creditTransactions)
+				.where(
+					and(
+						eq(creditTransactions.paymentTransactionId, paymentTransactionId),
+						eq(creditTransactions.transactionType, "purchase"),
+					),
+				)
+				.limit(1);
+
+			if (existingCreditTransaction) {
+				throw new Error("Credits have already been granted for this payment transaction");
+			}
+
+			// Validate credits amount matches payment transaction metadata
+			if (paymentTransaction.metadata) {
+				const metadata = paymentTransaction.metadata as any;
+				const expectedCredits = metadata.credits as number | undefined;
+
+				if (expectedCredits !== undefined && expectedCredits !== credits) {
+					throw new Error(
+						`Credits amount mismatch. Expected ${expectedCredits} credits from payment transaction, but received ${credits}`
+					);
+				}
+			}
+
 			// Get current credits balance
 			const [currentCredits] = await tx
 				.select()
