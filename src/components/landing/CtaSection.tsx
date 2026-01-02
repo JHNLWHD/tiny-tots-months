@@ -8,7 +8,7 @@ const CtaSection = () => {
 	const { isAuthenticated } = useAuth();
 
 	return (
-		<section className="royal-blue-cta-gradient py-24 relative overflow-hidden" aria-labelledby="cta-heading">
+		<section className="royal-blue-cta-gradient py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden" aria-labelledby="cta-heading">
 			{/* Background decorative elements */}
 			<div className="absolute inset-0 overflow-hidden">
 				<div className="absolute top-10 left-10 w-32 h-32 bg-baby-purple/10 rounded-full blur-2xl"></div>
@@ -17,49 +17,49 @@ const CtaSection = () => {
 			</div>
 			
 			<div className="w-full px-4 sm:px-6 lg:px-8 text-center relative z-10">
-				<h2 id="cta-heading" className="text-4xl md:text-5xl font-bold mb-8 text-gray-800 leading-tight">
+				<h2 id="cta-heading" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-gray-800 leading-tight px-2">
 					Start Documenting Your Baby's{" "}
 					<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
 						Journey
 					</span>{" "}
 					Today
 				</h2>
-				<p className="text-xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
+				<p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed px-2">
 					Don't miss a moment of your child's precious first years. Sign up now
 					and start creating memories that will last a lifetime.
 				</p>
 				
-				<div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
+				<div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-8 sm:mb-10 md:mb-12 px-2">
 					<Button
 						asChild
 						size="lg"
-						className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-12 py-4 text-xl font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+						className="bg-baby-purple hover:bg-baby-purple/90 text-white rounded-full px-8 sm:px-10 md:px-12 py-3 sm:py-4 text-base sm:text-lg md:text-xl font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full sm:w-auto"
 					>
 						{isAuthenticated ? (
 							<Link to="/app">
 								Go to App{" "}
-								<ArrowRight className="ml-3 h-6 w-6" aria-hidden="true" />
+								<ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
 							</Link>
 						) : (
 							<Link to="/auth">
 								Get Started for Free{" "}
-								<ArrowRight className="ml-3 h-6 w-6" aria-hidden="true" />
+								<ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
 							</Link>
 						)}
 					</Button>
 					
 					<div className="flex items-center text-gray-600">
-						<div className="flex -space-x-2 mr-3">
-							<div className="w-8 h-8 bg-baby-purple/20 rounded-full border-2 border-white"></div>
-							<div className="w-8 h-8 bg-baby-blue/20 rounded-full border-2 border-white"></div>
-							<div className="w-8 h-8 bg-baby-pink/20 rounded-full border-2 border-white"></div>
+						<div className="flex -space-x-2 mr-2 sm:mr-3">
+							<div className="w-6 h-6 sm:w-8 sm:h-8 bg-baby-purple/20 rounded-full border-2 border-white"></div>
+							<div className="w-6 h-6 sm:w-8 sm:h-8 bg-baby-blue/20 rounded-full border-2 border-white"></div>
+							<div className="w-6 h-6 sm:w-8 sm:h-8 bg-baby-pink/20 rounded-full border-2 border-white"></div>
 						</div>
-						<span className="text-sm font-medium">Join 1000+ happy families</span>
+						<span className="text-xs sm:text-sm font-medium">Join 1000+ happy families</span>
 					</div>
 				</div>
 				
 				{/* Trust badges */}
-				<div className="flex flex-wrap justify-center items-center gap-8 text-gray-500 text-sm">
+				<div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 text-gray-500 text-xs sm:text-sm px-2">
 					<div className="flex items-center bg-white/60 rounded-full px-4 py-2 backdrop-blur-sm">
 						<div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
 						<span>100% Free to Start</span>

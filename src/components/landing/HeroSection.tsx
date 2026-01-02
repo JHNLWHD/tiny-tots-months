@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { BetaBadge } from "@/components/BetaBadge";
 import { ArrowRight, Baby } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -9,7 +10,7 @@ const HeroSection = () => {
 
 	return (
 		<section
-			className="royal-blue-hero-gradient py-20 sm:py-28 relative overflow-hidden"
+			className="royal-blue-hero-gradient py-12 sm:py-20 md:py-28 relative overflow-hidden"
 			aria-labelledby="hero-heading"
 		>
 			{/* Background decorative elements */}
@@ -19,30 +20,33 @@ const HeroSection = () => {
 			</div>
 			
 			<div className="w-full px-4 sm:px-6 lg:px-8 text-center relative z-10">
-				<div className="flex justify-center mb-8">
-					<div className="bg-white p-6 rounded-full shadow-xl border border-baby-purple/10 transform hover:scale-105 transition-transform duration-300">
+				<div className="flex justify-center mb-6 sm:mb-8">
+					<div className="bg-white p-4 sm:p-6 rounded-full shadow-xl border border-baby-purple/10 transform hover:scale-105 transition-transform duration-300">
 						<Baby
 							size={56}
-							className="text-baby-purple animate-bounce-soft"
+							className="text-baby-purple animate-bounce-soft w-12 h-12 sm:w-14 sm:h-14"
 							aria-hidden="true"
 						/>
 					</div>
 				</div>
-				<h1
-					id="hero-heading"
-					className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-800 mb-8 leading-tight"
-				>
-					Capture Every Precious{" "}
-					<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
-						Milestone
-					</span>{" "}
-					of Your Little One
-				</h1>
-				<p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+				<div className="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+					<h1
+						id="hero-heading"
+						className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-800 leading-tight px-2"
+					>
+						Capture Every Precious{" "}
+						<span className="text-baby-purple bg-gradient-to-r from-baby-purple to-baby-blue bg-clip-text text-transparent">
+							Milestone
+						</span>{" "}
+						of Your Little One
+					</h1>
+					<BetaBadge size="lg" />
+				</div>
+				<p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
 					Document and share your baby's developmental journey month by month
 					with photos, videos, and milestone tracking in one beautiful app.
 				</p>
-				<div className="flex flex-wrap justify-center gap-6">
+				<div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6 px-2">
 					<Button
 						asChild
 						size="lg"
@@ -71,7 +75,7 @@ const HeroSection = () => {
 				</div>
 				
 				{/* Trust indicators */}
-				<div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-gray-500 text-sm">
+				<div className="mt-12 sm:mt-16 flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 text-gray-500 text-xs sm:text-sm px-2">
 					<div className="flex items-center">
 						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
 						<span>Trusted by 1000+ families</span>

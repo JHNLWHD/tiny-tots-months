@@ -1,25 +1,29 @@
 import { Baby, Facebook, Instagram, Twitter } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { BetaBadge } from "@/components/BetaBadge";
 const Footer = () => {
 	const currentYear = new Date().getFullYear();
 	return (
-		<footer className="bg-gradient-to-b from-white to-gray-50 py-16 border-t border-gray-200">
+		<footer className="bg-gradient-to-b from-white to-gray-50 py-10 sm:py-12 md:py-16 border-t border-gray-200">
 			<div className="w-full px-4 sm:px-6 lg:px-8">
-				<div className="flex flex-col md:flex-row justify-between items-center mb-12">
-					<div className="flex items-center mb-8 md:mb-0">
-						<div className="w-12 h-12 bg-gradient-to-r from-baby-purple to-baby-blue rounded-full flex items-center justify-center mr-3 shadow-lg">
+				<div className="flex flex-col md:flex-row justify-between items-center mb-8 sm:mb-10 md:mb-12">
+					<div className="flex items-center mb-6 sm:mb-8 md:mb-0">
+						<div className="w-10 h-10 sm:w-12 sm:h-12 bg-baby-purple rounded-full flex items-center justify-center mr-2 sm:mr-3 shadow-lg">
 							<Baby
-								className="h-6 w-6 text-white"
+								className="h-5 w-5 sm:h-6 sm:w-6 text-white"
 								aria-hidden="true"
 							/>
 						</div>
-						<span className="font-bold text-2xl text-baby-purple">
-							Tiny Tots Milestones
-						</span>
+						<div className="flex items-center gap-1.5 sm:gap-2">
+							<span className="font-bold text-lg sm:text-xl md:text-2xl text-baby-purple">
+								Tiny Tots Milestones
+							</span>
+							<BetaBadge size="sm" />
+						</div>
 					</div>
 
-					<div className="flex space-x-6">
+					<div className="flex space-x-4 sm:space-x-6">
 						<a
 							href="https://facebook.com"
 							target="_blank"
@@ -50,10 +54,10 @@ const Footer = () => {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12">
 					<div>
-						<h3 className="font-bold text-lg mb-6 text-baby-purple">About Us</h3>
-						<p className="text-gray-600 leading-relaxed">
+						<h3 className="font-bold text-base sm:text-lg mb-4 sm:mb-6 text-baby-purple">About Us</h3>
+						<p className="text-sm sm:text-base text-gray-600 leading-relaxed">
 							Tiny Tots Milestones helps parents capture and cherish their
 							little one's journey from the first smile to the first steps and
 							beyond. Creating memories that last a lifetime.
@@ -61,12 +65,11 @@ const Footer = () => {
 					</div>
 
 					<div>
-						<h3 className="font-bold text-lg mb-6 text-baby-purple">Quick Links</h3>
+						<h3 className="font-bold text-base sm:text-lg mb-4 sm:mb-6 text-baby-purple">Quick Links</h3>
 						<nav aria-label="Footer Navigation - Main">
-							<ul className="space-y-3 text-gray-600">
+							<ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
 								<li>
 									<Link to="/" className="hover:text-baby-purple transition-colors duration-300 flex items-center">
-										<span className="w-1 h-1 bg-baby-purple rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity"></span>
 										Home
 									</Link>
 								</li>
@@ -90,9 +93,9 @@ const Footer = () => {
 					</div>
 
 					<div>
-						<h3 className="font-bold text-lg mb-6 text-baby-purple">Legal & Support</h3>
+						<h3 className="font-bold text-base sm:text-lg mb-4 sm:mb-6 text-baby-purple">Legal & Support</h3>
 						<nav aria-label="Footer Navigation - Legal">
-							<ul className="space-y-3 text-gray-600">
+							<ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-600">
 								<li>
 									<Link to="/privacy-policy" className="hover:text-baby-purple transition-colors duration-300">
 										Privacy Policy
@@ -121,19 +124,19 @@ const Footer = () => {
 					</div>
 				</div>
 
-				<div className="text-center pt-8 border-t border-gray-200">
-					<p className="text-gray-500 mb-2">
+				<div className="text-center pt-6 sm:pt-8 border-t border-gray-200 px-2">
+					<p className="text-xs sm:text-sm text-gray-500 mb-2">
 						© {currentYear} Tiny Tots Milestones. All rights reserved.
 					</p>
 
-					<p className="text-sm text-gray-400">
+					<p className="text-xs sm:text-sm text-gray-400">
 						Helping parents document their baby's precious moments since 2025.
 					</p>
 					
-					<div className="mt-4 flex justify-center items-center space-x-2">
-						<div className="w-2 h-2 bg-baby-purple rounded-full"></div>
-						<span className="text-xs text-gray-400">Made with ❤️ for families worldwide</span>
-						<div className="w-2 h-2 bg-baby-purple rounded-full"></div>
+					<div className="mt-3 sm:mt-4 flex justify-center items-center space-x-1.5 sm:space-x-2">
+						<div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-baby-purple rounded-full"></div>
+						<span className="text-[10px] sm:text-xs text-gray-400">Made with ❤️ for families worldwide</span>
+						<div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-baby-purple rounded-full"></div>
 					</div>
 				</div>
 			</div>
