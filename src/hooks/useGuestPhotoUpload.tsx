@@ -30,6 +30,8 @@ export const useGuestPhotoUpload = (
 	pageSize: number = 12
 ) => {
 	const queryClient = useQueryClient();
+	// Track generation number to invalidate in-flight loadMore operations on refresh
+	const generationRef = useRef<number>(0);
 
 	const uploadPhoto = useMutation({
 		mutationFn: async (data: GuestPhotoUpload | GuestPhotoUpload[]) => {
@@ -115,14 +117,19 @@ export const useGuestPhotoUpload = (
 			};
 		},
 		onSuccess: (result) => {
+			// Increment generation to invalidate any in-flight loadMore operations
+			generationRef.current += 1;
 			// Invalidate queries to refresh the photo list
 			queryClient.invalidateQueries({
 				queryKey: ["guest-photos", eventId],
 			});
-			// Reset loaded photos to trigger a fresh fetch
-			setLoadedPhotos([]);
-			setHasMorePages(true);
-			setStorageOffset(0);
+			// Reset pagination state to trigger a fresh fetch
+			setPaginationState({
+				photos: [],
+				isLoadingMore: false,
+				hasMore: true,
+				storageOffset: 0,
+			});
 			
 			const { successful, failed, total } = result;
 			if (failed.length === 0) {
@@ -254,11 +261,13 @@ export const useGuestPhotoUpload = (
 		}
 	}, [pageSize, eventId, storageBucket, getSignedUrl]);
 
-	const [loadedPhotos, setLoadedPhotos] = useState<GuestPhoto[]>([]);
-	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [hasMorePages, setHasMorePages] = useState(true);
-	// Track the actual storage offset (number of files fetched from storage, not filtered count)
-	const [storageOffset, setStorageOffset] = useState<number>(0);
+	// Consolidated pagination state
+	const [paginationState, setPaginationState] = useState({
+		photos: [] as GuestPhoto[],
+		isLoadingMore: false,
+		hasMore: true,
+		storageOffset: 0, // Number of files fetched from storage (before filtering)
+	});
 
 	// Fetch photos only after authentication (security requirement)
 	// React Query handles caching automatically - no need for manual cache
@@ -276,10 +285,12 @@ export const useGuestPhotoUpload = (
 	// Update state when initial data is loaded and preload images for faster display
 	useEffect(() => {
 		if (initialData) {
-			setLoadedPhotos(initialData.photos);
-			setHasMorePages(initialData.hasMorePages);
-			// Set storage offset to the number of files fetched (before filtering)
-			setStorageOffset(initialData.filesFetched);
+			setPaginationState({
+				photos: initialData.photos,
+				isLoadingMore: false,
+				hasMore: initialData.hasMorePages,
+				storageOffset: initialData.filesFetched,
+			});
 			
 			// Preload images in browser cache for faster display
 			// This happens AFTER authentication, so it's secure
@@ -302,27 +313,42 @@ export const useGuestPhotoUpload = (
 	}, [initialData, fetchError]);
 
 	const loadMore = useCallback(async () => {
-		if (isLoadingMore || !hasMorePages) return;
+		if (paginationState.isLoadingMore || !paginationState.hasMore) return;
 
-		setIsLoadingMore(true);
+		// Capture the current generation at the start of the operation
+		const currentGeneration = generationRef.current;
+		
+		setPaginationState(prev => ({ ...prev, isLoadingMore: true }));
 		try {
-			// Use storageOffset (number of files fetched from storage) instead of loadedPhotos.length
+			// Use storageOffset (number of files fetched from storage) instead of photos.length
 			// This ensures we skip the correct number of files in storage, accounting for filtered files
-			const result = await fetchPhotos(storageOffset, pageSize);
-			setLoadedPhotos(prev => [...prev, ...result.photos]);
-			setHasMorePages(result.hasMorePages);
-			// Update storage offset by the number of files actually fetched (before filtering)
-			setStorageOffset(prev => prev + result.filesFetched);
+			const result = await fetchPhotos(paginationState.storageOffset, pageSize);
+			
+			// Check if generation has changed (refresh happened during fetch)
+			// If so, discard this stale result to prevent race condition
+			if (generationRef.current !== currentGeneration) {
+				console.log("loadMore result discarded: refresh occurred during fetch");
+				return;
+			}
+			
+			setPaginationState(prev => ({
+				photos: [...prev.photos, ...result.photos],
+				isLoadingMore: false,
+				hasMore: result.hasMorePages,
+				storageOffset: prev.storageOffset + result.filesFetched,
+			}));
 		} catch (error) {
-			console.error("Error loading more photos:", error);
-			toast("Error", {
-				description: "Failed to load more photos. Please try again.",
-				className: "bg-destructive text-destructive-foreground",
-			});
-		} finally {
-			setIsLoadingMore(false);
+			// Only show error if generation hasn't changed (refresh didn't happen)
+			if (generationRef.current === currentGeneration) {
+				console.error("Error loading more photos:", error);
+				toast("Error", {
+					description: "Failed to load more photos. Please try again.",
+					className: "bg-destructive text-destructive-foreground",
+				});
+				setPaginationState(prev => ({ ...prev, isLoadingMore: false }));
+			}
 		}
-	}, [storageOffset, isLoadingMore, hasMorePages, pageSize, fetchPhotos]);
+	}, [paginationState.storageOffset, paginationState.isLoadingMore, paginationState.hasMore, pageSize, fetchPhotos]);
 
 	// Reset loaded photos when authentication changes or eventId changes
 	const prevEventIdRef = useRef<string>(eventId);
@@ -331,9 +357,14 @@ export const useGuestPhotoUpload = (
 		
 		// Reset if authentication is lost or eventId changes
 		if (!isAuthenticated || eventIdChanged) {
-			setLoadedPhotos([]);
-			setHasMorePages(true);
-			setStorageOffset(0);
+			// Increment generation to invalidate any in-flight loadMore operations
+			generationRef.current += 1;
+			setPaginationState({
+				photos: [],
+				isLoadingMore: false,
+				hasMore: true,
+				storageOffset: 0,
+			});
 		}
 		
 		// Update ref to track current eventId
@@ -343,10 +374,15 @@ export const useGuestPhotoUpload = (
 	}, [isAuthenticated, eventId]);
 
 	const handleRefresh = useCallback(async () => {
-		// Reset loaded photos to trigger fresh fetch
-		setLoadedPhotos([]);
-		setHasMorePages(true);
-		setStorageOffset(0);
+		// Increment generation to invalidate any in-flight loadMore operations
+		generationRef.current += 1;
+		// Reset pagination state to trigger fresh fetch
+		setPaginationState({
+			photos: [],
+			isLoadingMore: false,
+			hasMore: true,
+			storageOffset: 0,
+		});
 		// Refetch the query
 		await refetch();
 	}, [refetch]);
@@ -354,11 +390,11 @@ export const useGuestPhotoUpload = (
 	return {
 		uploadPhoto: uploadPhoto.mutate,
 		isUploading: uploadPhoto.isPending,
-		photos: loadedPhotos,
-		isLoading: isLoading && loadedPhotos.length === 0,
-		isLoadingMore,
+		photos: paginationState.photos,
+		isLoading: isLoading && paginationState.photos.length === 0,
+		isLoadingMore: paginationState.isLoadingMore,
 		loadMore,
-		hasMore: hasMorePages,
+		hasMore: paginationState.hasMore,
 		refresh: handleRefresh,
 		isRefreshing: isFetching,
 	};
