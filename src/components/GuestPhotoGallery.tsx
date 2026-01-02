@@ -105,7 +105,6 @@ const GuestPhotoGallery = ({
 		isLoadingMore,
 		loadMore,
 		hasMore,
-		totalCount,
 		refresh,
 		isRefreshing
 	} = useGuestPhotoUpload(eventId, storageBucket, isAuthenticated);

@@ -19,8 +19,8 @@ export type GuestPhotoUpload = {
 
 type FetchPhotosResult = {
 	photos: GuestPhoto[];
-	totalCount: number;
 	hasMorePages: boolean;
+	filesFetched: number; // Number of files actually fetched from storage (before filtering)
 };
 
 export const useGuestPhotoUpload = (
@@ -121,8 +121,8 @@ export const useGuestPhotoUpload = (
 			});
 			// Reset loaded photos to trigger a fresh fetch
 			setLoadedPhotos([]);
-			setTotalCount(0);
 			setHasMorePages(true);
+			setStorageOffset(0);
 			
 			const { successful, failed, total } = result;
 			if (failed.length === 0) {
@@ -240,14 +240,11 @@ export const useGuestPhotoUpload = (
 				}),
 			);
 
-			// For total count, we'll estimate based on what we've loaded so far
-			// If we got a full page and there are more, we know there are at least offset + limit + 1
-			// Otherwise, total is offset + photos.length
-			const estimatedTotal = hasMorePages 
-				? offset + limit + 1 // At least this many, but we don't know exact
-				: offset + photos.length; // This is the exact total
+			// Return the number of files actually fetched from storage (before filtering)
+			// This is needed to correctly calculate the next offset
+			const filesFetched = (files || []).length;
 
-			return { photos, totalCount: estimatedTotal, hasMorePages };
+			return { photos, hasMorePages, filesFetched };
 		} catch (error) {
 			console.error("Error in fetchPhotos:", error);
 			throw error;
@@ -255,9 +252,10 @@ export const useGuestPhotoUpload = (
 	}, [pageSize, eventId, storageBucket, getSignedUrl]);
 
 	const [loadedPhotos, setLoadedPhotos] = useState<GuestPhoto[]>([]);
-	const [totalCount, setTotalCount] = useState<number>(0);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [hasMorePages, setHasMorePages] = useState(true);
+	// Track the actual storage offset (number of files fetched from storage, not filtered count)
+	const [storageOffset, setStorageOffset] = useState<number>(0);
 
 	// Fetch photos only after authentication (security requirement)
 	// React Query handles caching automatically - no need for manual cache
@@ -276,8 +274,9 @@ export const useGuestPhotoUpload = (
 	useEffect(() => {
 		if (initialData) {
 			setLoadedPhotos(initialData.photos);
-			setTotalCount(initialData.totalCount);
 			setHasMorePages(initialData.hasMorePages);
+			// Set storage offset to the number of files fetched (before filtering)
+			setStorageOffset(initialData.filesFetched);
 			
 			// Preload images in browser cache for faster display
 			// This happens AFTER authentication, so it's secure
@@ -304,10 +303,13 @@ export const useGuestPhotoUpload = (
 
 		setIsLoadingMore(true);
 		try {
-			const result = await fetchPhotos(loadedPhotos.length, pageSize);
+			// Use storageOffset (number of files fetched from storage) instead of loadedPhotos.length
+			// This ensures we skip the correct number of files in storage, accounting for filtered files
+			const result = await fetchPhotos(storageOffset, pageSize);
 			setLoadedPhotos(prev => [...prev, ...result.photos]);
-			setTotalCount(result.totalCount);
 			setHasMorePages(result.hasMorePages);
+			// Update storage offset by the number of files actually fetched (before filtering)
+			setStorageOffset(prev => prev + result.filesFetched);
 		} catch (error) {
 			console.error("Error loading more photos:", error);
 			toast("Error", {
@@ -317,22 +319,22 @@ export const useGuestPhotoUpload = (
 		} finally {
 			setIsLoadingMore(false);
 		}
-	}, [loadedPhotos.length, isLoadingMore, hasMorePages, pageSize, fetchPhotos]);
+	}, [storageOffset, isLoadingMore, hasMorePages, pageSize, fetchPhotos]);
 
 	// Reset loaded photos when authentication changes or eventId changes
 	useEffect(() => {
 		if (!isAuthenticated) {
 			setLoadedPhotos([]);
-			setTotalCount(0);
 			setHasMorePages(true);
+			setStorageOffset(0);
 		}
 	}, [isAuthenticated, eventId]);
 
 	const handleRefresh = useCallback(async () => {
 		// Reset loaded photos to trigger fresh fetch
 		setLoadedPhotos([]);
-		setTotalCount(0);
 		setHasMorePages(true);
+		setStorageOffset(0);
 		// Refetch the query
 		await refetch();
 	}, [refetch]);
@@ -345,7 +347,6 @@ export const useGuestPhotoUpload = (
 		isLoadingMore,
 		loadMore,
 		hasMore: hasMorePages,
-		totalCount,
 		refresh: handleRefresh,
 		isRefreshing: isLoading,
 	};
