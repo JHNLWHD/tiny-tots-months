@@ -65,6 +65,8 @@ const Upgrade = () => {
 			currency: currency
 		});
 
+		// Reset payment step when opening new payment dialog
+		setPaymentStep("method");
 		setCurrentPaymentRequest({
 			amount: pkg.amount,
 			currency: currency,
@@ -95,6 +97,8 @@ const Upgrade = () => {
 			return;
 		}
 
+		// Reset payment step when opening new payment dialog
+		setPaymentStep("method");
 		setCurrentPaymentRequest({
 			amount,
 			currency: currency,
@@ -106,6 +110,8 @@ const Upgrade = () => {
 	};
 
 	const handlePaymentSuccess = (paymentTransactionId: string) => {
+		// Reset payment step before closing dialog
+		setPaymentStep("method");
 		setShowPaymentDialog(false);
 		
 		// Don't grant credits/subscription immediately - wait for payment approval
@@ -134,6 +140,8 @@ const Upgrade = () => {
 	};
 
 	const handlePaymentCancel = () => {
+		// Reset payment step before closing dialog
+		setPaymentStep("method");
 		setShowPaymentDialog(false);
 		setCurrentPaymentRequest(null);
 	};
