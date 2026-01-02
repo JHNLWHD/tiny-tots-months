@@ -181,7 +181,37 @@ const GuestPhotoGallery = ({
 				<div className="p-6 md:p-8">
 					<div className="text-center py-12">
 						<ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-						<p className="text-gray-600 font-serif">No photos yet. Be the first to share!</p>
+						<p className="text-gray-600 font-serif mb-4">No photos yet. Be the first to share!</p>
+						<Button
+							onClick={refresh}
+							disabled={isRefreshing}
+							variant="outline"
+							className="mt-2"
+							style={{
+								borderColor: colorTheme.primary,
+								color: colorTheme.primary,
+							}}
+							onMouseEnter={(e) => {
+								if (!isRefreshing) {
+									e.currentTarget.style.backgroundColor = colorTheme.primaryLight;
+								}
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.backgroundColor = 'transparent';
+							}}
+						>
+							{isRefreshing ? (
+								<>
+									<Loader2 className="h-4 w-4 animate-spin mr-2" />
+									Refreshing...
+								</>
+							) : (
+								<>
+									<RefreshCw className="h-4 w-4 mr-2" />
+									Refresh
+								</>
+							)}
+						</Button>
 					</div>
 				</div>
 			</div>
