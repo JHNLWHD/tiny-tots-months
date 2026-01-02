@@ -1,7 +1,8 @@
 /// <reference path="../_shared/deno.d.ts" />
 // Edge function to get all payment transactions for admin users
 import { corsHeaders, handleCors, createCorsResponse, createCorsErrorResponse } from "../_shared/cors.ts";
-import { db, getAuthenticatedUser } from "../_shared/db-drizzle.ts";
+import { db } from "../_shared/db-drizzle.ts";
+import { getAdminUser } from "../_shared/admin.ts";
 import { paymentTransactions } from "../_shared/schema.ts";
 import { eq } from "https://esm.sh/drizzle-orm@0.34.0";
 
@@ -11,10 +12,13 @@ Deno.serve(async (req) => {
 	if (corsResponse) return corsResponse;
 
 	try {
-		// Verify authentication
-		const user = await getAuthenticatedUser(req);
-		if (!user) {
-			return createCorsErrorResponse("Unauthorized", 401);
+		// Verify authentication and admin access
+		const adminUser = await getAdminUser(req);
+		if (!adminUser) {
+			return createCorsErrorResponse(
+				"Admin access required",
+				403,
+			);
 		}
 
 		// Parse request body or URL params for filters
