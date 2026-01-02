@@ -320,19 +320,11 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
 						</div>
 					) : viewingProof?.url ? (
 						<div className="mt-4">
-							{viewingProof.url.toLowerCase().endsWith('.pdf') ? (
-								<iframe
-									src={viewingProof.url}
-									className="w-full h-[70vh] border rounded"
-									title="Payment Proof"
-								/>
-							) : (
-								<img
-									src={viewingProof.url}
-									alt="Payment Proof"
-									className="w-full h-auto rounded-lg border"
-								/>
-							)}
+							<img
+								src={viewingProof.url}
+								alt="Payment Proof"
+								className="w-full h-auto rounded-lg border"
+							/>
 							<div className="mt-4 flex justify-end">
 								<Button
 									variant="outline"
