@@ -5,14 +5,44 @@ import React from "react";
 import { Helmet } from "react-helmet-async";
 
 const PrivacyPolicy = () => {
+	const siteUrl = "https://tinytotsmilestones.com";
+	const currentUrl = typeof window !== "undefined" ? window.location.href : `${siteUrl}/privacy-policy`;
+	const ogImage = `${siteUrl}/og-image.png`;
+
 	return (
 		<Layout hideHeader={false}>
 			<Helmet>
 				<title>Privacy Policy - Tiny Tots Milestones</title>
 				<meta
 					name="description"
+					content="Privacy Policy for Tiny Tots Milestones - Learn how we protect your data and your baby's information. We take data security and privacy seriously."
+				/>
+				<meta
+					name="keywords"
+					content="Tiny Tots Milestones privacy policy, baby milestone app privacy, data protection, baby tracker security, parenting app privacy, child data protection"
+				/>
+
+				{/* Open Graph tags */}
+				<meta property="og:title" content="Privacy Policy - Tiny Tots Milestones" />
+				<meta
+					property="og:description"
 					content="Privacy Policy for Tiny Tots Milestones - Learn how we protect your data and your baby's information."
 				/>
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={currentUrl} />
+				<meta property="og:image" content={ogImage} />
+
+				{/* Twitter Card */}
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta name="twitter:title" content="Privacy Policy - Tiny Tots Milestones" />
+				<meta
+					name="twitter:description"
+					content="Learn how Tiny Tots Milestones protects your data and your baby's information."
+				/>
+				<meta name="twitter:image" content={ogImage} />
+
+				{/* Canonical URL */}
+				<link rel="canonical" href={currentUrl} />
 			</Helmet>
 
 			<div className="max-w-4xl mx-auto">
