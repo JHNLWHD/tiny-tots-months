@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MessageSquare, Phone } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import type React from "react";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
@@ -152,22 +152,6 @@ const Contact = () => {
 											>
 												hello@tinytotsmilestones.com
 											</a>
-										</div>
-									</div>
-
-									<div className="flex items-start">
-										<Phone className="h-5 w-5 text-baby-purple mr-3 mt-0.5" />
-										<div>
-											<p className="font-medium">Call Us</p>
-											<a
-												href="tel:+1234567890"
-												className="text-baby-purple hover:underline"
-											>
-												+1 (234) 567-890
-											</a>
-											<p className="text-sm text-gray-500">
-												Monday-Friday, 9am-5pm ET
-											</p>
 										</div>
 									</div>
 								</div>
