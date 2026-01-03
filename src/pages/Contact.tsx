@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MessageSquare, Phone } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react";
 import type React from "react";
 import { Helmet } from "react-helmet-async";
 import { toast } from "sonner";
@@ -15,14 +15,44 @@ const Contact = () => {
 		toast.success("Thank you for your message! We'll get back to you soon.");
 	};
 
+	const siteUrl = "https://tinytotsmilestones.com";
+	const currentUrl = typeof window !== "undefined" ? window.location.href : `${siteUrl}/contact`;
+	const ogImage = `${siteUrl}/og-image.png`;
+
 	return (
 		<Layout hideHeader={false}>
 			<Helmet>
 				<title>Contact Us - Tiny Tots Milestones</title>
 				<meta
 					name="description"
-					content="Get in touch with the Tiny Tots Milestones team. We're here to help with any questions or concerns."
+					content="Get in touch with the Tiny Tots Milestones team. We're here to help with any questions, concerns, or support requests about our baby milestone tracking app."
 				/>
+				<meta
+					name="keywords"
+					content="contact Tiny Tots Milestones, baby milestone app support, customer service, help with baby tracker, parenting app contact"
+				/>
+
+				{/* Open Graph tags */}
+				<meta property="og:title" content="Contact Us - Tiny Tots Milestones" />
+				<meta
+					property="og:description"
+					content="Get in touch with the Tiny Tots Milestones team. We're here to help with any questions, concerns, or support requests."
+				/>
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={currentUrl} />
+				<meta property="og:image" content={ogImage} />
+
+				{/* Twitter Card */}
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta name="twitter:title" content="Contact Us - Tiny Tots Milestones" />
+				<meta
+					name="twitter:description"
+					content="Get in touch with the Tiny Tots Milestones team for support and questions."
+				/>
+				<meta name="twitter:image" content={ogImage} />
+
+				{/* Canonical URL */}
+				<link rel="canonical" href={currentUrl} />
 			</Helmet>
 
 			<div className="max-w-4xl mx-auto">
@@ -122,22 +152,6 @@ const Contact = () => {
 											>
 												hello@tinytotsmilestones.com
 											</a>
-										</div>
-									</div>
-
-									<div className="flex items-start">
-										<Phone className="h-5 w-5 text-baby-purple mr-3 mt-0.5" />
-										<div>
-											<p className="font-medium">Call Us</p>
-											<a
-												href="tel:+1234567890"
-												className="text-baby-purple hover:underline"
-											>
-												+1 (234) 567-890
-											</a>
-											<p className="text-sm text-gray-500">
-												Monday-Friday, 9am-5pm ET
-											</p>
 										</div>
 									</div>
 								</div>

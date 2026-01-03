@@ -19,14 +19,44 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 
 const Help = () => {
+	const siteUrl = "https://tinytotsmilestones.com";
+	const currentUrl = typeof window !== "undefined" ? window.location.href : `${siteUrl}/help`;
+	const ogImage = `${siteUrl}/og-image.png`;
+
 	return (
 		<Layout hideHeader={false}>
 			<Helmet>
 				<title>Help & Support - Tiny Tots Milestones</title>
 				<meta
 					name="description"
-					content="Find answers to common questions and get support for your Tiny Tots Milestones account."
+					content="Find answers to common questions, FAQs, and get support for your Tiny Tots Milestones account. Learn how to track baby milestones, upload photos, and share with family."
 				/>
+				<meta
+					name="keywords"
+					content="Tiny Tots Milestones help, baby milestone app FAQ, how to use baby tracker, milestone app support, parenting app help, baby development tracker guide"
+				/>
+
+				{/* Open Graph tags */}
+				<meta property="og:title" content="Help & Support - Tiny Tots Milestones" />
+				<meta
+					property="og:description"
+					content="Find answers to common questions and get support for your Tiny Tots Milestones account. Learn how to track baby milestones and share with family."
+				/>
+				<meta property="og:type" content="website" />
+				<meta property="og:url" content={currentUrl} />
+				<meta property="og:image" content={ogImage} />
+
+				{/* Twitter Card */}
+				<meta name="twitter:card" content="summary_large_image" />
+				<meta name="twitter:title" content="Help & Support - Tiny Tots Milestones" />
+				<meta
+					name="twitter:description"
+					content="Find answers to common questions and get support for your baby milestone tracking app."
+				/>
+				<meta name="twitter:image" content={ogImage} />
+
+				{/* Canonical URL */}
+				<link rel="canonical" href={currentUrl} />
 			</Helmet>
 
 			<div className="max-w-4xl mx-auto">
