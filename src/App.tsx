@@ -20,6 +20,8 @@ import Admin from "./pages/Admin";
 import BabyGallery from "./pages/BabyGallery";
 import BabyJasmineBinyag from "./pages/BabyJasmineBinyag";
 import BabyWrapped from "./pages/BabyWrapped";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Contact from "./pages/Contact";
 import Help from "./pages/Help";
 import Home from "./pages/Home";
@@ -54,6 +56,8 @@ function App() {
 								<Route path="/terms-of-service" element={<TermsOfService />} />
 								<Route path="/contact" element={<Contact />} />
 								<Route path="/help" element={<Help />} />
+								<Route path="/blog" element={<Blog />} />
+								<Route path="/blog/:slug" element={<BlogPost />} />
 								<Route path="/baby-jasmine-binyag" element={<BabyJasmineBinyag />} />
 								<Route path="/ibs-and-hash-wedding" element={<IbsAndHashWedding />} />
 
