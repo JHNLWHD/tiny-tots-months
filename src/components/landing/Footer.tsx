@@ -1,4 +1,4 @@
-import { Baby, Facebook, Instagram, Twitter } from "lucide-react";
+import { Baby, Facebook } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { BetaBadge } from "@/components/BetaBadge";
@@ -25,31 +25,13 @@ const Footer = () => {
 
 					<div className="flex space-x-4 sm:space-x-6">
 						<a
-							href="https://facebook.com"
+							href="https://www.facebook.com/tinytotsmilestones"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
 							aria-label="Follow us on Facebook"
 						>
 							<Facebook size={20} />
-						</a>
-						<a
-							href="https://instagram.com"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
-							aria-label="Follow us on Instagram"
-						>
-							<Instagram size={20} />
-						</a>
-						<a
-							href="https://twitter.com"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="w-10 h-10 bg-gray-100 hover:bg-baby-purple/10 rounded-full flex items-center justify-center text-gray-500 hover:text-baby-purple transition-all duration-300 transform hover:scale-110"
-							aria-label="Follow us on Twitter"
-						>
-							<Twitter size={20} />
 						</a>
 					</div>
 				</div>
