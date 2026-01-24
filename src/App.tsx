@@ -13,6 +13,7 @@ import {
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import OnboardingRoute from "./components/OnboardingRoute";
 import AdminRoute from "./components/AdminRoute";
 import { TrackingConsentBanner } from "./components/TrackingConsentBanner";
 import Auth from "./pages/Auth";
@@ -29,6 +30,7 @@ import IbsAndHashWedding from "./pages/IbsAndHashWedding";
 import Landing from "./pages/Landing";
 import Month from "./pages/Month";
 import NotFound from "./pages/NotFound";
+import Onboarding from "./pages/Onboarding";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Settings from "./pages/Settings";
 import TermsOfService from "./pages/TermsOfService";
@@ -65,18 +67,30 @@ function App() {
 									path="/app"
 									element={
 										<ProtectedRoute>
-											<Layout>
-												<Outlet />
-											</Layout>
+											<Outlet />
 										</ProtectedRoute>
 									}
 								>
-									<Route index element={<Home />} />
-									<Route path="month/:babyId/:monthId" element={<Month />} />
-									<Route path="baby/:babyId/gallery" element={<BabyGallery />} />
-									<Route path="baby/:babyId/wrapped" element={<BabyWrapped />} />
-									<Route path="upgrade" element={<Upgrade />} />
-									<Route path="settings" element={<Settings />} />
+									{/* Onboarding handles its own redirect if user has babies */}
+									<Route path="onboarding" element={<Onboarding />} />
+
+									{/* OnboardingRoute redirects to /app/onboarding if no babies */}
+									<Route
+										element={
+											<OnboardingRoute>
+												<Layout>
+													<Outlet />
+												</Layout>
+											</OnboardingRoute>
+										}
+									>
+										<Route index element={<Home />} />
+										<Route path="month/:babyId/:monthId" element={<Month />} />
+										<Route path="baby/:babyId/gallery" element={<BabyGallery />} />
+										<Route path="baby/:babyId/wrapped" element={<BabyWrapped />} />
+										<Route path="upgrade" element={<Upgrade />} />
+										<Route path="settings" element={<Settings />} />
+									</Route>
 								</Route>
 
 								{/* Admin Routes */}
