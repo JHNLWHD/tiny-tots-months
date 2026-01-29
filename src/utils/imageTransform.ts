@@ -1,21 +1,33 @@
 /**
- * For free plan users, we can't use Supabase image transforms
- * Instead, we optimize loading through:
- * - CSS constraints (images display smaller)
- * - Lazy loading
- * - Progressive loading
- * - Proper loading attributes
+ * Image Transform Utilities
  * 
- * Note: Client-side resizing still requires downloading full images,
- * so it doesn't help with initial load time. We'll use the original
- * URLs with optimized loading strategies instead.
+ * Uses Supabase Pro image transformations to serve optimized images.
+ * Images are transformed on-the-fly based on the display context.
  */
+
+import {
+	type ImageSize,
+	SIZE_PRESETS,
+	getTransformedUrl,
+	isVideoUrl,
+} from './supabaseImageTransform';
+
+// Re-export for convenience
+export { type ImageSize, SIZE_PRESETS, getTransformedUrl, isVideoUrl };
 
 export type ThumbnailSize = "timeline" | "month-grid" | "single-month";
 
 /**
- * Gets the appropriate thumbnail size for a card type
- * (For free plan - this is informational, actual resizing happens via CSS)
+ * Maps card-specific sizes to standard ImageSize presets
+ */
+const CARD_SIZE_MAP: Record<ThumbnailSize, ImageSize> = {
+	"timeline": "preview",      // 400px - timeline cards are medium-sized
+	"month-grid": "thumbnail",  // 200px - grid items are small
+	"single-month": "display",  // 800px - single month view is larger
+};
+
+/**
+ * Gets the appropriate ImageSize preset for a card type
  */
 export const getThumbnailSizeForCard = (
 	cardType: "timeline" | "month-to-month",
@@ -30,5 +42,28 @@ export const getThumbnailSizeForCard = (
 		return "single-month";
 	}
 	return "month-grid";
+};
+
+/**
+ * Gets the ImageSize preset for a ThumbnailSize
+ */
+export const getImageSizePreset = (thumbnailSize: ThumbnailSize): ImageSize => {
+	return CARD_SIZE_MAP[thumbnailSize];
+};
+
+/**
+ * Transforms a URL based on card type context
+ */
+export const getCardImageUrl = (
+	url: string | undefined,
+	cardType: "timeline" | "month-to-month",
+	photoCount: number = 1,
+): string | undefined => {
+	if (!url) return undefined;
+	if (isVideoUrl(url)) return url; // Don't transform videos
+	
+	const thumbnailSize = getThumbnailSizeForCard(cardType, photoCount);
+	const imageSize = getImageSizePreset(thumbnailSize);
+	return getTransformedUrl(url, imageSize);
 };
 

@@ -8,12 +8,17 @@ import type { Photo } from "@/hooks/usePhotos";
 import { Play } from "lucide-react";
 import React from "react";
 import HeicImage from "./HeicImage";
+import type { ImageSize } from "@/utils/supabaseImageTransform";
 
 type PhotoCollageProps = {
 	photos: Photo[];
 	title?: string;
 	maxDisplayCount?: number;
 	isBackground?: boolean;
+	/** Image size for thumbnails (default: "thumbnail") */
+	thumbnailSize?: ImageSize;
+	/** Image size for full view in dialog (default: "full") */
+	fullSize?: ImageSize;
 }
 
 const PhotoCollage: React.FC<PhotoCollageProps> = ({
@@ -21,6 +26,8 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 	title,
 	maxDisplayCount = 5,
 	isBackground = false,
+	thumbnailSize = "thumbnail",
+	fullSize = "full",
 }) => {
 	const [selectedPhoto, setSelectedPhoto] = React.useState<Photo | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -58,6 +65,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 							src={photo.url}
 							alt="Background"
 							className="w-full h-full object-cover"
+							size={thumbnailSize}
 							style={{
 								borderRadius:
 									idx === 0
@@ -109,6 +117,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 									alt={photo.description || "Baby photo"}
 									className={`w-full h-full object-cover ${isBackground ? "opacity-100" : ""}`}
 									loading="lazy"
+									size={index === 0 ? "display" : thumbnailSize}
 									onError={(e) => {
 										const imgElement = e.currentTarget;
 										imgElement.onerror = null;
@@ -147,6 +156,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 										src={selectedPhoto.url || "/placeholder.svg"}
 										alt={selectedPhoto.description || "Baby photo"}
 										className="w-full h-auto"
+										size={fullSize}
 									/>
 								)}
 

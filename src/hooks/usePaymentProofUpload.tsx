@@ -4,6 +4,7 @@ import { trackFileUploadError, ErrorCategory, ErrorSeverity } from "@/lib/analyt
 import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import { compressImage } from "@/utils/imageCompressor";
 
 type UploadOptions = {
 	description?: string;
@@ -99,7 +100,7 @@ export const usePaymentProofUpload = () => {
 
 		if (isHeicFormat) {
 			toast.info("HEIC/HEIF Format Detected", {
-				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
+				description: "Converting and optimizing for upload...",
 			});
 		}
 
@@ -108,20 +109,28 @@ export const usePaymentProofUpload = () => {
 			setProgress(0);
 			setError(null);
 
+			// Compress image before upload
+			let fileToUpload = file;
+			try {
+				toast.info("Optimizing image...");
+				fileToUpload = await compressImage(file);
+			} catch (compressionError) {
+				console.warn("Image compression failed, uploading original:", compressionError);
+			}
+
 			// Generate file path specifically for payment proofs (no baby_id association)
-			const fileExt = file.name.split(".").pop();
+			const fileExt = fileToUpload.name.split(".").pop();
 			const fileName = `payment_proofs/${user.id}/${uuidv4()}.${fileExt}`;
 
 			// Custom upload function that tracks progress
 			const uploadWithProgress = async () => {
-				const uploadOptions: any = {};
-				if (isHeicFormat) {
-					uploadOptions.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
-				}
+				const uploadOptions: any = {
+					contentType: fileToUpload.type,
+				};
 
 				const { error: uploadError, data: uploadData } = await supabase.storage
 					.from("baby_images")
-					.upload(fileName, file, uploadOptions);
+					.upload(fileName, fileToUpload, uploadOptions);
 
 				setProgress(100);
 				options.onProgress?.(100);

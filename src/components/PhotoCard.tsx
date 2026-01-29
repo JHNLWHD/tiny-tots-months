@@ -4,6 +4,7 @@ import { Play, Trash2 } from "lucide-react";
 import React from "react";
 import type { Photo } from "@/types/photo";
 import HeicImage from "./HeicImage";
+import type { ImageSize } from "@/utils/supabaseImageTransform";
 
 type PhotoCardProps = {
 	photo: Photo;
@@ -12,6 +13,8 @@ type PhotoCardProps = {
 	showDeleteButton?: boolean;
 	showMonthBadge?: boolean;
 	className?: string;
+	/** Image size preset for optimization (default: "preview") */
+	imageSize?: ImageSize;
 };
 
 const PhotoCard: React.FC<PhotoCardProps> = ({
@@ -21,6 +24,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 	showDeleteButton = false,
 	showMonthBadge = true,
 	className = "",
+	imageSize = "preview",
 }) => {
 	const handleClick = () => {
 		onClick?.(photo);
@@ -58,6 +62,7 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 							alt={photo.description || "Baby photo"}
 							className="w-full h-full object-cover"
 							loading="lazy"
+							size={imageSize}
 							onError={(e) => {
 								console.error("Image failed to load:", photo.storage_path);
 								const imgElement = e.currentTarget;
