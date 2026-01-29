@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ImagePlus, VideoIcon } from "lucide-react";
 import type React from "react";
+import { FILE_SIZE_LIMITS, ONE_MB } from "./validateFile";
 
 type FileSelectorProps = {
 	canUploadVideo: boolean;
@@ -29,7 +30,7 @@ const FileSelector: React.FC<FileSelectorProps> = ({
 					</span>
 					{canUploadVideo && (
 						<span className="text-xs text-gray-400">
-							(Videos must be under 50MB)
+							(Videos must be under {FILE_SIZE_LIMITS.VIDEO_MAX_SIZE / ONE_MB}MB)
 						</span>
 					)}
 				</div>

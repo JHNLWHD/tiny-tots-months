@@ -30,7 +30,7 @@ const PricingSection = () => {
 		features: [
 			"1 baby profile",
 			"Full 12 months tracking",
-			"10 photos per month",
+			"10 photos per month (500MB storage)",
 			"Basic milestone suggestions",
 			"Export/download features",
 		],
@@ -76,7 +76,7 @@ const PricingSection = () => {
 		savings: billingCycle === "yearly" ? "2 months free!" : null,
 		features: [
 			"Unlimited baby profiles",
-			"Unlimited photos & videos",
+			"10GB photo & video storage",
 			"Premium milestone templates",
 			"Priority support",
 			"Advanced analytics",
@@ -95,7 +95,8 @@ const PricingSection = () => {
 		price: getLifetimePrice()?.formatted || "",
 		pricePeriod: "one-time payment",
 		features: [
-			"All Family Subscription features",
+			"25GB photo & video storage",
+			"Unlimited baby profiles",
 			"Lifetime access",
 			"No recurring fees",
 			"Grandfathered pricing protection",

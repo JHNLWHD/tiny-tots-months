@@ -123,18 +123,19 @@ const GuestPhotoGallery = ({
 				? `📸 Photo by ${guestPhoto.guest_name}\n\n${dateDisplay}`
 				: dateDisplay;
 
-			return {
-				id: guestPhoto.id,
-				baby_id: guestPhoto.event_id,
-				user_id: "guest",
-				month_number: 0,
-				storage_path: guestPhoto.storage_path,
-				description: description,
-				is_video: false,
-				created_at: guestPhoto.created_at,
-				updated_at: guestPhoto.created_at,
-				url: guestPhoto.url,
-			};
+		return {
+			id: guestPhoto.id,
+			baby_id: guestPhoto.event_id,
+			user_id: "guest",
+			month_number: 0,
+			storage_path: guestPhoto.storage_path,
+			description: description,
+			is_video: false,
+			file_size: 0, // Guest photos don't track size
+			created_at: guestPhoto.created_at,
+			updated_at: guestPhoto.created_at,
+			url: guestPhoto.url,
+		};
 		});
 	}, [photos]);
 

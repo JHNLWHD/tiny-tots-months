@@ -4,6 +4,11 @@ import {
   createAbilityFor, 
   checkAbility,
   hasCreditsRequired,
+  hasStorageAvailable,
+  getRemainingStorage,
+  getStorageUsagePercent,
+  getStorageQuotaForTier,
+  formatStorageSize,
   type Actions, 
   type Subjects, 
   type AppAbility,
@@ -26,6 +31,7 @@ export const useAbilities = (context?: Partial<UserContext>) => {
     babyCount: context?.babyCount || 0,
     monthlyPhotoCount: context?.monthlyPhotoCount || 0,
     monthNumber: context?.monthNumber || 1,
+    storageUsedBytes: context?.storageUsedBytes || 0,
   }), [tier, creditsBalance, context]);
 
   // Create abilities based on user context
@@ -143,6 +149,21 @@ export const useAbilities = (context?: Partial<UserContext>) => {
   const canExportData = () => check('export', 'all');
   const canViewAnalytics = () => check('read', 'Analytics');
 
+  // Storage quota methods
+  const checkStorageForUpload = (fileSizeBytes: number) => {
+    return hasStorageAvailable(userContext, fileSizeBytes);
+  };
+  
+  const getStorageInfo = () => ({
+    used: userContext.storageUsedBytes || 0,
+    quota: getStorageQuotaForTier(userContext.tier),
+    remaining: getRemainingStorage(userContext),
+    usagePercent: getStorageUsagePercent(userContext),
+    usedFormatted: formatStorageSize(userContext.storageUsedBytes || 0),
+    quotaFormatted: formatStorageSize(getStorageQuotaForTier(userContext.tier)),
+    remainingFormatted: formatStorageSize(getRemainingStorage(userContext)),
+  });
+
   return {
     // Core ability methods
     ability,
@@ -160,6 +181,10 @@ export const useAbilities = (context?: Partial<UserContext>) => {
     canUsePremiumTemplates,
     canExportData,
     canViewAnalytics,
+
+    // Storage quota methods
+    checkStorageForUpload,
+    getStorageInfo,
 
     // User context
     userContext,

@@ -6,6 +6,7 @@ export type Photo = {
 	storage_path: string;
 	description: string | null;
 	is_video: boolean;
+	file_size?: number; // Size of the uploaded file in bytes (optional for backwards compatibility)
 	created_at: string;
 	updated_at: string;
 	url?: string; // URL for the actual image from storage
