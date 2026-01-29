@@ -70,7 +70,7 @@ const isLikelyImage = (file: File): boolean => {
 
 export const validateFile = async (
 	file: File | null,
-	isPremium: boolean,
+	canUploadVideo: boolean,
 ): Promise<FileValidationResult> => {
 	if (!file) {
 		return { isValid: false, isVideo: false, effectiveMimeType: "" };
@@ -98,7 +98,7 @@ export const validateFile = async (
 		if (isLikelyImage(file)) {
 			const fallbackMimeType = "image/jpeg";
 			
-			return validateWithMimeType(file, fallbackMimeType, isPremium, true);
+			return validateWithMimeType(file, fallbackMimeType, canUploadVideo, true);
 		}
 		
 		console.error("File validation failed: Could not determine file type and doesn't appear to be an image");
@@ -109,19 +109,19 @@ export const validateFile = async (
 		return { isValid: false, isVideo: false, effectiveMimeType: "" };
 	}
 
-	return validateWithMimeType(file, effectiveMimeType, isPremium, false);
+	return validateWithMimeType(file, effectiveMimeType, canUploadVideo, false);
 };
 
 // Extracted validation logic to reuse for fallback scenarios
 const validateWithMimeType = (
 	file: File,
 	mimeType: string,
-	isPremium: boolean,
+	canUploadVideo: boolean,
 	isFallback: boolean
 ): FileValidationResult => {
 	const isVideo = mimeType.startsWith("video/");
 
-	if (isVideo && !isPremium) {
+	if (isVideo && !canUploadVideo) {
 		toast("Premium Required", {
 			description: "Video uploads require premium subscription or credits",
 			className: "bg-destructive text-destructive-foreground",
