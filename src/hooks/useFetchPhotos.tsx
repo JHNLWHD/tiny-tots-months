@@ -3,8 +3,13 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Photo } from "@/types/photo";
 import { useQuery } from "@tanstack/react-query";
+import { getTransformedUrl, isVideoUrl, type ImageSize } from "@/utils/supabaseImageTransform";
 
-export const useFetchPhotos = (babyId?: string, monthNumber?: number) => {
+export const useFetchPhotos = (
+	babyId?: string,
+	monthNumber?: number,
+	imageSize?: ImageSize
+) => {
 	const { user } = useAuth();
 
 	const fetchPhotos = async (): Promise<Photo[]> => {
@@ -41,9 +46,16 @@ export const useFetchPhotos = (babyId?: string, monthNumber?: number) => {
 						throw signedUrlError;
 					}
 
+					let url = signedUrlData?.signedUrl;
+					
+					// Apply image transformation if size specified and not a video
+					if (url && imageSize && !isVideoUrl(photo.storage_path)) {
+						url = getTransformedUrl(url, imageSize);
+					}
+
 					return {
 						...photo,
-						url: signedUrlData?.signedUrl,
+						url,
 					};
 				} catch (err) {
 					console.error("Failed to get signed URL for photo:", photo.id, err);

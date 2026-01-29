@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Photo } from "@/types/photo";
 import type { Milestone } from "@/hooks/useMilestones";
+import { getTransformedUrl, isVideoUrl, type ImageSize } from "@/utils/supabaseImageTransform";
 
 export type WrappedStats = {
 	totalPhotos: number;
@@ -19,7 +20,7 @@ export type WrappedStats = {
 	babyBirthDate: string;
 };
 
-export const useBabyWrapped = (babyId?: string) => {
+export const useBabyWrapped = (babyId?: string, imageSize: ImageSize = "preview") => {
 	const { user } = useAuth();
 
 	const fetchWrappedData = async (): Promise<WrappedStats> => {
@@ -108,9 +109,15 @@ export const useBabyWrapped = (babyId?: string) => {
 						return photo as Photo;
 					}
 
+					// Apply image transformation if not a video
+					let url = signedUrlData.signedUrl;
+					if (!isVideoUrl(photo.storage_path)) {
+						url = getTransformedUrl(url, imageSize);
+					}
+
 					return {
 						...photo,
-						url: signedUrlData.signedUrl,
+						url,
 					} as Photo;
 				} catch (err) {
 					console.error(

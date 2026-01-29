@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { compressImage } from "@/utils/imageCompressor";
 
 export type GuestPhoto = {
 	id: string;
@@ -62,7 +63,15 @@ export const useGuestPhotoUpload = (
 					throw new Error(`"${file.name}" is not an image file`);
 				}
 
-				const fileExt = file.name.split(".").pop();
+				// Compress image before upload
+				let fileToUpload = file;
+				try {
+					fileToUpload = await compressImage(file);
+				} catch (compressionError) {
+					console.warn("Image compression failed, uploading original:", compressionError);
+				}
+
+				const fileExt = fileToUpload.name.split(".").pop();
 				const guestNamePrefix = uploadData.guest_name 
 					? `${sanitizeName(uploadData.guest_name)}-` 
 					: '';
@@ -73,10 +82,10 @@ export const useGuestPhotoUpload = (
 				// Upload to storage
 				const { error: uploadError } = await supabase.storage
 					.from(storageBucket)
-					.upload(fileName, file, {
+					.upload(fileName, fileToUpload, {
 						cacheControl: "3600",
 						upsert: false,
-						contentType: file.type,
+						contentType: fileToUpload.type,
 					});
 
 				if (uploadError) {

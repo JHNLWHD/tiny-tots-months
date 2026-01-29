@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { convertHeicToWebFormat } from '@/utils/heicConverter';
 import { toast } from "@/components/ui/sonner";
+import { getTransformedUrl, isVideoUrl, type ImageSize } from '@/utils/supabaseImageTransform';
 
 type HeicImageProps = {
   src: string;
@@ -10,6 +11,8 @@ type HeicImageProps = {
   onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   onLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   style?: React.CSSProperties;
+  /** Optional image size preset for Supabase image transformations */
+  size?: ImageSize;
 }
 
 const HeicImage: React.FC<HeicImageProps> = ({
@@ -20,21 +23,30 @@ const HeicImage: React.FC<HeicImageProps> = ({
   onError,
   onLoad,
   style,
+  size,
 }) => {
-  const [displaySrc, setDisplaySrc] = useState<string>(src);
+  // Apply image transformation if size is specified and not a video
+  const transformedSrc = useMemo(() => {
+    if (!src || !size || isVideoUrl(src)) {
+      return src;
+    }
+    return getTransformedUrl(src, size);
+  }, [src, size]);
+
+  const [displaySrc, setDisplaySrc] = useState<string>(transformedSrc);
   const [isConverting, setIsConverting] = useState(false);
   const [conversionFailed, setConversionFailed] = useState(false);
 
   useEffect(() => {
     const handleHeicConversion = async () => {
       // Check if the URL might be a HEIC/HEIF image
-      const isLikelyHeic = src.toLowerCase().includes('.heic') || 
-                          src.toLowerCase().includes('.heif') ||
-                          src.includes('heic') || 
-                          src.includes('heif');
+      const isLikelyHeic = transformedSrc.toLowerCase().includes('.heic') || 
+                          transformedSrc.toLowerCase().includes('.heif') ||
+                          transformedSrc.includes('heic') || 
+                          transformedSrc.includes('heif');
 
       if (!isLikelyHeic) {
-        setDisplaySrc(src);
+        setDisplaySrc(transformedSrc);
         return;
       }
 
@@ -47,7 +59,7 @@ const HeicImage: React.FC<HeicImageProps> = ({
         });
         
         // Fetch the image data
-        const response = await fetch(src);
+        const response = await fetch(transformedSrc);
         if (!response.ok) {
           throw new Error('Failed to fetch image');
         }
@@ -70,11 +82,11 @@ const HeicImage: React.FC<HeicImageProps> = ({
           return () => URL.revokeObjectURL(convertedUrl);
         } else {
           // If conversion fails or not needed, use original
-          setDisplaySrc(src);
+          setDisplaySrc(transformedSrc);
         }
       } catch (error) {
         setConversionFailed(true);
-        setDisplaySrc(src); // Fallback to original
+        setDisplaySrc(transformedSrc); // Fallback to original
         
         // Show error toast
         toast("HEIC Conversion Failed", {
@@ -87,12 +99,12 @@ const HeicImage: React.FC<HeicImageProps> = ({
     };
 
     handleHeicConversion();
-  }, [src]);
+  }, [transformedSrc]);
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     // If it was a converted image that failed, try the original
-    if (displaySrc !== src && !conversionFailed) {
-      setDisplaySrc(src);
+    if (displaySrc !== transformedSrc && !conversionFailed) {
+      setDisplaySrc(transformedSrc);
       setConversionFailed(true);
       return;
     }

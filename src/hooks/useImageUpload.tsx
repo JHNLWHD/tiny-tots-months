@@ -6,6 +6,7 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreatePhotoData } from "@/types/photo";
+import { compressImage } from "@/utils/imageCompressor";
 
 type UploadOptions = {
 	babyId: string;
@@ -101,28 +102,43 @@ export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 
 		if (isHeicFormat) {
 			toast("HEIC/HEIF Format Detected", {
-				description: "Uploading Apple HEIC/HEIF format. This may have limited compatibility on some devices.",
+				description: "Converting and optimizing for upload...",
 			});
 		}
 
 		setProgress(0);
 		uploadOptions.onProgress?.(0);
 
-		// Generate file path
-		const fileExt = file.name.split(".").pop();
-		const fileName = `${user.id}/${uploadOptions.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
+		// Check if this is a video file
 		const isVideo = file.type.startsWith("video/") || 
-						 !!fileName.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
+						 !!file.name.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
+
+		// Compress image before upload (skip videos)
+		let fileToUpload = file;
+		if (!isVideo) {
+			try {
+				toast("Optimizing image...", {
+					description: "Compressing for faster upload and storage savings",
+				});
+				fileToUpload = await compressImage(file);
+			} catch (compressionError) {
+				console.warn("Image compression failed, uploading original:", compressionError);
+				// Continue with original file if compression fails
+			}
+		}
+
+		// Generate file path using the compressed file's extension
+		const fileExt = fileToUpload.name.split(".").pop();
+		const fileName = `${user.id}/${uploadOptions.babyId}/${monthNumber}/${uuidv4()}.${fileExt}`;
 
 		const uploadWithProgress = async () => {
-			const uploadOptionsConfig: any = {};
-			if (isHeicFormat) {
-				uploadOptionsConfig.contentType = file.type || (fileExt?.toLowerCase() === 'heic' ? 'image/heic' : 'image/heif');
-			}
+			const uploadOptionsConfig: any = {
+				contentType: fileToUpload.type,
+			};
 
 			const { error: uploadError, data: uploadData } = await supabase.storage
 				.from("baby_images")
-				.upload(fileName, file, uploadOptionsConfig);
+				.upload(fileName, fileToUpload, uploadOptionsConfig);
 
 			setProgress(100);
 			uploadOptions.onProgress?.(100);
