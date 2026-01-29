@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/sonner";
 import type { CreatePhotoData } from "@/hooks/usePhotos";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useAbilities } from "@/hooks/useAbilities";
 import { createHeicPreviewUrl, convertHeicToFile } from "@/utils/heicConverter";
 import type React from "react";
 import { useState } from "react";
@@ -32,13 +32,16 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 	const [isVideo, setIsVideo] = useState(false);
 	const [effectiveMimeType, setEffectiveMimeType] = useState<string>("");
 	const [isConverting, setIsConverting] = useState(false);
-	const { isPremium } = useSubscription();
+	const { canUploadVideo } = useAbilities();
+	
+	// Check CASL abilities for video upload permission
+	const videoUploadAllowed = canUploadVideo().allowed;
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files?.[0]) {
 			const file = e.target.files[0];
 
-			const validation = await validateFile(file, isPremium);
+			const validation = await validateFile(file, videoUploadAllowed);
 
 			if (!validation.isValid) {
 				return;
@@ -140,12 +143,12 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
 	return (
 		<Card className="p-6 bg-white/90 rounded-xl">
 			<h3 className="text-lg font-medium mb-4">
-				Upload New {isPremium ? "Photo or Video" : "Photo"} for Month {month}
+				Upload New {videoUploadAllowed ? "Photo or Video" : "Photo"} for Month {month}
 			</h3>
 
 			<div className="space-y-4">
 				{!preview ? (
-					<FileSelector isPremium={isPremium} onFileChange={handleFileChange} />
+					<FileSelector canUploadVideo={videoUploadAllowed} onFileChange={handleFileChange} />
 				) : (
 					<MediaPreview
 						preview={preview}
