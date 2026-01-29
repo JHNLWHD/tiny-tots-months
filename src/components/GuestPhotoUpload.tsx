@@ -7,6 +7,7 @@ import { Camera, Lock, Upload, X } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useGuestPhotoUpload } from "@/hooks/useGuestPhotoUpload";
+import { FILE_SIZE_LIMITS, ONE_MB } from "@/components/photoUploader/validateFile";
 
 type FileWithPreview = {
 	file: File;
@@ -70,8 +71,8 @@ const GuestPhotoUpload = ({ eventId, storageBucket, colorTheme = defaultColorThe
 				return;
 			}
 
-			// Validate file size (max 50MB - Supabase limit)
-			if (file.size > 50 * 1024 * 1024) {
+			// Validate file size (using VIDEO_MAX_SIZE as max for guest uploads)
+			if (file.size > FILE_SIZE_LIMITS.VIDEO_MAX_SIZE) {
 				tooLargeFiles.push(file.name);
 				return;
 			}
@@ -88,8 +89,9 @@ const GuestPhotoUpload = ({ eventId, storageBucket, colorTheme = defaultColorThe
 		}
 
 		if (tooLargeFiles.length > 0) {
+			const maxSizeMB = FILE_SIZE_LIMITS.VIDEO_MAX_SIZE / ONE_MB;
 			toast("File Too Large", {
-				description: `${tooLargeFiles.length} file(s) were skipped. File size must be less than 50MB`,
+				description: `${tooLargeFiles.length} file(s) were skipped. File size must be less than ${maxSizeMB}MB`,
 				className: "bg-destructive text-destructive-foreground",
 			});
 		}
@@ -294,7 +296,7 @@ const GuestPhotoUpload = ({ eventId, storageBucket, colorTheme = defaultColorThe
 										Click to upload or drag and drop
 									</p>
 									<p className="text-sm text-gray-500 mt-1">
-										JPG, PNG, GIF, WEBP up to 50MB (multiple files allowed)
+										JPG, PNG, GIF, WEBP up to {FILE_SIZE_LIMITS.VIDEO_MAX_SIZE / ONE_MB}MB (multiple files allowed)
 									</p>
 								</div>
 							</label>

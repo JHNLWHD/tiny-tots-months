@@ -16,8 +16,8 @@ export const PlanComparison: React.FC = () => {
 	const premiumPlanFeatures = [
 		{ text: "Unlimited baby profiles" },
 		{ text: "Complete 12 months milestone tracking" },
-		{ text: "Unlimited photo uploads" },
-		{ text: "Video uploads (up to 50MB)" },
+		{ text: "10GB photo & video storage" },
+		{ text: "Video uploads (up to 20MB)" },
 		{ text: "Priority support" },
 	];
 

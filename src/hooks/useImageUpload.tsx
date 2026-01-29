@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreatePhotoData } from "@/types/photo";
 import { compressImage } from "@/utils/imageCompressor";
+import { FILE_SIZE_LIMITS } from "@/components/photoUploader/validateFile";
 
 type UploadOptions = {
 	babyId: string;
@@ -49,8 +50,11 @@ export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 		// Ensure month number is at least 1 to satisfy database constraint
 		const monthNumber = Math.max(1, uploadOptions.monthNumber);
 
-		// Validate file size (max 100MB to match Supabase config)
-		if (file.size > 100 * 1024 * 1024) {
+		// Validate file size using centralized limits
+		const isVideoFile = file.type.startsWith("video/") || 
+			!!file.name.toLowerCase().match(/\.(mp4|mov|qt|webm|avi|m4v)$/);
+		const maxFileSize = isVideoFile ? FILE_SIZE_LIMITS.VIDEO_MAX_SIZE : FILE_SIZE_LIMITS.IMAGE_MAX_SIZE;
+		if (file.size > maxFileSize) {
 			const sizeError = new Error("File too large");
 			trackFileUploadError(sizeError, file.type, file.size, "validation");
 			throw sizeError;
@@ -167,6 +171,7 @@ export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 				storage_path: fileName,
 				description: uploadOptions.description || null,
 				is_video: isVideo,
+				file_size: fileToUpload.size, // Track file size for storage quota
 			})
 			.select()
 			.single();

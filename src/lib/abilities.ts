@@ -1,4 +1,5 @@
 import { AbilityBuilder, createMongoAbility, MongoAbility } from '@casl/ability';
+import { ONE_KB, ONE_MB, ONE_GB } from '@/components/photoUploader/validateFile';
 
 // Define the actions users can perform
 export type Actions = 
@@ -32,6 +33,7 @@ export type UserContext = {
   babyCount: number;
   monthlyPhotoCount: number;
   monthNumber: number;
+  storageUsedBytes?: number; // Total storage used by user in bytes
 };
 
 // Credit costs for various actions
@@ -42,6 +44,58 @@ export const CREDIT_COSTS = {
   PREMIUM_TEMPLATES: 3,
   EXPORT_FEATURES: 2,
 } as const;
+
+// Storage quotas in bytes per tier
+export const STORAGE_QUOTAS = {
+  FREE: 500 * ONE_MB,     // 500MB
+  FAMILY: 10 * ONE_GB,    // 10GB
+  LIFETIME: 25 * ONE_GB,  // 25GB
+} as const;
+
+// Helper to get storage quota for a tier
+export function getStorageQuotaForTier(tier: 'free' | 'family' | 'lifetime'): number {
+  switch (tier) {
+    case 'lifetime':
+      return STORAGE_QUOTAS.LIFETIME;
+    case 'family':
+      return STORAGE_QUOTAS.FAMILY;
+    case 'free':
+    default:
+      return STORAGE_QUOTAS.FREE;
+  }
+}
+
+// Format bytes to human-readable string
+export function formatStorageSize(bytes: number): string {
+  if (bytes >= ONE_GB) {
+    return `${(bytes / ONE_GB).toFixed(1)}GB`;
+  }
+  if (bytes >= ONE_MB) {
+    return `${(bytes / ONE_MB).toFixed(0)}MB`;
+  }
+  return `${(bytes / ONE_KB).toFixed(0)}KB`;
+}
+
+// Check if user has storage space available for a file of given size
+export function hasStorageAvailable(user: UserContext, fileSizeBytes: number): boolean {
+  const quota = getStorageQuotaForTier(user.tier);
+  const currentUsage = user.storageUsedBytes || 0;
+  return (currentUsage + fileSizeBytes) <= quota;
+}
+
+// Get remaining storage space for user
+export function getRemainingStorage(user: UserContext): number {
+  const quota = getStorageQuotaForTier(user.tier);
+  const currentUsage = user.storageUsedBytes || 0;
+  return Math.max(0, quota - currentUsage);
+}
+
+// Get storage usage percentage
+export function getStorageUsagePercent(user: UserContext): number {
+  const quota = getStorageQuotaForTier(user.tier);
+  const currentUsage = user.storageUsedBytes || 0;
+  return Math.min(100, Math.round((currentUsage / quota) * 100));
+}
 
 /**
  * Create abilities based on user's subscription tier and credits

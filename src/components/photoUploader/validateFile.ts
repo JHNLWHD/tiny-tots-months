@@ -1,6 +1,16 @@
 import { toast } from "@/components/ui/sonner";
 import { fileTypeFromBlob } from "file-type";
 
+// File size constants
+export const ONE_KB = 1024;
+export const ONE_MB = ONE_KB * ONE_KB;  // 1,048,576 bytes
+export const ONE_GB = ONE_MB * ONE_KB;  // 1,073,741,824 bytes
+
+export const FILE_SIZE_LIMITS = {
+	IMAGE_MAX_SIZE: 10 * ONE_MB,  // 10MB
+	VIDEO_MAX_SIZE: 20 * ONE_MB,  // 20MB
+} as const;
+
 export type FileValidationResult = {
 	isValid: boolean;
 	isVideo: boolean;
@@ -129,12 +139,11 @@ const validateWithMimeType = (
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };
 	}
 
-	const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+	const maxSize = isVideo ? FILE_SIZE_LIMITS.VIDEO_MAX_SIZE : FILE_SIZE_LIMITS.IMAGE_MAX_SIZE;
 	if (file.size > maxSize) {
+		const maxSizeMB = maxSize / ONE_MB;
 		toast(isVideo ? "Video too large" : "Image too large", {
-			description: isVideo
-				? "Maximum video size is 50MB"
-				: "Maximum image size is 10MB",
+			description: `Maximum ${isVideo ? "video" : "image"} size is ${maxSizeMB}MB`,
 			className: "bg-destructive text-destructive-foreground",
 		});
 		return { isValid: false, isVideo, effectiveMimeType: mimeType };
