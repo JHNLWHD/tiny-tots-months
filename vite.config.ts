@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { mdxFrontmatter } from "./vite-plugin-mdx-frontmatter";
 import { pingEndpoint } from "./vite-plugin-ping";
+import { statusEndpoint } from "./vite-plugin-status";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -15,6 +16,7 @@ export default defineConfig(({ mode }) => ({
 		port: 8080,
 	},
 	plugins: [
+		statusEndpoint(),
 		pingEndpoint(),
 		mdxFrontmatter(),
 		mdx({
