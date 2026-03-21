@@ -1,4 +1,4 @@
-import { Camera, CheckCircle2, Share2 } from "lucide-react";
+import { Camera, CheckCircle2, Lock } from "lucide-react";
 import React from "react";
 
 const ProblemSolutionSection = () => {
@@ -14,9 +14,9 @@ const ProblemSolutionSection = () => {
 						Why <span className="text-baby-purple">Tiny Tots Milestones</span>?
 					</h2>
 					<p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed px-2">
-						Parents often struggle with scattered photos, messy notes, and the
-						challenge of sharing their baby's growth with loved ones. Tiny Tots
-						Milestones brings it all together in one beautiful, easy-to-use app.
+						Parents often struggle with scattered photos, messy notes, and losing
+						track of how their baby is growing. Tiny Tots Milestones brings it
+						all together in one beautiful, easy-to-use app.
 					</p>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
@@ -45,12 +45,13 @@ const ProblemSolutionSection = () => {
 					</article>
 					<article className="royal-blue-card-gradient p-6 sm:p-8 md:p-10 rounded-2xl text-center shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-baby-purple/10">
 						<div className="bg-baby-purple/10 inline-flex p-3 sm:p-4 rounded-full mb-4 sm:mb-6 shadow-md">
-							<Share2 className="h-6 w-6 sm:h-8 sm:w-8 text-baby-purple" aria-hidden="true" />
+							<Lock className="h-6 w-6 sm:h-8 sm:w-8 text-baby-purple" aria-hidden="true" />
 						</div>
-						<h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">Private Sharing</h3>
+						<h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-800">Private by default</h3>
 						<p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-							Securely share your baby's journey with family and friends using
-							unique private links.
+							Your photos and milestones stay in your account—not on a public
+							timeline. Sign in from your own devices to view and update
+							everything in one place.
 						</p>
 					</article>
 				</div>

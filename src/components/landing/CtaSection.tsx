@@ -54,7 +54,9 @@ const CtaSection = () => {
 							<div className="w-6 h-6 sm:w-8 sm:h-8 bg-baby-blue/20 rounded-full border-2 border-white"></div>
 							<div className="w-6 h-6 sm:w-8 sm:h-8 bg-baby-pink/20 rounded-full border-2 border-white"></div>
 						</div>
-						<span className="text-xs sm:text-sm font-medium">Join 1000+ happy families</span>
+						<span className="text-xs sm:text-sm font-medium">
+							Start with a free account. Pay only if you want more.
+						</span>
 					</div>
 				</div>
 				

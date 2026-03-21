@@ -32,11 +32,12 @@ const PricingSection = () => {
 			"Full 12 months tracking",
 			"10 photos per month (500MB storage)",
 			"Basic milestone suggestions",
-			"Export/download features",
+			"Download photos from your gallery",
 		],
 		limitations: [
-			"No video uploads",
-			"No premium templates",
+			"Videos require Premium/Lifetime or 2 credits each",
+			"Full export unlock: 2 credits or upgrade",
+			"No premium templates (3 credits or upgrade)",
 		],
 		ctaLink: "/auth",
 		ctaText: "Get Started",
@@ -79,9 +80,9 @@ const PricingSection = () => {
 			"10GB photo & video storage",
 			"Premium milestone templates",
 			"Priority support",
-			"Advanced analytics",
-			"Family collaboration",
-			"Export capabilities",
+			"Usage & activity dashboard (Settings)",
+			"Continue tracking past month 12 (premium)",
+			"Export included",
 		],
 		ctaLink: isAuthenticated ? "/app/upgrade" : "/auth",
 		ctaText: "Start Family Plan",
@@ -100,7 +101,7 @@ const PricingSection = () => {
 			"Lifetime access",
 			"No recurring fees",
 			"Grandfathered pricing protection",
-			"Priority feature access",
+			"All Family plan features",
 		],
 		ctaLink: isAuthenticated ? "/app/upgrade" : "/auth",
 		ctaText: "Get Lifetime Access",
@@ -223,25 +224,12 @@ const PricingSection = () => {
 				<div className="text-center px-2">
 					<div className="inline-flex flex-wrap items-center justify-center bg-baby-purple/10 rounded-full px-4 sm:px-6 py-2 sm:py-3 text-baby-purple font-semibold mb-6 sm:mb-8 text-xs sm:text-sm">
 						<span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-baby-purple rounded-full mr-1.5 sm:mr-2"></span>
-						<span className="whitespace-nowrap">No hidden fees • Secure payments • 30-day money back guarantee</span>
+						<span className="whitespace-nowrap">No hidden fees • Secure payments</span>
 					</div>
 					
-					<div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 md:space-x-8 text-gray-400">
-						<div className="flex items-center">
-							<span className="text-xl sm:text-2xl font-bold text-baby-purple mr-1.5 sm:mr-2">1000+</span>
-							<span className="text-xs sm:text-sm">Happy Families</span>
-						</div>
-						<div className="hidden sm:block w-px h-8 bg-gray-300"></div>
-						<div className="flex items-center">
-							<span className="text-xl sm:text-2xl font-bold text-baby-purple mr-1.5 sm:mr-2">50K+</span>
-							<span className="text-xs sm:text-sm">Milestones Tracked</span>
-						</div>
-						<div className="hidden sm:block w-px h-8 bg-gray-300"></div>
-						<div className="flex items-center">
-							<span className="text-xl sm:text-2xl font-bold text-baby-purple mr-1.5 sm:mr-2">100K+</span>
-							<span className="text-xs sm:text-sm">Photos Stored</span>
-						</div>
-					</div>
+					<p className="text-center text-gray-500 text-sm max-w-xl mx-auto">
+						Designed for parents who want milestones, photos, and memories in one calm place.
+					</p>
 				</div>
 			</div>
 		</section>
