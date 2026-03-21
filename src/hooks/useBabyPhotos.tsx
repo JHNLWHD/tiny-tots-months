@@ -1,68 +1,82 @@
 import type { Photo } from "@/types/photo";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { getTransformedUrl, isVideoUrl, type ImageSize } from "@/utils/supabaseImageTransform";
+import { enrichPhotosWithSignedUrls } from "@/utils/enrichPhotoWithSignedUrls";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-export const useBabyPhotos = (babyId: string, imageSize?: ImageSize) => {
-    const fetchPhotosWithUrls = async (): Promise<Photo[]> => {
-        if (!babyId) return [];
+const PAGE_SIZE = 100;
+const LARGE_THRESHOLD = 500;
 
-        // Fetch photo records for the baby
-        const { data, error } = await supabase
-            .from("photo")
-            .select("*")
-            .eq("baby_id", babyId)
-            .order("month_number", { ascending: true });
+export const useBabyPhotos = (babyId: string) => {
+	const countQuery = useQuery({
+		queryKey: ["photos", "gallery", babyId, "count"],
+		queryFn: async () => {
+			const { count, error } = await supabase
+				.from("photo")
+				.select("*", { count: "exact", head: true })
+				.eq("baby_id", babyId);
+			if (error) throw error;
+			return count ?? 0;
+		},
+		enabled: !!babyId,
+	});
 
-        if (error) {
-            throw error;
-        }
+	const count = countQuery.data;
+	const countReady = countQuery.isSuccess;
 
-        // Generate signed URLs for each photo so we have a `url` property available
-        return await Promise.all(
-            (data || []).map(async (photo) => {
-                try {
-                    const { data: signedUrlData, error: signedUrlError } =
-                        await supabase.storage
-                            .from("baby_images")
-                            .createSignedUrl(photo.storage_path, 3600); // 1-hour expiry
+	const smallListQuery = useQuery({
+		queryKey: ["photos", "gallery", babyId, "all"],
+		queryFn: async () => {
+			const { data, error } = await supabase
+				.from("photo")
+				.select("*")
+				.eq("baby_id", babyId)
+				.order("created_at", { ascending: false })
+				.order("id", { ascending: false })
+				.limit(LARGE_THRESHOLD);
+			if (error) throw error;
+			return enrichPhotosWithSignedUrls(data ?? []);
+		},
+		enabled: !!babyId && countReady && count <= LARGE_THRESHOLD,
+	});
 
-                    if (signedUrlError) {
-                        throw signedUrlError;
-                    }
+	const pagedQuery = useInfiniteQuery({
+		queryKey: ["photos", "gallery", babyId, "pages"],
+		initialPageParam: 0,
+		queryFn: async ({ pageParam }) => {
+			const from = pageParam as number;
+			const { data, error } = await supabase
+				.from("photo")
+				.select("*")
+				.eq("baby_id", babyId)
+				.order("created_at", { ascending: false })
+				.order("id", { ascending: false })
+				.range(from, from + PAGE_SIZE - 1);
+			if (error) throw error;
+			return enrichPhotosWithSignedUrls(data ?? []);
+		},
+		getNextPageParam: (lastPage, allPages) => {
+			if (lastPage.length < PAGE_SIZE) return undefined;
+			return allPages.reduce((sum, p) => sum + p.length, 0);
+		},
+		enabled: !!babyId && countReady && count > LARGE_THRESHOLD,
+	});
 
-                    let url = signedUrlData?.signedUrl;
-                    
-                    // Apply image transformation if size specified and not a video
-                    if (url && imageSize && !isVideoUrl(photo.storage_path)) {
-                        url = getTransformedUrl(url, imageSize);
-                    }
+	const usePaged = count !== undefined && count > LARGE_THRESHOLD;
+	const photos: Photo[] = usePaged
+		? (pagedQuery.data?.pages.flat() ?? [])
+		: (smallListQuery.data ?? []);
 
-                    return {
-                        ...photo,
-                        url,
-                    } as Photo;
-                } catch (err) {
-                    console.error("Failed to create signed URL for photo:", photo.id, err);
-                    return photo as Photo; // Return photo without a URL if signing fails
-                }
-            })
-        );
-    };
+	const isLoading =
+		countQuery.isLoading ||
+		(usePaged ? pagedQuery.isLoading : smallListQuery.isLoading);
 
-    const {
-        data: photos = [],
-        isLoading,
-        error,
-    } = useQuery({
-        queryKey: ["photos", babyId],
-        queryFn: fetchPhotosWithUrls,
-        enabled: !!babyId,
-    });
-
-    return {
-        photos,
-        isLoading,
-        error,
-    };
+	return {
+		photos,
+		isLoading,
+		error: countQuery.error ?? smallListQuery.error ?? pagedQuery.error,
+		totalCount: count,
+		fetchNextPage: pagedQuery.fetchNextPage,
+		hasNextPage: pagedQuery.hasNextPage ?? false,
+		isFetchingNextPage: pagedQuery.isFetchingNextPage,
+	};
 };

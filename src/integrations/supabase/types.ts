@@ -86,6 +86,7 @@ export type Database = {
 					created_at: string;
 					description: string | null;
 					id: string;
+					is_favorite: boolean;
 					is_video: boolean;
 					month_number: number;
 					storage_path: string;
@@ -96,7 +97,9 @@ export type Database = {
 					baby_id: string;
 					created_at?: string;
 					description?: string | null;
+					file_size?: number | null;
 					id?: string;
+					is_favorite?: boolean;
 					is_video?: boolean;
 					month_number: number;
 					storage_path: string;
@@ -108,6 +111,7 @@ export type Database = {
 					created_at?: string;
 					description?: string | null;
 					id?: string;
+					is_favorite?: boolean;
 					is_video?: boolean;
 					month_number?: number;
 					storage_path?: string;

@@ -239,6 +239,11 @@ export const useImageUpload = (babyId?: string, monthNumber?: number) => {
 			queryClient.invalidateQueries({
 				queryKey: ["photos", babyId, monthNumber],
 			});
+			if (babyId) {
+				queryClient.invalidateQueries({
+					queryKey: ["photos", "gallery", babyId],
+				});
+			}
 			toast("Upload Complete", {
 				description: "Your file was uploaded successfully",
 			});

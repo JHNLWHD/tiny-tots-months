@@ -6,10 +6,11 @@ export type Photo = {
 	storage_path: string;
 	description: string | null;
 	is_video: boolean;
+	is_favorite?: boolean;
 	file_size?: number; // Size of the uploaded file in bytes (optional for backwards compatibility)
 	created_at: string;
 	updated_at: string;
-	url?: string; // URL for the actual image from storage
+	url?: string; // Signed URL for the image from storage (use transform params / HeicImage size for grid)
 };
 
 export type CreatePhotoData = {

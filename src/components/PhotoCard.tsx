@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Play, Trash2 } from "lucide-react";
-import React from "react";
+import { Heart, Play, Trash2 } from "lucide-react";
+import type { FC, MouseEvent } from "react";
 import type { Photo } from "@/types/photo";
 import HeicImage from "./HeicImage";
 import type { ImageSize } from "@/utils/supabaseImageTransform";
@@ -9,35 +9,49 @@ import type { ImageSize } from "@/utils/supabaseImageTransform";
 type PhotoCardProps = {
 	photo: Photo;
 	onClick?: (photo: Photo) => void;
+	/** User clicked delete on the card (parent opens confirm or deletes). */
 	onDelete?: (photo: Photo) => void;
-	showDeleteButton?: boolean;
 	showMonthBadge?: boolean;
+	onToggleFavorite?: (photo: Photo) => void;
+	/** Compare mode: highlight when selected */
+	compareSelected?: boolean;
 	className?: string;
 	/** Image size preset for optimization (default: "preview") */
 	imageSize?: ImageSize;
 };
 
-const PhotoCard: React.FC<PhotoCardProps> = ({
+const PhotoCard: FC<PhotoCardProps> = ({
 	photo,
 	onClick,
 	onDelete,
-	showDeleteButton = false,
 	showMonthBadge = true,
+	onToggleFavorite,
+	compareSelected = false,
 	className = "",
-	imageSize = "preview",
+	imageSize = "preview" as ImageSize,
 }) => {
 	const handleClick = () => {
 		onClick?.(photo);
 	};
 
-	const handleDeleteClick = (e: React.MouseEvent) => {
+	const handleDeleteClick = (e: MouseEvent<HTMLButtonElement>) => {
 		e.stopPropagation();
 		onDelete?.(photo);
 	};
 
+	const handleFavoriteClick = (e: MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		onToggleFavorite?.(photo);
+	};
+
+	const gridSrc = photo.url || "/placeholder.svg";
+	const useTransform = !photo.is_video;
+
 	return (
 		<Card
-			className={`group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-baby-purple/30 ${className}`}
+			className={`group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-baby-purple/30 ${
+				compareSelected ? "ring-2 ring-baby-purple ring-offset-2" : ""
+			} ${className}`}
 			onClick={handleClick}
 		>
 			<div className="relative aspect-square bg-gray-100">
@@ -58,11 +72,11 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 				) : (
 					<div className="relative w-full h-full">
 						<HeicImage
-							src={photo.url || "/placeholder.svg"}
+							src={gridSrc}
 							alt={photo.description || "Baby photo"}
 							className="w-full h-full object-cover"
 							loading="lazy"
-							size={imageSize}
+							size={useTransform ? imageSize : undefined}
 							onError={(e) => {
 								console.error("Image failed to load:", photo.storage_path);
 								const imgElement = e.currentTarget;
@@ -82,7 +96,27 @@ const PhotoCard: React.FC<PhotoCardProps> = ({
 					</div>
 				)}
 
-				{showDeleteButton && onDelete && (
+				{onToggleFavorite && (
+					<Button
+						type="button"
+						variant="secondary"
+						size="icon"
+						className="absolute bottom-2 right-2 z-10 h-9 w-9 rounded-full bg-white/90 shadow hover:bg-white"
+						onClick={handleFavoriteClick}
+						aria-label={photo.is_favorite ? "Remove favorite" : "Add favorite"}
+					>
+						<Heart
+							size={18}
+							className={
+								photo.is_favorite
+									? "fill-red-500 text-red-500"
+									: "text-gray-600"
+							}
+						/>
+					</Button>
+				)}
+
+				{onDelete && (
 					<Button
 						variant="destructive"
 						size="icon"

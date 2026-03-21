@@ -3,6 +3,8 @@
 ## Overview
 Provide a full-screen, immersive photo viewing experience with captions, navigation, thumbnails, and download capabilities. The lightbox is the primary way users view individual photos in detail.
 
+**Follow-on requirements** (slideshow / auto-advance): `openspec/specs/photo-lightbox-slideshow/spec.md` (canonical); archived change copy: `openspec/changes/archive/2026-03-21-gallery-backlog-features/specs/photo-lightbox-slideshow/spec.md`.
+
 ## Inputs
 
 ### Props

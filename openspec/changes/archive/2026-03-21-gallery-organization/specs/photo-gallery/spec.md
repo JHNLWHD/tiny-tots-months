@@ -1,7 +1,11 @@
 # Capability: Baby Gallery (All Photos View)
 
+> **Amendment:** **PDF export** for the baby gallery was later removed from product scope and is not a follow-on requirement in current `gallery-backlog-features` specs. The next paragraph still lists PDF as originally planned when this spec was archived.
+
 ## Overview
 Provide a dedicated page for browsing all photos and videos for a specific baby, with powerful filtering and organization options. This is the primary photo browsing experience outside of the month-specific context.
+
+**Follow-on requirements** (caption search, favorites, compare, PDF export later removed, large-library loading, list images via Storage transforms) are specified under change **`gallery-backlog-features`** (archived): `openspec/specs/baby-gallery-advanced/spec.md` and `openspec/specs/photo-thumbnail-pipeline/spec.md` (canonical; archived deltas under `openspec/changes/archive/2026-03-21-gallery-backlog-features/specs/`).
 
 ## Inputs
 

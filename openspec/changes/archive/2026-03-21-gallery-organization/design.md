@@ -1,5 +1,7 @@
 # Gallery & Organization - System Design
 
+> **Amendment:** **Baby gallery PDF export** was later removed from product scope and is not in active `gallery-backlog-features` specs. The paragraph that points to `gallery-backlog-features` still lists PDF as originally planned when this document was archived.
+
 ## Architecture Overview
 
 ```
@@ -460,6 +462,18 @@ Currently photos are full-size, which can slow loading. Future optimization:
 │  [Skeleton]  [Skeleton]  [Skeleton]    │
 └────────────────────────────────────────┘
 ```
+
+---
+
+## Extensions (related OpenSpec change)
+
+Behavior beyond this design—caption search, persisted favorites, compare-two mode, PDF export (later removed from product), server-paged loading for very large libraries, list delivery via Storage transforms (not stored thumbnails), and lightbox slideshow—is specified under change id **`gallery-backlog-features`** (archived 2026-03-21). Paths from **repo root**:
+
+- `openspec/changes/archive/2026-03-21-gallery-backlog-features/design.md` — decisions for those features
+- `openspec/specs/baby-gallery-advanced/spec.md`
+- `openspec/specs/photo-thumbnail-pipeline/spec.md`
+- `openspec/specs/photo-lightbox-slideshow/spec.md`
+- `openspec/changes/archive/2026-03-21-gallery-backlog-features/tasks.md` — implementation tasks
 
 ---
 
