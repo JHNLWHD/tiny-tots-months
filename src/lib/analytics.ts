@@ -188,12 +188,15 @@ export const trackFileUploadError = (
 	error: Error,
 	fileType?: string,
 	fileSize?: number,
-	uploadStage?: string
+	uploadStage?: string,
+	meta?: Record<string, unknown>,
 ) => {
 	trackError(error, ErrorCategory.FILE_UPLOAD, ErrorSeverity.MEDIUM, {
 		file_type: fileType,
 		file_size: fileSize,
 		upload_stage: uploadStage,
+		upload_phase: uploadStage,
+		...meta,
 	});
 };
 
@@ -209,12 +212,14 @@ export const trackDatabaseError = (
 	error: Error,
 	operation?: string,
 	table?: string,
-	userId?: string
+	userId?: string,
+	meta?: Record<string, unknown>,
 ) => {
 	trackError(error, ErrorCategory.DATABASE, ErrorSeverity.HIGH, {
 		db_operation: operation,
 		db_table: table,
 		user_id: userId,
+		...meta,
 	});
 };
 

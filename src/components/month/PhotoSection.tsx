@@ -10,6 +10,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type { Photo } from "@/hooks/usePhotos";
+import type { CreatePhotoData } from "@/types/photo";
 import { Loader2 } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
@@ -22,7 +23,7 @@ type PhotoSectionProps = {
 	monthNumber: number;
 	photos: Photo[];
 	isUploading: boolean;
-	uploadPhoto: (data) => void;
+	uploadPhoto: (data: CreatePhotoData) => Promise<unknown>;
 	deletePhoto: (photo: Photo) => void;
 	refetchPhotos: () => void;
 	isLoading: boolean;
