@@ -1,17 +1,16 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Photo } from "@/types/photo";
-import { getTransformedUrl, isVideoUrl, type ImageSize } from "@/utils/supabaseImageTransform";
 
 type PhotoRow = Photo & {
 	is_favorite?: boolean | null;
 };
 
 /**
- * Adds signed `url` for the primary object; optional `imageSize` applies Supabase Storage image transforms for list/grid.
+ * Adds a signed `url` for `storage_path`. Image resizing for display is handled
+ * in `PhotoImage` via the `size` prop (`getTransformedUrl`).
  */
 export async function enrichPhotoWithSignedUrls(
 	photo: PhotoRow,
-	imageSize?: ImageSize,
 ): Promise<Photo> {
 	let url: string | undefined;
 
@@ -22,9 +21,6 @@ export async function enrichPhotoWithSignedUrls(
 
 		if (!signedUrlError && signedUrlData?.signedUrl) {
 			url = signedUrlData.signedUrl;
-			if (url && imageSize && !isVideoUrl(photo.storage_path)) {
-				url = getTransformedUrl(url, imageSize);
-			}
 		}
 	} catch (err) {
 		console.error("Failed to create signed URL for photo:", photo.id, err);
@@ -39,7 +35,6 @@ export async function enrichPhotoWithSignedUrls(
 
 export async function enrichPhotosWithSignedUrls(
 	rows: PhotoRow[],
-	imageSize?: ImageSize,
 ): Promise<Photo[]> {
-	return Promise.all(rows.map((p) => enrichPhotoWithSignedUrls(p, imageSize)));
+	return Promise.all(rows.map((p) => enrichPhotoWithSignedUrls(p)));
 }

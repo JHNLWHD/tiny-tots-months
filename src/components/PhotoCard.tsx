@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Heart, Play, Trash2 } from "lucide-react";
 import type { FC, MouseEvent } from "react";
 import type { Photo } from "@/types/photo";
-import HeicImage from "./HeicImage";
+import PhotoImage from "./PhotoImage";
 import type { ImageSize } from "@/utils/supabaseImageTransform";
 
 type PhotoCardProps = {
@@ -16,7 +16,7 @@ type PhotoCardProps = {
 	/** Compare mode: highlight when selected */
 	compareSelected?: boolean;
 	className?: string;
-	/** Image size preset for optimization (default: "preview") */
+	/** Supabase transform preset for grid (default: "thumbnail") */
 	imageSize?: ImageSize;
 };
 
@@ -28,7 +28,7 @@ const PhotoCard: FC<PhotoCardProps> = ({
 	onToggleFavorite,
 	compareSelected = false,
 	className = "",
-	imageSize = "preview" as ImageSize,
+	imageSize = "thumbnail",
 }) => {
 	const handleClick = () => {
 		onClick?.(photo);
@@ -45,7 +45,6 @@ const PhotoCard: FC<PhotoCardProps> = ({
 	};
 
 	const gridSrc = photo.url || "/placeholder.svg";
-	const useTransform = !photo.is_video;
 
 	return (
 		<Card
@@ -71,12 +70,12 @@ const PhotoCard: FC<PhotoCardProps> = ({
 					</div>
 				) : (
 					<div className="relative w-full h-full">
-						<HeicImage
+						<PhotoImage
 							src={gridSrc}
 							alt={photo.description || "Baby photo"}
 							className="w-full h-full object-cover"
 							loading="lazy"
-							size={useTransform ? imageSize : undefined}
+							size={imageSize}
 							onError={(e) => {
 								console.error("Image failed to load:", photo.storage_path);
 								const imgElement = e.currentTarget;

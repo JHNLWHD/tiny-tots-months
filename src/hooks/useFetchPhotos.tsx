@@ -1,27 +1,30 @@
 import { toast } from "@/components/ui/sonner";
+import {
+	PHOTO_QUERY_GC_MS,
+	PHOTO_QUERY_STALE_MS,
+} from "@/constants/photoQueryCache";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import type { Photo } from "@/types/photo";
-import { useQuery } from "@tanstack/react-query";
 import { enrichPhotosWithSignedUrls } from "@/utils/enrichPhotoWithSignedUrls";
-import type { ImageSize } from "@/utils/supabaseImageTransform";
+import { useQuery } from "@tanstack/react-query";
 
-export const useFetchPhotos = (
-	babyId?: string,
-	monthNumber?: number,
-	imageSize?: ImageSize
-) => {
+/** Month photos load in full so caption/favorite filters and sort modes stay correct. */
+export const useFetchPhotos = (babyId?: string, monthNumber?: number) => {
 	const { user } = useAuth();
+
+	const enabled = !!user && !!babyId && !!monthNumber;
 
 	const fetchPhotos = async (): Promise<Photo[]> => {
 		if (!user || !babyId || !monthNumber) return [];
 
-		// First fetch the photo records
 		const { data, error } = await supabase
 			.from("photo")
 			.select("*")
 			.eq("baby_id", babyId)
-			.eq("month_number", monthNumber);
+			.eq("month_number", monthNumber)
+			.order("created_at", { ascending: false })
+			.order("id", { ascending: false });
 
 		if (error) {
 			console.error("Error fetching photos:", error);
@@ -32,7 +35,7 @@ export const useFetchPhotos = (
 			throw error;
 		}
 
-		return enrichPhotosWithSignedUrls(data ?? [], imageSize);
+		return enrichPhotosWithSignedUrls(data ?? []);
 	};
 
 	const {
@@ -42,7 +45,9 @@ export const useFetchPhotos = (
 	} = useQuery({
 		queryKey: ["photos", babyId, monthNumber],
 		queryFn: fetchPhotos,
-		enabled: !!user && !!babyId && !!monthNumber,
+		enabled,
+		staleTime: PHOTO_QUERY_STALE_MS,
+		gcTime: PHOTO_QUERY_GC_MS,
 	});
 
 	return {

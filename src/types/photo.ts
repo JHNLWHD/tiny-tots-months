@@ -10,7 +10,7 @@ export type Photo = {
 	file_size?: number; // Size of the uploaded file in bytes (optional for backwards compatibility)
 	created_at: string;
 	updated_at: string;
-	url?: string; // Signed URL for the image from storage (use transform params / HeicImage size for grid)
+	url?: string; // Signed object URL; use PhotoImage `size` for display transforms
 };
 
 export type CreatePhotoData = {

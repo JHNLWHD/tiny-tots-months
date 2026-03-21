@@ -25,7 +25,7 @@ import {
 	List,
 	Loader2,
 } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 const BabyGallery = () => {
@@ -61,7 +61,23 @@ const BabyGallery = () => {
 	const [compareB, setCompareB] = useState<Photo | null>(null);
 	const [compareDialogOpen, setCompareDialogOpen] = useState(false);
 
+	const galleryLoadMoreRef = useRef<HTMLDivElement>(null);
+
 	const { mutate: toggleFavorite } = useTogglePhotoFavorite();
+
+	useEffect(() => {
+		if (!hasNextPage || isFetchingNextPage) return;
+		const el = galleryLoadMoreRef.current;
+		if (!el) return;
+		const obs = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting) fetchNextPage();
+			},
+			{ root: null, rootMargin: "320px", threshold: 0 },
+		);
+		obs.observe(el);
+		return () => obs.disconnect();
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const baby = babies.find((b) => b.id === babyId);
 
@@ -395,8 +411,13 @@ const BabyGallery = () => {
 				</div>
 			)}
 
-			{hasNextPage && (
-				<div className="flex justify-center pt-2">
+			{hasNextPage ? (
+				<div className="flex flex-col items-center gap-3 pt-4">
+					<div
+						ref={galleryLoadMoreRef}
+						className="h-px w-full shrink-0"
+						aria-hidden
+					/>
 					<Button
 						type="button"
 						variant="outline"
@@ -413,7 +434,7 @@ const BabyGallery = () => {
 						)}
 					</Button>
 				</div>
-			)}
+			) : null}
 
 			<PhotoLightbox
 				photos={filteredPhotos}

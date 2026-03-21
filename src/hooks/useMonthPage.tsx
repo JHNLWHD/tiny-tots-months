@@ -33,9 +33,9 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 	} = usePhotos(selectedBabyId || undefined, monthNumber);
 
 	// Get abilities with photo count context
-	const abilities = useAbilities({ 
+	const abilities = useAbilities({
 		monthNumber,
-		monthlyPhotoCount: photos.length 
+		monthlyPhotoCount: photos.length,
 	});
 
 	// Fetch milestones for selected baby and month

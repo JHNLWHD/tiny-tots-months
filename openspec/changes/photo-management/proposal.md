@@ -292,13 +292,15 @@ if (totalStorageUsed + fileSize > quota[userTier]) {
 - **Upload Hook:** `src/hooks/useImageUpload.tsx`
 - **Upload Component:** `src/components/PhotoUploader.tsx`
 - **Delete Hook:** `src/hooks/useDeletePhoto.tsx`
-- **Fetch Hook:** `src/hooks/useFetchPhotos.tsx`
+- **Fetch Hooks:** `src/hooks/useFetchPhotos.tsx` (month, full list), `src/hooks/useBabyPhotos.tsx` (baby gallery, paginated)
+- **URL enrichment:** `src/utils/enrichPhotoWithSignedUrls.ts`, `src/constants/photoQueryCache.ts`
 - **HEIC Converter:** `src/utils/heicConverter.ts`
 - **Image Compressor:** `src/utils/imageCompressor.ts`
 - **File Validation:** `src/components/photoUploader/validateFile.ts`
 - **Image Transform:** `src/utils/supabaseImageTransform.ts`
 - **Gallery Component:** `src/components/PhotoGrid.tsx`
-- **Lightbox:** Uses `yet-another-react-lightbox` library
+- **Display image:** `src/components/PhotoImage.tsx` (transform presets + HEIC preview, blob URL lifecycle)
+- **Lightbox:** `yet-another-react-lightbox` + `PhotoLightboxContent` custom `render.slide`
 
 ### Compression Settings
 ```typescript
@@ -312,20 +314,15 @@ const DEFAULT_OPTIONS = {
 
 ### Signed URL Strategy
 ```typescript
-// Generate on fetch (1 hour expiry)
-const { data } = await supabase.storage
-  .from("baby_images")
-  .createSignedUrl(storage_path, 3600);
+// One sign per row; PhotoImage applies display transforms (grid / lightbox)
+import { enrichPhotosWithSignedUrls } from "@/utils/enrichPhotoWithSignedUrls";
 
-// Return URL with photo metadata
-return {
-  ...photo,
-  url: data.signedUrl
-};
+const photos = await enrichPhotosWithSignedUrls(rows);
+// Display: PhotoImage(photo.url, size). React Query: photoQueryCache tuning.
 ```
 
 ## Open Questions
-1. Should we generate multiple image sizes server-side or client-side?
+1. ~~Should we generate multiple image sizes server-side or client-side?~~ **Resolved for read path:** Supabase Storage image transforms on signed URLs; single object stored. *Open:* premium “original quality” download semantics.
 2. Should original-quality downloads be a premium feature?
 3. How often should we reconcile storage quotas?
 4. Should we implement photo versioning (edit history)?
@@ -337,5 +334,5 @@ return {
 
 **Status:** Production  
 **Created:** 2026-03-08  
-**Last Updated:** 2026-03-08  
-**Version:** 1.0
+**Last Updated:** 2026-03-22  
+**Version:** 1.2
