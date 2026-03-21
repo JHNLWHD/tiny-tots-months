@@ -1,7 +1,9 @@
 # view-timeline Specification
 
 ## Purpose
-TBD - created by archiving change deprecate-view-wrapped. Update Purpose after archive.
+
+Milestone and month navigation SHALL stay usable without the deprecated Wrapped experience: timelines and progress views work from home and month routes alone.
+
 ## Requirements
 ### Requirement: Milestone display contexts without Wrapped
 

@@ -13,27 +13,33 @@ export type Database = {
 				Row: {
 					created_at: string;
 					date_of_birth: string;
+					deleted_at: string | null;
 					gender: string | null;
 					id: string;
 					name: string;
+					photo_url: string | null;
 					updated_at: string;
 					user_id: string;
 				};
 				Insert: {
 					created_at?: string;
 					date_of_birth: string;
+					deleted_at?: string | null;
 					gender?: string | null;
 					id?: string;
 					name: string;
+					photo_url?: string | null;
 					updated_at?: string;
 					user_id: string;
 				};
 				Update: {
 					created_at?: string;
 					date_of_birth?: string;
+					deleted_at?: string | null;
 					gender?: string | null;
 					id?: string;
 					name?: string;
+					photo_url?: string | null;
 					updated_at?: string;
 					user_id?: string;
 				};
