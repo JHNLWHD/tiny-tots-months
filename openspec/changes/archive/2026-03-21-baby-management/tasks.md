@@ -191,30 +191,30 @@ This is a **reverse-engineered** task breakdown documenting how the Baby Managem
 
 ---
 
-## Known Gaps (Not Implemented)
+## Known Gaps (implemented in follow-up)
 
 ### Edit Functionality
-- [ ] Create EditBabyDialog component
-- [ ] Add updateBaby function to hook
-- [ ] Add "Edit" button to UI
-- [ ] Implement form pre-population
+- [x] Create EditBabyDialog component
+- [x] Add updateBaby function to hook
+- [x] Add "Edit" button to UI
+- [x] Implement form pre-population
 
 ### Soft Delete
-- [ ] Add deleted_at column
-- [ ] Update queries to filter deleted
-- [ ] Add restore functionality
-- [ ] Update RLS policies
+- [x] Add deleted_at column
+- [x] Update queries to filter deleted
+- [x] Add restore functionality
+- [x] Update RLS policies
 
 ### Profile Photos
-- [ ] Add photo_url column
-- [ ] Implement photo upload
-- [ ] Add storage cleanup
-- [ ] Display photos in UI
+- [x] Add photo_url column
+- [x] Implement photo upload
+- [x] Add storage cleanup
+- [x] Display photos in UI
 
 ### Selection Persistence
-- [ ] Save selectedBabyId to localStorage
-- [ ] Load from localStorage on mount
-- [ ] Sync across tabs
+- [x] Save selectedBabyId to localStorage
+- [x] Load from localStorage on mount
+- [x] Sync across tabs
 
 ---
 
@@ -255,5 +255,5 @@ Database (1.1-1.4)
 
 **Status:** Completed (in production)  
 **Created:** 2026-03-08  
-**Last Updated:** 2026-03-08  
+**Last Updated:** 2026-03-21  
 **Version:** 1.0

@@ -65,11 +65,18 @@ const SelectScrollDownButton = React.forwardRef<
 SelectScrollDownButton.displayName =
 	SelectPrimitive.ScrollDownButton.displayName;
 
+type SelectContentProps = React.ComponentPropsWithoutRef<
+	typeof SelectPrimitive.Content
+> & {
+	/** Portal target; use inside Dialog so the menu unmounts with the dialog (avoids stuck pointer-events). */
+	container?: HTMLElement | null;
+};
+
 const SelectContent = React.forwardRef<
 	React.ElementRef<typeof SelectPrimitive.Content>,
-	React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-	<SelectPrimitive.Portal>
+	SelectContentProps
+>(({ className, children, position = "popper", container, ...props }, ref) => (
+	<SelectPrimitive.Portal container={container ?? undefined}>
 		<SelectPrimitive.Content
 			ref={ref}
 			className={cn(

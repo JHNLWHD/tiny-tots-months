@@ -88,15 +88,23 @@ export const useAnalytics = () => {
 				.select("*")
 				.eq("user_id", user.id);
 
+			const activeBabyIds =
+				babies
+					?.filter((b) => !(b as { deleted_at?: string | null }).deleted_at)
+					.map((b) => b.id) ?? [];
+
 			const { data: photos } = await supabase
 				.from("photo")
 				.select("*")
 				.eq("user_id", user.id);
 
-			const { data: milestones } = await supabase
-				.from("milestone")
-				.select("*")
-				.in("baby_id", babies?.map(b => b.id) || []);
+			const { data: milestones } =
+				activeBabyIds.length > 0
+					? await supabase
+							.from("milestone")
+							.select("*")
+							.in("baby_id", activeBabyIds)
+					: { data: [] };
 
 			// Calculate metrics
 			const totalCreditsEarned = creditTransactions
@@ -187,7 +195,7 @@ export const useAnalytics = () => {
 				featureUsage: {
 					photosUploaded,
 					videosUploaded,
-					babiesCreated: babies?.length || 0,
+					babiesCreated: activeBabyIds.length,
 					milestonesCreated: milestones?.length || 0,
 					exportsGenerated: 0, // TODO: Track exports
 				},
