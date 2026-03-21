@@ -76,13 +76,15 @@ User                  UI                DB              Storage
    - Order by created_at DESC (newest first)
 
 4-5. **Signed URL Generation**
-   - For each photo, generate signed URL
-   - URLs expire after 1 hour (3600 seconds)
-   - Cached in React Query
-   - URLs regenerated on fetch (not stored in DB)
+   - For each photo, create one signed object URL for `storage_path` (3600s expiry) → `Photo.url`
+   - **Transforms are not applied during enrich**; `PhotoImage` applies `getTransformedUrl` when a `size` preset is passed
+   - **Videos** use the same signed `url` on `<video>` (no image transform)
+   - React Query caches list data with explicit `staleTime` / `gcTime` (see URL Management)
+   - URLs are not persisted in the database
 
 6-7. **Grid Display**
    - Render photos in responsive grid (3-4 columns)
+   - Use `PhotoImage` with `src={photo.url}` and a grid preset (e.g. `thumbnail` on `PhotoCard`)
    - Use CSS object-cover for uniform sizing
    - Lazy load images (browser native)
    - Show video icon for videos
@@ -90,7 +92,8 @@ User                  UI                DB              Storage
 8-11. **Lightbox View**
    - User clicks photo
    - Open full-screen lightbox
-   - Display photo at full resolution (1600px max)
+   - Custom `render.slide` uses `PhotoImage` with `size="full"` for stills; `<video controls>` for videos
+   - Download uses raw signed `photo.url` (full object)
    - Show caption if exists
    - Show metadata (date, month)
 
@@ -144,10 +147,10 @@ SELECT * FROM photo WHERE baby_id = $1 ORDER BY created_at DESC;
 ```
 
 ### URL Management
-- **Generation:** On every fetch (not cached in DB)
+- **Generation:** On fetch (not stored in DB); one `createSignedUrl` per row (object URL on `Photo.url`); display transforms in `PhotoImage`
 - **Expiry:** 1 hour (3600 seconds)
-- **Refresh:** Manual refresh if user reports broken images
-- **Cache:** React Query caches photos + URLs for 5 minutes
+- **Refresh:** Refetch invalidates queries (upload, delete, favorite toggle, etc.); user can refresh the page
+- **Cache:** `src/constants/photoQueryCache.ts` — `PHOTO_QUERY_STALE_MS` (5 minutes) and `PHOTO_QUERY_GC_MS` (50 minutes) so cached data is refreshed before typical signed URL expiry
 
 ### Responsive Sizing
 ```
@@ -170,12 +173,11 @@ Lightbox:  Full screen, up to 1600px
 - Future: Auto-regenerate on error
 
 ### 2. Many Photos (100+)
-**Scenario:** Gallery has 100+ photos  
+**Scenario:** Baby gallery (`/app/baby/:id/gallery`) has many photos  
 **Handling:**
-- All photos fetched at once (no pagination yet)
-- Browser lazy loads images (native)
-- May be slow on initial load
-- Future: Implement pagination (20-30 per page)
+- **Baby gallery:** Fetched in pages of **24** via `useInfiniteQuery` (`useBabyPhotos`); **Load more** button and **infinite scroll** (IntersectionObserver) load additional pages
+- **Month page:** Still loads **all** photos for that baby + month in one query so client-side sort (newest/oldest/description), caption search, and favorites filtering stay correct on the full set
+- Browser lazy-loads images in the DOM where applicable
 
 ### 3. Video Playback in Lightbox
 **Scenario:** User clicks video in gallery  
@@ -285,9 +287,10 @@ Lightbox:  Full screen, up to 1600px
 ## Dependencies
 
 ### Internal
-- **useFetchPhotos** - Fetch photos hook
-- **usePhotos** - Composite hook
-- **Photo type** - TypeScript types
+- **useFetchPhotos** - Month-scoped photos (full list + signed URLs)
+- **useBabyPhotos** - Baby-wide gallery (paginated + infinite scroll)
+- **usePhotos** - Composite hook (month page)
+- **Photo type** - TypeScript types (`url` = signed object URL)
 
 ### External
 - **yet-another-react-lightbox** - Lightbox component
@@ -298,7 +301,7 @@ Lightbox:  Full screen, up to 1600px
 - **PhotoGrid** - Grid display component
 - **PhotoSection** - Month-specific photos
 - **Lightbox** - Full-screen viewer (from library)
-- **HeicImage** - Handles HEIC display (fallback)
+- **PhotoImage** - Signed `src` + optional Supabase `size` preset; client HEIC/HEIF fetch→convert→object URL when URL looks like HEIC; blob URL revoked on effect cleanup
 
 ### Database Query
 ```typescript
@@ -310,17 +313,12 @@ const { data, error } = await supabase
   .order("created_at", { ascending: false });
 ```
 
-### Signed URL Generation
+### Signed URL enrichment (no transform here)
 ```typescript
-const photosWithUrls = await Promise.all(
-  photos.map(async (photo) => {
-    const { data } = await supabase.storage
-      .from("baby_images")
-      .createSignedUrl(photo.storage_path, 3600);
-    
-    return { ...photo, url: data?.signedUrl };
-  })
-);
+import { enrichPhotosWithSignedUrls } from "@/utils/enrichPhotoWithSignedUrls";
+
+const photos = await enrichPhotosWithSignedUrls(rows);
+// PhotoImage(src: photo.url, size: 'thumbnail' | 'full' | …) applies transforms.
 ```
 
 ---
@@ -329,29 +327,27 @@ const photosWithUrls = await Promise.all(
 - `upload-photo` - Add photos to gallery
 - `delete-photo` - Remove photos from gallery
 - `caption-photo` - Edit photo descriptions
+- `photo-thumbnail-pipeline` (workspace spec: `openspec/specs/photo-thumbnail-pipeline/spec.md`) - Sign in enrich; transform in `PhotoImage`
 
 ---
 
 ## Known Issues & Future Improvements
 
 ### Known Issues
-1. **No pagination** - All photos fetched at once (slow for 100+ photos)
-2. **URL expiry** - Manual refresh needed after 1 hour
-3. **No image optimization** - Fetches full compressed size (not thumbnails)
-4. **No lazy loading** - All signed URLs generated upfront
-5. **Video thumbnails** - No thumbnail generation for videos
+1. **Month page scale** - Very large single-month libraries load all rows at once (by design for sort/filter correctness)
+2. **URL expiry** - After ~1 hour without refetch, images may 404 until page refresh or query refetch
+3. **Video thumbnails** - No generated poster image; grid uses video element / play affordance
+4. **Signed URL volume** - Each visible row still requires signing work on fetch (batched per row, not per variant beyond transform URLs)
 
 ### Future Improvements
-1. **Pagination** - Load 20-30 photos per page
-2. **Infinite scroll** - Load more as user scrolls
-3. **Thumbnail sizes** - Fetch optimized sizes for grid
-4. **URL refresh** - Auto-regenerate expired URLs
-5. **Virtual scrolling** - Better performance for large galleries
-6. **Masonry layout** - Pinterest-style variable heights
-7. **Bulk actions** - Select multiple, delete/download batch
-8. **Search/filter** - Find photos by caption/date
-9. **Photo metadata** - Show EXIF data, location
-10. **Video thumbnails** - Generate preview images for videos
+1. **URL refresh** - Auto-regenerate on image `error` / 404
+2. **Virtual scrolling** - For very large baby galleries after load
+3. **Month pagination** - If needed: server-driven sort + filters with matching API (or hybrid load-all when filters active)
+4. **Masonry layout** - Pinterest-style variable heights
+5. **Bulk actions** - Select multiple, delete/download batch
+6. **Search/filter** - Server-side or indexed caption search across months
+7. **Photo metadata** - EXIF, location
+8. **Video thumbnails** - Generated poster frame or uploaded poster path
 
 ---
 
@@ -370,7 +366,8 @@ const photosWithUrls = await Promise.all(
 ### Performance Tests
 - [ ] Gallery loads in <2 seconds (10 photos)
 - [ ] Signed URLs generate quickly (<100ms each)
-- [ ] Large galleries (50+ photos) load acceptably
+- [ ] Large baby galleries: first page (~24 items) loads without fetching entire library
+- [ ] Load more / infinite scroll fetches next page without duplicating prior rows
 - [ ] Images lazy load on scroll
 
 ### Edge Case Tests
@@ -391,65 +388,34 @@ const photosWithUrls = await Promise.all(
 ## Implementation Notes
 
 ### Code Locations
-- **Fetch Hook:** `src/hooks/useFetchPhotos.tsx`
-- **Composite Hook:** `src/hooks/usePhotos.tsx`
-- **Grid Component:** `src/components/PhotoGrid.tsx`
-- **Section Component:** `src/components/month/PhotoSection.tsx`
-- **Gallery Page:** `src/pages/BabyGallery.tsx`
+- **Month fetch:** `src/hooks/useFetchPhotos.tsx` — `useQuery`, full month list, `enrichPhotosWithSignedUrls(rows)`, `PHOTO_QUERY_*` cache tuning
+- **Baby gallery fetch:** `src/hooks/useBabyPhotos.tsx` — `useInfiniteQuery`, page size **24**, same enrichment
+- **Composite (month page):** `src/hooks/usePhotos.tsx`
+- **Enrichment:** `src/utils/enrichPhotoWithSignedUrls.ts`
+- **Transforms:** `src/utils/supabaseImageTransform.ts`
+- **Cache constants:** `src/constants/photoQueryCache.ts`
+- **Grid / collage:** `src/components/PhotoGrid.tsx`, `PhotoCard.tsx`, `PhotoCollage.tsx`
+- **Month UI:** `src/components/month/PhotoSection.tsx`
+- **Gallery UI:** `src/pages/BabyGallery.tsx` (infinite scroll sentinel + load more)
+- **Lightbox:** `src/components/PhotoLightboxContent.tsx` (`render.slide` + `PhotoImage` / `<video>`)
 
-### Key Functions
+### Key behavior
+- **Query keys:** Month `["photos", babyId, monthNumber]`; gallery pages `["photos", "gallery", babyId, "pages"]`
+- **Invalidation:** Upload/delete/favorite mutations invalidate month and gallery prefixes via `queryClient.invalidateQueries`
+- **Optimistic favorites:** `useTogglePhotoFavorite` patches month `Photo[]` and gallery infinite pages
+
+### Cache strategy
 ```typescript
-// From useFetchPhotos.tsx
-export const useFetchPhotos = (babyId?: string, monthNumber?: number) => {
-  return useQuery({
-    queryKey: ["photos", babyId, monthNumber],
-    queryFn: async () => {
-      // 1. Fetch photos
-      let query = supabase
-        .from("photo")
-        .select("*")
-        .eq("baby_id", babyId)
-        .order("created_at", { ascending: false });
-      
-      if (monthNumber) {
-        query = query.eq("month_number", monthNumber);
-      }
-      
-      const { data, error } = await query;
-      if (error) throw error;
-      
-      // 2. Generate signed URLs
-      const photosWithUrls = await Promise.all(
-        data.map(async (photo) => {
-          const { data: urlData } = await supabase.storage
-            .from("baby_images")
-            .createSignedUrl(photo.storage_path, 3600);
-          
-          return { ...photo, url: urlData?.signedUrl };
-        })
-      );
-      
-      return photosWithUrls;
-    },
-    enabled: !!babyId,
-  });
-};
-```
+// src/constants/photoQueryCache.ts
+export const PHOTO_QUERY_STALE_MS = 5 * 60 * 1000;
+export const PHOTO_QUERY_GC_MS = 50 * 60 * 1000;
 
-### Cache Strategy
-```typescript
-// React Query caches for 5 minutes (default)
-// Invalidated on:
-// - Photo upload
-// - Photo deletion
-// - Caption update
-
-queryClient.invalidateQueries(["photos", babyId, monthNumber]);
+// Applied to useFetchPhotos + useBabyPhotos photo queries
 ```
 
 ---
 
 **Status:** Production  
 **Created:** 2026-03-08  
-**Last Updated:** 2026-03-08  
-**Version:** 1.0
+**Last Updated:** 2026-03-22  
+**Version:** 1.2

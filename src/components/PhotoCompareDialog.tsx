@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import type { Photo } from "@/types/photo";
 import type React from "react";
-import HeicImage from "./HeicImage";
+import PhotoImage from "./PhotoImage";
 
 type PhotoCompareDialogProps = {
 	open: boolean;
@@ -29,7 +29,7 @@ const Panel: React.FC<{ photo: Photo; label: string }> = ({ photo, label }) => (
 					playsInline
 				/>
 			) : (
-				<HeicImage
+				<PhotoImage
 					src={photo.url || "/placeholder.svg"}
 					alt={photo.description || label}
 					className="w-full h-full object-contain"

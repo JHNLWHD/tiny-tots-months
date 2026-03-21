@@ -25,7 +25,7 @@
 │  • PhotoGrid (gallery display)                          │
 │  • PhotoSection (month-specific photos)                 │
 │  • Lightbox (full-screen viewer)                        │
-│  • HeicImage (handles HEIC display)                     │
+│  • PhotoImage (Supabase transform presets + HEIC preview)│
 └───────────────────────┬─────────────────────────────────┘
                         │
                         ▼
@@ -44,7 +44,8 @@
 ├─────────────────────────────────────────────────────────┤
 │  • usePhotos() - Fetch, upload, delete                  │
 │  • useImageUpload() - Upload logic                      │
-│  • useFetchPhotos() - Query photos                      │
+│  • useFetchPhotos() - Month-scoped photos (full list)   │
+│  • useBabyPhotos() - Baby gallery (paginated + infinite)│
 │  • useDeletePhoto() - Remove photos                     │
 │  • React Query - Cache + optimistic updates            │
 └───────────────────────┬─────────────────────────────────┘
@@ -348,31 +349,24 @@ if (tier === 'free') {
 
 ---
 
-### 6. No Server-Side Image Transformation
+### 6. Read-time image delivery (Supabase transforms + client compression)
 
-**Decision:** Use client-side compression, no server-side resizing  
+**Decision:** Client-side compression **on upload**; **Supabase Storage image transformations on read** for grids and lightbox (signed URL → `/render/image/` URL with width/quality/resize). No second stored object.
+
 **Rationale:**
-- Supabase doesn't offer built-in image transformation
-- Client-side compression works well
-- Avoids infrastructure costs
-- Users see progress during compression
+- One object per photo in `baby_images`; transforms are query/path variants of the same signed URL
+- Grids use small presets (`thumbnail`); lightbox/download use `full` (e.g. 1600px cap)
+- `enrichPhotoWithSignedUrls` signs only; `PhotoImage` applies `getTransformedUrl` per `size`
 
-**Current Approach:**
-- Compress before upload (client-side)
-- Store single compressed version
-- Use CSS for display size adjustments
-
-**Future Enhancement:**
-- Could add server-side transformation via Edge Function
-- Generate multiple sizes (thumbnail, preview, full)
-- Cache transformations
+**Current approach:**
+- Upload pipeline: validate → HEIC convert if needed → compress → store once
+- Read pipeline: `createSignedUrl` + `getTransformedUrl` (`src/utils/supabaseImageTransform.ts`)
+- Enrich signs only: `src/utils/enrichPhotoWithSignedUrls.ts`; sizes via `PhotoImage`
 
 **Trade-offs:**
-- ✅ Simple, no infrastructure
-- ✅ Free (no processing costs)
-- ❌ Can't resize after upload
-- ❌ No thumbnail optimization
-- ❌ Users pay bandwidth for full-size fetch (mitigated by compression)
+- ✅ Lower bandwidth for list views vs serving full-width images in every cell
+- ✅ No extra thumbnail files or DB columns
+- ⚠️ Transform availability depends on Supabase plan; utilities can fall back to raw signed URL where applicable
 
 ---
 
@@ -806,43 +800,35 @@ const { data: photo, error } = await supabase
 type UploadResult = Photo & { url: string };
 ```
 
-### Fetch Photos
+### Fetch Photos (month vs baby gallery)
 
 ```typescript
-// Input
-const { photos, isLoading } = useFetchPhotos(babyId, monthNumber);
+// Month page — full list for one baby + month (sort/filter need complete set)
+const { photos, isLoading, refetch } = useFetchPhotos(babyId, monthNumber);
+// useQuery: staleTime/gcTime from src/constants/photoQueryCache.ts
+// enrichPhotosWithSignedUrls(rows)
 
-// Supabase query
-const { data, error } = await supabase
-  .from("photo")
-  .select("*")
-  .eq("baby_id", babyId)
-  .eq("month_number", monthNumber)
-  .order("created_at", { ascending: false });
+// Baby gallery — paginated infinite query (24 per page)
+const {
+  photos,
+  isLoading,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useBabyPhotos(babyId);
 
-// Generate signed URLs
-const photosWithUrls = await Promise.all(
-  data.map(async (photo) => {
-    const { data: signedData } = await supabase.storage
-      .from("baby_images")
-      .createSignedUrl(photo.storage_path, 3600);
-    
-    return {
-      ...photo,
-      url: signedData?.signedUrl,
-    };
-  })
-);
+// Enrichment (shared): one signed object URL per row; transforms in PhotoImage
+import { enrichPhotosWithSignedUrls } from "@/utils/enrichPhotoWithSignedUrls";
+const withUrls = await enrichPhotosWithSignedUrls(rows);
 
-// Output
-type Photo[] = {
+// Photo shape (client) — transforms via PhotoImage `size`, not on url
+type Photo = {
   id: string;
   storage_path: string;
-  description: string | null;
+  url?: string; // signed object URL
   is_video: boolean;
-  url: string;  // Signed URL
-  // ... other fields
-}[];
+  // ...
+};
 ```
 
 ### Delete Photo
@@ -1212,5 +1198,5 @@ const cropImage = async (file: File, crop: Crop) => {
 
 **Status:** Production  
 **Created:** 2026-03-08  
-**Last Updated:** 2026-03-08  
-**Version:** 1.0
+**Last Updated:** 2026-03-22
+**Version:** 1.2

@@ -20,13 +20,11 @@ export const useTogglePhotoFavorite = () => {
 			const { baby_id: bid, month_number: month, id } = photo;
 
 			const monthKey = ["photos", bid, month] as const;
-			const galleryAllKey = ["photos", "gallery", bid, "all"] as const;
 			const galleryPagesKey = ["photos", "gallery", bid, "pages"] as const;
 
 			await queryClient.cancelQueries({ queryKey: ["photos"] });
 
 			const previousMonth = queryClient.getQueryData<Photo[]>(monthKey);
-			const previousGalleryAll = queryClient.getQueryData<Photo[]>(galleryAllKey);
 			const previousGalleryPages =
 				queryClient.getQueryData<InfiniteData<Photo[]>>(galleryPagesKey);
 
@@ -34,9 +32,6 @@ export const useTogglePhotoFavorite = () => {
 				p.id === id ? { ...p, is_favorite: favorite } : p;
 
 			queryClient.setQueryData<Photo[]>(monthKey, (old) =>
-				old?.map(mapRow) ?? old,
-			);
-			queryClient.setQueryData<Photo[]>(galleryAllKey, (old) =>
 				old?.map(mapRow) ?? old,
 			);
 			queryClient.setQueryData<InfiniteData<Photo[]>>(galleryPagesKey, (old) => {
@@ -50,7 +45,6 @@ export const useTogglePhotoFavorite = () => {
 			return {
 				rollback: () => {
 					queryClient.setQueryData(monthKey, previousMonth);
-					queryClient.setQueryData(galleryAllKey, previousGalleryAll);
 					queryClient.setQueryData(galleryPagesKey, previousGalleryPages);
 				},
 			};

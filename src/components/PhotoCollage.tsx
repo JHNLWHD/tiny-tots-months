@@ -7,7 +7,7 @@ import {
 import type { Photo } from "@/hooks/usePhotos";
 import { Play } from "lucide-react";
 import React from "react";
-import HeicImage from "./HeicImage";
+import PhotoImage from "./PhotoImage";
 import type { ImageSize } from "@/utils/supabaseImageTransform";
 
 type PhotoCollageProps = {
@@ -61,8 +61,8 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 			<div className="h-full w-full grid grid-cols-2 grid-rows-2 gap-0.5 absolute inset-0">
 				{displayPhotos.map((photo, idx) => (
 					<div key={photo.id} className="relative w-full h-full">
-						<HeicImage
-							src={photo.url}
+						<PhotoImage
+							src={photo.url || ""}
 							alt="Background"
 							className="w-full h-full object-cover"
 							size={thumbnailSize}
@@ -112,12 +112,14 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 									</div>
 								) : null}
 
-								<HeicImage
+								<PhotoImage
 									src={photo.url || "/placeholder.svg"}
 									alt={photo.description || "Baby photo"}
 									className={`w-full h-full object-cover ${isBackground ? "opacity-100" : ""}`}
 									loading="lazy"
-									size={index === 0 ? "display" : thumbnailSize}
+									size={
+										index === 0 ? "display" : thumbnailSize
+									}
 									onError={(e) => {
 										const imgElement = e.currentTarget;
 										imgElement.onerror = null;
@@ -152,7 +154,7 @@ const PhotoCollage: React.FC<PhotoCollageProps> = ({
 										src={selectedPhoto.url || ""}
 									/>
 								) : (
-									<HeicImage
+									<PhotoImage
 										src={selectedPhoto.url || "/placeholder.svg"}
 										alt={selectedPhoto.description || "Baby photo"}
 										className="w-full h-auto"

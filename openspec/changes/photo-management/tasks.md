@@ -184,11 +184,13 @@ This is a **reverse-engineered** task breakdown documenting how the Photo and Vi
 - [x] Show captions in lightbox
 - [x] Support video playback
 
-### Task 5.8: Create HeicImage Component (Optional)
+### Task 5.8: Create PhotoImage Component (Optional)
 - [x] Handle HEIC image display
 - [x] Client-side conversion for viewing
 - [x] Show conversion progress
 - [x] Fallback on error
+- [x] Renamed from `HeicImage`; Supabase transforms only in this component (`size` → `getTransformedUrl`)
+- [x] HEIC effect: named async + `void` call; ref-based `revokeObjectURL`; helpers `urlLooksLikeHeic` / `revokeBlobRef`
 
 ---
 
@@ -281,16 +283,11 @@ This is a **reverse-engineered** task breakdown documenting how the Photo and Vi
 - [ ] Parallel uploads
 - [ ] Upload progress bars
 
-### Advanced Editing
-- [ ] Inline caption editing (lightbox/grid)
-- [ ] Crop/rotate photos
-- [ ] Filters/adjustments
-
 ### Performance
-- [ ] Gallery pagination
-- [ ] Infinite scroll
-- [ ] Thumbnail sizes (server-side transform)
-- [ ] URL caching strategy
+- [x] Gallery pagination
+- [x] Infinite scroll
+- [x] Thumbnail sizes (server-side transform)
+- [x] URL caching strategy
 
 ### Features
 - [ ] Video thumbnails
@@ -357,10 +354,11 @@ Database (1.1-1.4)
 - 70-85% file size reduction via compression
 - 3-6 second average upload time (5MB original)
 - Sub-2-second gallery load (10 photos)
+- Baby gallery: 24-photo pages, infinite scroll + load more; grids/lightbox use `PhotoImage` + Supabase transforms; React Query `staleTime`/`gcTime` aligned with signed URL TTL
 
 ---
 
 **Status:** Completed (in production)  
 **Created:** 2026-03-08  
-**Last Updated:** 2026-03-08  
-**Version:** 1.0
+**Last Updated:** 2026-03-22  
+**Version:** 1.2
