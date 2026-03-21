@@ -56,7 +56,7 @@ const PrivacyPolicy = () => {
 						<CardTitle>Your Privacy Matters</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4 text-left">
-						<p>Last Updated: May 4, 2025</p>
+						<p>Last Updated: March 21, 2026</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
 							1. Introduction
@@ -92,7 +92,6 @@ const PrivacyPolicy = () => {
 							<li>Provide and maintain our services</li>
 							<li>Process and manage your account</li>
 							<li>Store and organize your baby's milestone data and media</li>
-							<li>Generate shareable links when you choose to share content</li>
 							<li>Process subscription payments and verify premium status</li>
 							<li>Improve our services and develop new features</li>
 						</ul>
@@ -112,18 +111,23 @@ const PrivacyPolicy = () => {
 						</h2>
 						<p>
 							We do not sell or rent your personal information to third parties.
-							Your data is only shared when:
+							Your milestone and media content is stored for your account and is
+							not published on a public timeline controlled by us. Your
+							information may be disclosed only when:
 						</p>
 						<ul className="list-disc pl-6 space-y-2 mt-2">
-							<li>
-								You explicitly choose to share content via our sharing features
-							</li>
 							<li>Required by law or to protect our rights</li>
 							<li>
 								With service providers who assist us in operating our website
-								and services (all bound by confidentiality agreements)
+								and services (for example hosting and payment processing), bound
+								by confidentiality and data-processing terms
 							</li>
 						</ul>
+						<p className="mt-4">
+							If we introduce optional sharing features (such as links for family
+							viewers), we will update this policy and the product to describe how
+							those features work.
+						</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
 							6. Your Rights

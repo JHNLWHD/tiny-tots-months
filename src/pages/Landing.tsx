@@ -42,13 +42,8 @@ const Landing = () => {
 					price: "0",
 					priceCurrency: "USD",
 				},
-				aggregateRating: {
-					"@type": "AggregateRating",
-					ratingValue: "4.8",
-					ratingCount: "1000",
-				},
 				description:
-					"Track and document your baby's developmental milestones month by month with photos, videos, and milestone tracking.",
+					"Track your baby's milestones month by month with photos and milestone journaling. Optional videos with Premium/Lifetime or credits. Private account—not a public feed.",
 			},
 			{
 				"@type": "WebSite",
@@ -56,7 +51,7 @@ const Landing = () => {
 				url: siteUrl,
 				name: "Tiny Tots Milestones",
 				description:
-					"Track and document your baby's developmental journey month by month with photos, videos, and milestone tracking.",
+					"Track your baby's milestones month by month with photos and optional videos (Premium/Lifetime or credits). Your content stays in your private account.",
 				publisher: {
 					"@id": `${siteUrl}/#organization`,
 				},
@@ -70,7 +65,7 @@ const Landing = () => {
 				<title>Tiny Tots Milestones - Track Your Baby's Development Month by Month</title>
 				<meta
 					name="description"
-					content="Track and document your baby's developmental milestones month by month with photos, videos, and milestone tracking. Share precious moments with family and friends through our easy-to-use baby milestone tracker app."
+					content="Track milestones month by month with photos and journaling. Optional videos with Premium, Lifetime, or credits. Private account—not a public feed. Free to start."
 				/>
 				<meta
 					name="keywords"
@@ -84,7 +79,7 @@ const Landing = () => {
 				/>
 				<meta
 					property="og:description"
-					content="Track and document your baby's developmental milestones month by month with photos, videos, and milestone tracking. Share precious moments with family and friends."
+					content="Baby milestones and monthly photos in one place. Optional videos with premium or credits. Private account. Free to start."
 				/>
 				<meta property="og:type" content="website" />
 				<meta property="og:url" content={currentUrl} />

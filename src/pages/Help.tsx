@@ -29,7 +29,7 @@ const Help = () => {
 				<title>Help & Support - Tiny Tots Milestones</title>
 				<meta
 					name="description"
-					content="Find answers to common questions, FAQs, and get support for your Tiny Tots Milestones account. Learn how to track baby milestones, upload photos, and share with family."
+					content="Find answers to common questions, FAQs, and get support for your Tiny Tots Milestones account. Learn how to track baby milestones, upload photos, and manage your account."
 				/>
 				<meta
 					name="keywords"
@@ -40,7 +40,7 @@ const Help = () => {
 				<meta property="og:title" content="Help & Support - Tiny Tots Milestones" />
 				<meta
 					property="og:description"
-					content="Find answers to common questions and get support for your Tiny Tots Milestones account. Learn how to track baby milestones and share with family."
+					content="Find answers to common questions and get support for your Tiny Tots Milestones account. Learn how to track baby milestones and use the app."
 				/>
 				<meta property="og:type" content="website" />
 				<meta property="og:url" content={currentUrl} />
@@ -161,15 +161,14 @@ const Help = () => {
 
 							<AccordionItem value="item-3">
 								<AccordionTrigger>
-									How do I share my baby's milestones with family?
+									Can family view my baby's milestones without an account?
 								</AccordionTrigger>
 								<AccordionContent>
-									You can share either an entire baby profile or specific
-									months. To share, go to the baby's dashboard or a specific
-									month view and click on the "Share" button. This generates a
-									unique shareable link that you can copy and send to family and
-									friends. Anyone with the link can view the shared content
-									without needing an account.
+									Not yet. There is no share-link feature in the app today—your
+									photos and milestones stay in your private account until you
+									sign in. You can download individual photos from the gallery
+									lightbox where available, or use export options if your plan
+									includes them. We may add optional sharing in a future update.
 								</AccordionContent>
 							</AccordionItem>
 
@@ -179,10 +178,11 @@ const Help = () => {
 								</AccordionTrigger>
 								<AccordionContent>
 									Free accounts can create one baby profile and have basic
-									access to all features. Premium accounts can create unlimited
-									baby profiles, have increased storage for media uploads, and
-									get access to additional premium features like themed
-									milestone templates and enhanced sharing options.
+									access to core features (with limits on photos per month,
+									storage, and month access). Premium accounts can create
+									unlimited baby profiles, get higher storage caps, export, the
+									usage dashboard, and premium milestone templates. See Pricing
+									on the website or Upgrade in the app for current details.
 								</AccordionContent>
 							</AccordionItem>
 
@@ -214,11 +214,10 @@ const Help = () => {
 							<AccordionItem value="item-7">
 								<AccordionTrigger>Is my data secure?</AccordionTrigger>
 								<AccordionContent>
-									We take data security seriously. All your data is stored
-									securely in the cloud with encryption, and we never share your
-									information without your consent. Shared links are generated
-									with unique tokens and can be revoked at any time. For more
-									details, please see our Privacy Policy.
+									We take data security seriously. Your milestone data and
+									media are stored securely in the cloud, and we do not sell your
+									personal information. Content in your account is not posted on
+									a public feed. For more details, please see our Privacy Policy.
 								</AccordionContent>
 							</AccordionItem>
 						</Accordion>

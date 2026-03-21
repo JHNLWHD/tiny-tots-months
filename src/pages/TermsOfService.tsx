@@ -56,7 +56,7 @@ const TermsOfService = () => {
 						<CardTitle>Terms and Conditions</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4 text-left">
-						<p>Last Updated: May 4, 2025</p>
+						<p>Last Updated: March 21, 2026</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
 							1. Agreement to Terms
@@ -72,9 +72,9 @@ const TermsOfService = () => {
 						</h2>
 						<p>
 							Tiny Tots Milestones provides an online platform for parents to
-							document and share their baby's developmental journey with
-							features including milestone tracking, media uploads, and sharing
-							capabilities.
+							document their baby's developmental journey, including milestone
+							tracking and media uploads organized by month. Content is
+							associated with your account and is not posted on a public feed.
 						</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
@@ -96,7 +96,7 @@ const TermsOfService = () => {
 							Milestones. By uploading content, you grant us a license to host,
 							store, and display your content to provide our services. You are
 							solely responsible for the content you upload and must have the
-							necessary rights to share it.
+							necessary rights to provide it for storage and use on our service.
 						</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
@@ -110,14 +110,16 @@ const TermsOfService = () => {
 						</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">
-							6. Sharing Features
+							6. Access to your content
 						</h2>
 						<p>
-							Our service allows you to share content with others through
-							generated links. You control who you share content with and are
-							responsible for managing these sharing permissions. Anyone with
-							access to a share link may view the content associated with that
-							link.
+							Your content is available to you when signed in to your account,
+							subject to your subscription tier and our technical and security
+							controls. The service does not currently provide shareable links for
+							viewing a baby profile or timeline outside your account. If we add
+							such features, we will describe them in these Terms and in the
+							product. You are responsible for keeping your login credentials
+							confidential.
 						</p>
 
 						<h2 className="text-xl font-semibold text-gray-800 mt-6">

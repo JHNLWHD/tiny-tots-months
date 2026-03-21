@@ -156,8 +156,9 @@ const Settings = () => {
 										your data or delete your account.
 									</p>
 									<p>
-										<strong>Sharing:</strong> Content is only shared when you explicitly generate 
-										and distribute shareable links.
+										<strong>Privacy:</strong> Your milestones and media stay in your
+										account and are not published on a public feed. There is no
+										share-link feature today; sign in to view or manage your data.
 									</p>
 								</div>
 								<div className="pt-4 border-t border-gray-200">

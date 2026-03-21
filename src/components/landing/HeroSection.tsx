@@ -43,8 +43,9 @@ const HeroSection = () => {
 					<BetaBadge size="lg" />
 				</div>
 				<p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
-					Document and share your baby's developmental journey month by month
-					with photos, videos, and milestone tracking in one beautiful app.
+					Document your baby's journey month by month with photos and milestone
+					tracking. Add videos on Premium, Lifetime, or with credits—all in one
+					place, in your private account.
 				</p>
 				<div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4 sm:gap-6 px-2">
 					<Button
@@ -78,11 +79,11 @@ const HeroSection = () => {
 				<div className="mt-12 sm:mt-16 flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 text-gray-500 text-xs sm:text-sm px-2">
 					<div className="flex items-center">
 						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
-						<span>Trusted by 1000+ families</span>
+						<span>Built for busy parents</span>
 					</div>
 					<div className="flex items-center">
 						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>
-						<span>100% secure & private</span>
+						<span>Private by design—not a public feed</span>
 					</div>
 					<div className="flex items-center">
 						<div className="w-2 h-2 bg-baby-purple rounded-full mr-2"></div>

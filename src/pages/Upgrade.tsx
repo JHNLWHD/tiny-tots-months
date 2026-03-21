@@ -290,6 +290,10 @@ const Upgrade = () => {
 										<CheckCircle2 className="w-4 h-4 text-green-500" />
 										<span>Premium templates: 3 credits</span>
 									</div>
+									<div className="flex items-center gap-2">
+										<CheckCircle2 className="w-4 h-4 text-green-500" />
+										<span>Export unlock: 2 credits</span>
+									</div>
 								</div>
 							</Card>
 						</TabsContent>
@@ -346,12 +350,12 @@ const Upgrade = () => {
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
 									{[
 										"Unlimited baby profiles",
-										"Unlimited photos & videos",
+										"10GB photo & video storage",
 										"Premium milestone templates",
 										"Priority support",
-										"Advanced analytics",
-										"Family collaboration",
-										"Export capabilities",
+										"Usage & activity dashboard (Settings)",
+										"Continue tracking past month 12 (premium)",
+										"Export included",
 										"Cancel anytime"
 									].map((feature, index) => (
 										<div key={index} className="flex items-center gap-2">
@@ -389,10 +393,10 @@ const Upgrade = () => {
 									
 									<div className="text-left space-y-2 text-sm">
 										{[
+											"25GB photo & video storage",
 											"All Family Subscription features",
-											"Lifetime access guarantee",
-											"No recurring payments ever",
-											"Priority feature access",
+											"Lifetime access",
+											"No recurring payments",
 											"Grandfathered pricing protection"
 										].map((feature, index) => (
 											<div key={index} className="flex items-center gap-2">
@@ -408,7 +412,7 @@ const Upgrade = () => {
 
 					<div className="mt-12 text-center text-gray-500 text-sm">
 						<p className="mb-2">
-							🔒 Secure payments • 30-day money back guarantee • Cancel anytime
+							🔒 Secure payments • Cancel subscription anytime (Family plan)
 						</p>
 						<p>
 							Need help? Contact our support team at{" "}

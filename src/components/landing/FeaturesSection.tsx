@@ -38,14 +38,14 @@ const FeaturesSection = () => {
 		{
 			title: "Photo & Video Collection",
 			description:
-				"Upload and organize photos and videos by month, creating a beautiful visual record of your baby's growth journey.",
+				"Upload and organize photos by month within your plan's storage. Add videos on Premium or Lifetime, or use credits for individual uploads.",
 			features: [
 				{
-					text: "Upload unlimited photos (Premium)",
+					text: "Generous photo storage on paid plans (10GB Family, 25GB Lifetime)",
 					icon: <Camera className="h-5 w-5 text-baby-pink mr-2" />,
 				},
 				{
-					text: "Add videos of special moments (Premium)",
+					text: "Videos on Premium/Lifetime or 2 credits each (free tier)",
 					icon: <Star className="h-5 w-5 text-baby-yellow mr-2" />,
 				},
 				{
@@ -72,7 +72,7 @@ const FeaturesSection = () => {
 					icon: <Star className="h-5 w-5 text-baby-blue mr-2" />,
 				},
 				{
-					text: "Built for busy parents",
+					text: "Pick up where you left off after signing in",
 					icon: <Check className="h-5 w-5 text-green-500 mr-2" />,
 				},
 			],
@@ -98,7 +98,7 @@ const FeaturesSection = () => {
 						Powerful <span className="text-baby-purple">Features</span> for Every Family
 					</h2>
 					<p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-2">
-						Everything you need to capture, organize, and share your baby's precious moments
+						Everything you need to capture and organize your baby's precious moments
 						in one beautifully designed app.
 					</p>
 				</div>
