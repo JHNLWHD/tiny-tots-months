@@ -14,7 +14,7 @@ type PhotoUploaderProps = {
 	babyId: string;
 	month: number;
 	onUploadComplete: () => void;
-	onUpload: (data: CreatePhotoData) => void;
+	onUpload: (data: CreatePhotoData) => Promise<unknown>;
 	isUploading: boolean;
 }
 

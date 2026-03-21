@@ -1,4 +1,3 @@
-import { validateFile } from "@/components/photoUploader/validateFile";
 import { toast } from "@/components/ui/sonner";
 import { useBabyProfiles } from "@/hooks/useBabyProfiles";
 import { useMilestones } from "@/hooks/useMilestones";
@@ -147,6 +146,12 @@ export const useMonthPage = (monthNumber: number, initialBabyId?: string) => {
 			return result;
 		} catch (error) {
 			console.error("Upload failed in useMonthPage:", error);
+			const message =
+				error instanceof Error ? error.message : "Failed to upload file";
+			toast("Upload Error", {
+				description: message,
+				className: "bg-destructive text-destructive-foreground",
+			});
 			return null;
 		}
 	};
