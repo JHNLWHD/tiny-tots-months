@@ -1,5 +1,9 @@
 # Gallery & Organization System
 
+> **OpenSpec archive:** `openspec/changes/archive/2026-03-21-gallery-organization/` (moved from `openspec/changes/gallery-organization/` on 2026-03-21).
+
+> **Amendment:** After this change was archived, **baby gallery PDF export** was removed from the product and is no longer part of change `gallery-backlog-features` (now archived). Mentions of PDF export below reflect the original backlog; use `openspec/specs/baby-gallery-advanced/spec.md` and `openspec/changes/archive/2026-03-21-gallery-backlog-features/` for shipped scope and history.
+
 ## Problem
 Users need intuitive ways to browse, view, and organize their baby photos and videos:
 - Navigate through months of photos quickly
@@ -82,6 +86,25 @@ A multi-view gallery system with powerful organization and viewing capabilities:
 - Photo metadata (location, camera info)
 - Export album as PDF
 - Shared albums with family
+
+### Follow-on OpenSpec change (formal specs and tasks)
+
+Several items above—especially caption search, favorites, compare, slideshow, PDF export, server-side loading for very large libraries, and stored thumbnail generation—are **specified and task-tracked** under a dedicated change (this repo does not fold them into `gallery-organization` implementation tasks).
+
+**Change id:** `gallery-backlog-features`
+
+Paths below are from the **repository root**. Change `gallery-backlog-features` is archived at `openspec/changes/archive/2026-03-21-gallery-backlog-features/`; canonical merged specs live under `openspec/specs/` (`baby-gallery-advanced`, `photo-thumbnail-pipeline`, `photo-lightbox-slideshow`). Relative markdown links between changes were avoided on purpose so archiving does not break hyperlinks.
+
+| Artifact | Path (from repo root) |
+|----------|------------------------|
+| Proposal | `openspec/changes/archive/2026-03-21-gallery-backlog-features/proposal.md` |
+| Design | `openspec/changes/archive/2026-03-21-gallery-backlog-features/design.md` |
+| Tasks | `openspec/changes/archive/2026-03-21-gallery-backlog-features/tasks.md` |
+| Spec: advanced gallery | `openspec/specs/baby-gallery-advanced/spec.md` |
+| Spec: thumbnails | `openspec/specs/photo-thumbnail-pipeline/spec.md` |
+| Spec: lightbox slideshow | `openspec/specs/photo-lightbox-slideshow/spec.md` |
+
+Implement that work with `/opsx-apply gallery-backlog-features` (or equivalent) after reviewing those artifacts.
 
 ## User Journeys
 

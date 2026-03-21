@@ -8,27 +8,37 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTogglePhotoFavorite } from "@/hooks/useTogglePhotoFavorite";
 import type { Photo } from "@/hooks/usePhotos";
-import React from "react";
+import { type FC, useState } from "react";
 import PhotoCard from "./PhotoCard";
 import PhotoLightbox from "./PhotoLightbox";
 
 type PhotoGridProps = {
+	babyId: string;
+	monthNumber: number;
 	photos: Photo[];
 	onDelete?: (id: string) => void;
-	readOnly?: boolean;
 	babyName?: string;
 };
 
-const PhotoGrid: React.FC<PhotoGridProps> = ({
+const PhotoGrid: FC<PhotoGridProps> = ({
+	babyId,
+	monthNumber,
 	photos,
-	onDelete,
-	readOnly = false,
+	onDelete: onDeleteById,
 	babyName = "baby",
 }) => {
-	const [lightboxOpen, setLightboxOpen] = React.useState(false);
-	const [lightboxIndex, setLightboxIndex] = React.useState(0);
-	const [photoToDelete, setPhotoToDelete] = React.useState<Photo | null>(null);
+	const { mutate: toggleFavorite } = useTogglePhotoFavorite();
+
+	const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+	const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+	const [photoToDelete, setPhotoToDelete] = useState<Photo | null>(null);
+
+	const openDeleteDialog = (photo: Photo) => {
+		if (!onDeleteById) return;
+		setPhotoToDelete(photo);
+	};
 
 	if (!photos || photos.length === 0) {
 		return (
@@ -44,13 +54,13 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 		setLightboxOpen(true);
 	};
 
-	const handleDeleteClick = (photo: Photo) => {
-		setPhotoToDelete(photo);
+	const handleToggleFavorite = (photo: Photo) => {
+		toggleFavorite(photo);
 	};
 
 	const handleConfirmDelete = () => {
-		if (photoToDelete && onDelete) {
-			onDelete(photoToDelete.id);
+		if (photoToDelete && onDeleteById) {
+			onDeleteById(photoToDelete.id);
 		}
 		setPhotoToDelete(null);
 	};
@@ -67,8 +77,8 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 						key={photo.id}
 						photo={photo}
 						onClick={handlePhotoClick}
-						onDelete={handleDeleteClick}
-						showDeleteButton={!readOnly && !!onDelete}
+						onDelete={onDeleteById ? openDeleteDialog : undefined}
+						onToggleFavorite={handleToggleFavorite}
 						showMonthBadge={true}
 					/>
 				))}
@@ -85,7 +95,12 @@ const PhotoGrid: React.FC<PhotoGridProps> = ({
 				showThumbnails={true}
 			/>
 
-			<AlertDialog open={!!photoToDelete} onOpenChange={() => setPhotoToDelete(null)}>
+			<AlertDialog
+				open={!!photoToDelete}
+				onOpenChange={(open) => {
+					if (!open) setPhotoToDelete(null);
+				}}
+			>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Delete Photo</AlertDialogTitle>

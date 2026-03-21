@@ -2,6 +2,8 @@
 
 This document reverse-engineers the implementation tasks for the complete gallery and photo organization system.
 
+> **Amendment:** **Baby gallery PDF export** was later dropped from the product; it is not in active `gallery-backlog-features` tasks/specs. The “follow-on specs” section below still names PDF as originally envisioned when this archive was written.
+
 ---
 
 ## Phase 1: Data Fetching & Hooks
@@ -319,10 +321,10 @@ This document reverse-engineers the implementation tasks for the complete galler
 - [x] Aspect ratio placeholders to prevent layout shift
 - [x] Skeleton loaders during initial fetch
 
-### 7.4 Code Splitting (Future)
-- [ ] Lazy load PhotoLightbox component
-- [ ] Lazy load yet-another-react-lightbox library
-- [ ] Only load when user opens lightbox
+### 7.4 Code Splitting
+- [x] Lazy load PhotoLightbox component
+- [x] Lazy load yet-another-react-lightbox library
+- [x] Only load when user opens lightbox
 
 ---
 
@@ -409,16 +411,16 @@ This document reverse-engineers the implementation tasks for the complete galler
 - ✅ Mobile-optimized (touch gestures)
 - ✅ Performance optimized (React Query, useMemo, lazy loading)
 
-**Next Steps (Future Enhancements):**
-- [ ] Custom albums/collections
-- [ ] Photo search by caption
-- [ ] Bulk select and delete
-- [ ] Favorite photos
-- [ ] Photo comparison (side-by-side)
-- [ ] Slideshow mode
-- [ ] Export album as PDF
-- [ ] Server-side pagination for >500 photos
-- [ ] Thumbnail pre-generation
+**Follow-on work (separate OpenSpec change — not tasks in this file):**
+
+Change id: **`gallery-backlog-features`** (archived 2026-03-21). Paths from **repo root**.
+
+- `openspec/changes/archive/2026-03-21-gallery-backlog-features/proposal.md` — scope
+- `openspec/changes/archive/2026-03-21-gallery-backlog-features/design.md` — technical decisions
+- `openspec/changes/archive/2026-03-21-gallery-backlog-features/tasks.md` — implementation checklist
+- **Canonical specs:** `openspec/specs/baby-gallery-advanced/spec.md` (search, favorites, compare, large-library loading), `openspec/specs/photo-thumbnail-pipeline/spec.md`, `openspec/specs/photo-lightbox-slideshow/spec.md`
+
+Themes: caption search, favorites, side-by-side compare, slideshow, PDF export, pagination/load more for very large libraries, thumbnail pre-generation on upload.
 
 ---
 

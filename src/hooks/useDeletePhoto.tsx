@@ -8,14 +8,14 @@ export const useDeletePhoto = (babyId?: string, monthNumber?: number) => {
 
 	const deletePhotoMutation = useMutation({
 		mutationFn: async (photo: Photo) => {
-			// 1. Delete the file from storage
+			const paths = [photo.storage_path];
 			const { error: storageError } = await supabase.storage
 				.from("baby_images")
-				.remove([photo.storage_path]);
+				.remove(paths);
 
 			if (storageError) throw storageError;
 
-			// 2. Delete the record from the database
+			// Delete the record from the database
 			const { error: dbError } = await supabase
 				.from("photo")
 				.delete()
@@ -23,10 +23,15 @@ export const useDeletePhoto = (babyId?: string, monthNumber?: number) => {
 
 			if (dbError) throw dbError;
 		},
-		onSuccess: () => {
+		onSuccess: (_data, photo) => {
 			queryClient.invalidateQueries({
 				queryKey: ["photos", babyId, monthNumber],
 			});
+			if (photo?.baby_id) {
+				queryClient.invalidateQueries({
+					queryKey: ["photos", "gallery", photo.baby_id],
+				});
+			}
 			toast("Success", {
 				description: "File deleted successfully",
 			});

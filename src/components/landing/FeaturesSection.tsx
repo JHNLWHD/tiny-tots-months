@@ -1,10 +1,10 @@
 import {
 	Award,
-	BookOpen,
 	Camera,
 	Check,
 	Lightbulb,
 	Rocket,
+	Smartphone,
 	Star,
 } from "lucide-react";
 import React from "react";
@@ -59,27 +59,27 @@ const FeaturesSection = () => {
 			icon: <Camera size={64} className="text-baby-pink" />,
 		},
 		{
-			title: "Export to PDF/Book",
+			title: "Your memories, everywhere",
 			description:
-				"Premium subscribers can export their baby's milestones and photos into a beautifully formatted PDF or book layout, perfect for printing.",
+				"Sign in on any device and pick up where you left off. Photos and milestones stay organized in one place so you always have the full story.",
 			features: [
 				{
-					text: "Create beautiful keepsakes",
-					icon: <Star className="h-5 w-5 text-baby-mint mr-2" />,
+					text: "Works on phone, tablet, and desktop",
+					icon: <Smartphone className="h-5 w-5 text-baby-mint mr-2" />,
 				},
 				{
-					text: "Multiple design templates",
-					icon: <Rocket className="h-5 w-5 text-baby-blue mr-2" />,
+					text: "Secure cloud storage",
+					icon: <Star className="h-5 w-5 text-baby-blue mr-2" />,
 				},
 				{
-					text: "High-resolution print quality",
+					text: "Built for busy parents",
 					icon: <Check className="h-5 w-5 text-green-500 mr-2" />,
 				},
 			],
-			imageTitle: "PDF Export Preview",
+			imageTitle: "Cross-device access",
 			colorClass: "text-baby-mint",
 			imagePosition: "left" as const,
-			icon: <BookOpen size={64} className="text-baby-mint" />,
+			icon: <Award size={64} className="text-baby-mint" />,
 		},
 	];
 
