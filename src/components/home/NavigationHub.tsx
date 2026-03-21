@@ -186,13 +186,6 @@ const NavigationHub: React.FC<NavigationHubProps> = ({
 						</div>
 						<div className="flex flex-col sm:flex-row gap-3">
 							<Link
-								to={`/app/baby/${selectedBaby.id}/wrapped`}
-								className="px-6 py-3 bg-baby-purple text-white rounded-full hover:bg-baby-purple/90 transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 flex items-center justify-center gap-2 text-center"
-							>
-								<span>🎉</span>
-								View Wrapped
-							</Link>
-							<Link
 								to={`/app/baby/${selectedBaby.id}/gallery`}
 								className="px-6 py-3 bg-baby-purple text-white rounded-full hover:bg-baby-purple/90 transition-colors font-medium shadow-lg hover:shadow-xl transform hover:scale-105 duration-300 text-center"
 							>
